@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+
+{% block title %}
+  <title>قائمة المستخدمين</title>
+{% endblock %}
+
+{% block content %}
+<body dir="rtl">
+  <div class="container">
+    <br />
+    <div class="card">
+      <div class="card-header">
+        <h3 style="text-align: center">قائمة المستخدمين</h3>
+      </div>
+      <table class="table table-hover table-responsive">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">الاسم الكامل</th>
+            <th scope="col">البريد الإلكتروني</th>
+            <th scope="col">رقم الهاتف</th>
+            <th scope="col">المهنة</th>
+            <th scope="col">الفريق</th>
+            <th scope="col">صورة الملف الشخصي</th>
+            <th scope="col">تاريخ الإنشاء</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for profile in profiles %}
+          <tr>
+            <!-- Display a sequential counter -->
+            <th scope="row">{{ forloop.counter }}</th>
+            <!-- Full name from the related Contact model (using __str__ or property) -->
+            <td>{{ profile.profiles.contact.ar_full_name }}</td>
+            <!-- Email from the related User model -->
+            <td>{{ profile.profiles.contact.email }}</td>
+            <!-- Phone number from the related Contact model -->
+            <td>{{ profile.profiles.contact.phone_number }}</td>
+            <!-- Occupation names from the related Occupation model -->
+            <td>{{ profile.profiles.occupation.ar_name }} / {{ profile.occupation.en_name }}</td>
+            <!-- Team name if assigned; otherwise display a default message -->
+            <td>
+              {% if profile.profiles.team %}
+                {{ profile.profiles.team.ar_name }} / {{ profile.profiles.team.en_name }}
+              {% else %}
+                غير منتمي لفريق
+              {% endif %}
+            </td>
+            <!-- Profile image: using the computed property to get the image path -->
+            <td>
+<img src="{{ user.profiles.profile_image_path }}" alt="Profile Image" style="max-width: 100px; max-height: 100px;">            </td>
+            <!-- Format the creation date -->
+            <td>{{ profile.profiles.created_at|date:"Y-m-d H:i" }}</td>
+          </tr>v
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center">لا توجد سجلات مستخدمين.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+{% endblock %}

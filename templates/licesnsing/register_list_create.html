@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+
+{% block title %}
+  <title>بيانات السجل</title>
+{% endblock %}
+
+{% block content %}
+<body dir="rtl">
+  <div class="container">
+    <br />
+    <div class="card">
+      <div class="card-header">
+        <h3 style="text-align: center">بيانات المنشأة - السجل</h3>
+      </div>
+      <table class="table table-hover table-responsive">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">اسم المنشأة</th>
+            <th scope="col">رقم السجل</th>
+            <th scope="col">تاريخ انتهاء السجل</th>
+            <th scope="col">حالة السجل</th>
+            <th scope="col">تعديل السجل</th>
+            <th scope="col">حذف السجل</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for reg in registers %}
+          <tr>
+            <!-- Display the RFID or an index number -->
+            <th scope="row">{{ reg.rfid }}</th>
+            <!-- Assuming the related Establishment model has a 'name' field -->
+            <td>{{ reg.establishment.establishment_name }}</td>
+            <!-- Using the register's primary key as its number -->
+            <td>{{ reg.id }}</td>
+            <!-- Display the register's expiration date -->
+            <td>{{ reg.expiration_date }}</td>
+            <!-- Example status: if the expiration date is greater than today, it's active -->
+            <td>
+                  {% if reg.expiration_date > today %}
+                    ساري المفعول
+                  {% else %}
+                    منتهي
+                  {% endif %}
+                </td>
+
+            <td>
+              <!-- Edit link: Adjust the URL name and parameter as needed -->
+              <a href="{% url 'register-list' %}">
+                <button class="btn btn-primary" type="button">تعديل</button>
+              </a>
+            </td>
+            <td>
+              <!-- Delete button triggers a confirmation function -->
+              <button class="btn btn-danger" type="button"
+                onclick="confirmToPost('{% url 'register-delete' reg.id %}')">
+                حذف
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center">لا توجد سجلات.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+{% endblock %}

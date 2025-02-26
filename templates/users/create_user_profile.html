@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+  <title>Create User and Profile</title>
+{% endblock %}
+
+{% block content %}
+<div class="container" dir="rtl">
+  <h2 class="text-center">إنشاء مستخدم جديد مع ملفه الشخصي</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset>
+      <legend>معلومات المستخدم</legend>
+      {{ user_form|crispy }}
+    </fieldset>
+    <fieldset>
+      <legend>معلومات الملف الشخصي</legend>
+      {{ profile_form|crispy }}
+    </fieldset>
+    <fieldset>
+      <legend>معلومات جهة الاتصال</legend>
+      {{ contact_form|crispy }}
+    </fieldset>
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary">إنشاء المستخدم</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

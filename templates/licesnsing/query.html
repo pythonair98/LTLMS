@@ -1,0 +1,210 @@
+{% load widget_tweaks %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+<html lang="ar">
+
+<body dir="rtl">
+    {% if found %} {% if datafound %}
+    <div class="container">
+        <br/>
+        <h3 class="text-center">تمت قراءة المعرف بنجاح</h3>
+        <br>
+        <form class="form-horizontal" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header">
+                    <h3>بيانات المنشأة المراد معاينتها</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.rifd.label}} {{ eform.rifd|add_class:"form-control"}}
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <hr class="mt-5">
+                    <div class="row">
+                        <hr class="mt-5">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.establishment_name.label }} {{ eform.establishment_name|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.main_category.label }} {{ eform.main_category|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.sub_category.label }} {{ eform.sub_category|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.box_O_P.label }} {{ eform.box_O_P|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.email.label }} {{ eform.email|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.phone_number.label }} {{ eform.phone_number|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.owner_name.label }} {{ eform.owner_name|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.owner_number.label }} {{ eform.owner_number|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.director_name.label }} {{ eform.director_name|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.director_number.label }} {{ eform.director_number|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.representative_name.label }} {{ eform.representative_name|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.representative_number.label }} {{ eform.representative_number|add_class:"form-control"}}
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="mt-5">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.municipality_name.label }} {{ eform.municipality_name|add_class:"form-control"}}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.region_number.label }} {{ eform.region_number|add_class:"form-control"}}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.street_number.label}} {{ eform.street_number|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.street_name.label }} {{ eform.street_name|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.block_number.label }} {{ eform.block_number|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.block_name.label }} {{ eform.block_name|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.building_number.label }} {{ eform.building_number|add_class:"form-control"}}
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="mt-5">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.activity_name.label }} {{ eform.activity_name|add_class:"form-control"}}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.activity_code.label }} {{ eform.activity_code|add_class:"form-control"}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+            <br>
+            <div class="card">
+                <div class="card-header">
+                    <h3>بيانات المعاينة</h3>
+                </div>
+                <br><br>
+                <form action="/reader" method="post">
+                    <div class="card-body">
+                        {% csrf_token %}
+                    <div class="row ">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ eform.rifd.label}} {{ eform.rifd|add_class:"form-control"}}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <button id="find-me" class="form-control " type="button">أضغط لتحديد المكان</button><br/>
+                                <p id="status"></p><br/>
+                                <div id="map" class="big-map"></div>
+                                {{ iform.latitude|add_class:"form-control"|attr:"id:latitude" }} {{ iform.longitude|add_class:"form-control"|attr:"id:longitude" }}
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-md-6 ">
+                            <div class="form-group ">
+                                {{ iform.status.label }} {{ iform.status|add_class:"list-unstyled" }}
+                            </div>
+                        </div>
+                        <div class="col-md-6 ">
+                            <div id="notes-group" class="form-group ">
+                                {{ iform.notes.label }} {{ iform.notes|add_class:"form-control" }}
+                            </div>
+                        </div>
+                    </div>
+                        <div class="row ">
+                        <div class="col-md-6 ">
+                            {{ mform|crispy }}
+                        </div>
+                    </div>
+                </div>
+                <div class="row ">
+                    <div class="col-md-12 ">
+                        <div class="form-group ">
+                            <input type="submit" value="حفظ" class="form-control">
+                        </div>
+                    </div>
+                </div>
+    </form>
+    </div>
+    {% else %}
+    <h2 align="center ">لم يتم العثور على المعرف {{ code }} في قاعدة البيانات</h2>
+    {% endif %} {% else %}
+    <h2 align="center ">في انتظار قراءة المعرف</h2>
+    {% endif %}
+</body>
+
+</html>

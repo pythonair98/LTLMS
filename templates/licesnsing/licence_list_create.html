@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+
+{% block title %}
+  <title>بيانات الترخيص</title>
+{% endblock %}
+
+{% block content %}
+<body dir="rtl">
+  <div class="container">
+    <br />
+    <div class="card">
+      <div class="card-header">
+        <h3 style="text-align: center">بيانات الترخيص</h3>
+      </div>
+      <table class="table table-hover table-responsive">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">رقم الترخيص</th>
+            <th scope="col">رقم السجل</th>
+            <th scope="col">تاريخ إنشاء الترخيص</th>
+            <th scope="col">تاريخ انتهاء الترخيص</th>
+            <th scope="col">الفئة الرئيسية</th>
+            <th scope="col">النشاط</th>
+            <th scope="col">الفئة الفرعية</th>
+            <th scope="col">تعديل الترخيص</th>
+            <th scope="col">حذف الترخيص</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lic in licences %}
+          <tr>
+            <!-- Display the license primary key or another unique identifier -->
+            <th scope="row">{{ lic.number }}</th>
+            <!-- License number can be the same as the primary key -->
+            <td>{{ lic.number }}</td>
+            <!-- Display the associated register's number -->
+            <td>{{ lic.register.id }}</td>
+            <!-- Date fields for the license -->
+            <td>{{ lic.creation_date }}</td>
+            <td>{{ lic.expiration_date }}</td>
+            <!-- Display related category/activity names; adjust field names if necessary -->
+            <td>{{ lic.main_category.ar_name }}</td>
+            <td>{{ lic.activity.ar_name }}</td>
+            <td>{{ lic.sub_category.ar_name }}</td>
+            <td>
+              <!-- Edit link for the license -->
+              <a href="{% url 'licence-list'  %}">
+                <button class="btn btn-primary" type="button">تعديل</button>
+              </a>
+            </td>
+            <td>
+              <!-- Delete button for the license -->
+              <button class="btn btn-danger" type="button"
+                onclick="confirmToPost('{% url 'licence-delete' lic.number %}')">
+                حذف
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="10" class="text-center">لا توجد تراخيص.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+{% endblock %}

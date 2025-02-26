@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+{% block title %}
+    <title>Form Example</title>
+
+{% endblock %}
+
+{% block content %}
+
+<body dir="rtl">
+    <div class="container">
+        <br />
+        <div class="card">
+            <div class="card-header">
+                <h3 style="text-align: center">بيانات المنشأة</h3>
+            </div>
+            <table class="table table-hover table-responsive">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">اسم المنشأة</th>
+                    <th scope="col">رقم السجل</th>
+                    <th scope="col">تاريخ انتهاء السجل</th>
+                    <th scope="col">حالة السجل</th>
+                    <th scope="col">رقم الترخيص</th>
+                    <th scope="col">حالة الترخيص</th>
+                    <th scope="col">اسم المالك</th>
+                    <th scope="col">تعديل منشأة</th>
+                    <th scope="col">حذف منشأة</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for est in establishments %}
+                <tr>
+                    <th scope="row">{{ est.rifd }}</th>
+                    <td>{{ est.establishment_name }}</td>
+                    <td>{{ est.register_number }}</td>
+                    <td>{{ est.register_expiration_date }}</td>
+                    <td>{{  est.register_expiration_date }}</td>
+                    <td>{{ est.license_number }}</td>
+                    <td>{{est.license_expiration_date }}</td>
+                    <td>{{ est.owner_name }}</td>
+                    <td>
+                        <a href="/edit_establishment/{{est.register_number}}">
+                            <button class="btn btn-primary" type="submit">تعديل</button>
+                        </a>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" type="button" onclick="confirmToPost('/delete_establishment/{{est.register_number}}')">حذف</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        </div>
+    </div>
+</body>
+{% endblock %}
+
+</html>
