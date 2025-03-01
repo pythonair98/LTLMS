@@ -106,7 +106,7 @@ class SubCategory(models.Model):
 
 
 class Establishment(models.Model):
-    rifd = models.CharField(max_length=100, unique=True,primary_key=True)
+    rifd = models.CharField(max_length=100, unique=True, primary_key=True)
     establishment_name = models.CharField(max_length=200)
     # register_number = models.CharField(max_length=100, primary_key=True)
     # register_issuance_date = models.DateField(default=timezone.now)
@@ -248,6 +248,7 @@ class Inspection(models.Model):
     )
     is_archived = models.BooleanField(default=False)
     archived_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f"Inspection {self.register_number} - {'Accepted' if self.status else 'Refused'}"
 
@@ -260,8 +261,10 @@ class Inspection(models.Model):
         from django.core.mail import send_mail
 
         subject = "Inspection Update"
-        message = (f"Inspection for {self.register_number} has been "
-                   f"{'Accepted' if self.status else 'Refused'}.")
+        message = (
+            f"Inspection for {self.register_number} has been "
+            f"{'Accepted' if self.status else 'Refused'}."
+        )
         email_recipient = (
             self.establishment.email
         )  # Assuming there is an 'email' field on the related Establishment model
@@ -289,32 +292,27 @@ class InspectionMedia(models.Model):
     Each instance represents a single uploaded image along with a type indicating
     what kind of photo it is (e.g., register photo, license photo, etc.).
     """
+
     MEDIA_TYPE_CHOICES = (
-        ('register_photo', 'Register Photo'),
-        ('license_photo', 'License Photo'),
-        ('establishment_photo', 'Establishment Photo'),
-        ('cars_building_photo', 'Cars Building Photo'),
+        ("register_photo", "Register Photo"),
+        ("license_photo", "License Photo"),
+        ("establishment_photo", "Establishment Photo"),
+        ("cars_building_photo", "Cars Building Photo"),
     )
 
     inspection = models.ForeignKey(
         Inspection,
         on_delete=models.CASCADE,
-        related_name='media',
-        verbose_name="Inspection"
+        related_name="media",
+        verbose_name="Inspection",
     )
     media_type = models.CharField(
-        max_length=50,
-        choices=MEDIA_TYPE_CHOICES,
-        verbose_name="Media Type"
+        max_length=50, choices=MEDIA_TYPE_CHOICES, verbose_name="Media Type"
     )
     image = models.ImageField(
-        upload_to=inspection_media_upload_to,
-        verbose_name="Image"
+        upload_to=inspection_media_upload_to, verbose_name="Image"
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Uploaded at"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Uploaded at")
 
     def __str__(self):
         return f"{self.inspection.register_number} - {self.get_media_type_display()}"
@@ -347,7 +345,7 @@ class EstablishmentRegister(models.Model):
         Establishment,
         on_delete=models.CASCADE,
         related_name="registers",
-        help_text="The establishment issuing this car license registration."
+        help_text="The establishment issuing this car license registration.",
     )
 
     # Date when the license was issued.
@@ -363,13 +361,13 @@ class EstablishmentRegister(models.Model):
     # Automatically set the field to now when the object is first created.
     created_at = models.DateTimeField(
         auto_now_add=True,
-        help_text="Timestamp when the registration record was created."
+        help_text="Timestamp when the registration record was created.",
     )
 
     # Automatically update the field to now every time the object is saved.
     updated_at = models.DateTimeField(
         auto_now=True,
-        help_text="Timestamp when the registration record was last updated."
+        help_text="Timestamp when the registration record was last updated.",
     )
 
     def __str__(self):
@@ -393,7 +391,7 @@ class EstablishmentRegister(models.Model):
     class Meta:
         verbose_name = "Establishment Register"
         verbose_name_plural = "Establishment Registers"
-        ordering = ['-issuance_date']
+        ordering = ["-issuance_date"]
 
 
 class EstablishmentLicence(models.Model):
@@ -422,7 +420,7 @@ class EstablishmentLicence(models.Model):
     # The primary key for the licence (auto-incremented)
     number = models.AutoField(
         primary_key=True,
-        help_text="Auto-incrementing primary key representing the licence number."
+        help_text="Auto-incrementing primary key representing the licence number.",
     )
 
     # ForeignKey to the registration record. Using a related_name allows reverse lookups:
@@ -431,7 +429,7 @@ class EstablishmentLicence(models.Model):
         EstablishmentRegister,
         on_delete=models.CASCADE,
         related_name="licences",
-        help_text="Reference to the registration record associated with this licence."
+        help_text="Reference to the registration record associated with this licence.",
     )
 
     # Dates for licence creation and expiration
@@ -442,27 +440,25 @@ class EstablishmentLicence(models.Model):
     main_category = models.ForeignKey(
         MainCategory,
         on_delete=models.CASCADE,
-        help_text="Reference to the main category associated with this licence."
+        help_text="Reference to the main category associated with this licence.",
     )
     activity = models.ForeignKey(
         Activity,
         on_delete=models.CASCADE,
-        help_text="Reference to the activity associated with this licence."
+        help_text="Reference to the activity associated with this licence.",
     )
     sub_category = models.ForeignKey(
         SubCategory,
         on_delete=models.CASCADE,
-        help_text="Reference to the sub category associated with this licence."
+        help_text="Reference to the sub category associated with this licence.",
     )
 
     # Timestamps for record tracking
     created_at = models.DateTimeField(
-        auto_now_add=True,
-        help_text="Timestamp when the licence record was created."
+        auto_now_add=True, help_text="Timestamp when the licence record was created."
     )
     updated_at = models.DateTimeField(
-        auto_now=True,
-        help_text="Timestamp when the licence record was last updated."
+        auto_now=True, help_text="Timestamp when the licence record was last updated."
     )
 
     def __str__(self):
@@ -503,9 +499,7 @@ class EstablishmentLicence(models.Model):
     class Meta:
         verbose_name = "Establishment Licence"
         verbose_name_plural = "Establishment Licences"
-        ordering = ['-creation_date']
-
-
+        ordering = ["-creation_date"]
 
 
 # Replace 'yourapp' with your actual app name if needed.
@@ -513,6 +507,7 @@ class EstablishmentLicence(models.Model):
 # For example:
 # from yourapp.models import Establishment
 # or use 'Establishment' if using a string reference.
+
 
 class InspectionAssignment(models.Model):
     """
@@ -530,54 +525,40 @@ class InspectionAssignment(models.Model):
     """
 
     STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('accepted', 'Accepted'),
-        ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
+        ("pending", "Pending"),
+        ("accepted", "Accepted"),
+        ("in_progress", "In Progress"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
     )
 
     inspector = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='inspection_assignments',
-        verbose_name="Inspector"
+        related_name="inspection_assignments",
+        verbose_name="Inspector",
     )
     establishment = models.ForeignKey(
-        'Establishment',  # Replace with your actual Establishment model if needed.
+        "Establishment",  # Replace with your actual Establishment model if needed.
         on_delete=models.CASCADE,
-        related_name='inspection_assignments',
-        verbose_name="Establishment"
+        related_name="inspection_assignments",
+        verbose_name="Establishment",
     )
-    assigned_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Assigned At"
-    )
-    due_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name="Due Date"
-    )
+    assigned_at = models.DateTimeField(auto_now_add=True, verbose_name="Assigned At")
+    due_date = models.DateTimeField(null=True, blank=True, verbose_name="Due Date")
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='pending',
-        verbose_name="Assignment Status"
+        default="pending",
+        verbose_name="Assignment Status",
     )
-    notes = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name="Assignment Notes"
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Updated At"
-    )
+    notes = models.TextField(null=True, blank=True, verbose_name="Assignment Notes")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
 
     class Meta:
         verbose_name = "Inspection Assignment"
         verbose_name_plural = "Inspection Assignments"
-        ordering = ['-assigned_at']
+        ordering = ["-assigned_at"]
 
     def __str__(self):
         return (

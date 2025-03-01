@@ -5,8 +5,8 @@ from .models import (
     EstablishmentRole,
     SubCategory,
     EstablishmentLicence,
-    EstablishmentRegister, InspectionAssignment,
-
+    EstablishmentRegister,
+    InspectionAssignment,
 )
 
 from django.utils.translation import gettext_lazy as _
@@ -65,7 +65,10 @@ class EstablishmentAdmin(admin.ModelAdmin):
 
     # Fields displayed in the detailed form view (edit page)
     fields = (
-        ("rifd", "establishment_name",),
+        (
+            "rifd",
+            "establishment_name",
+        ),
         ("main_category", "sub_category", "activity"),
         ("owner_name", "owner_number", "director_name", "director_number"),
         ("representative_name", "representative_number", "box_O_P"),
@@ -170,48 +173,41 @@ class EstablishmentRegisterAdmin(admin.ModelAdmin):
       - **fieldsets**: Logical grouping of form fields in the detail view.
       - **readonly_fields**: Fields that are read-only in the admin form.
     """
+
     # Columns to display in the list view
     list_display = (
-        'establishment_id',
-        'establishment',
-        'issuance_date',
-        'expiration_date',
-        'created_at',
-        'updated_at'
+        "establishment_id",
+        "establishment",
+        "issuance_date",
+        "expiration_date",
+        "created_at",
+        "updated_at",
     )
 
     # Allow filtering by these date fields
-    list_filter = (
-        'issuance_date',
-        'expiration_date',
-        'created_at'
-    )
+    list_filter = ("issuance_date", "expiration_date", "created_at")
 
     # Enable search by RFID and the name of the related establishment
-    search_fields = (
-        'establishment__rifd',
-        'establishment__owner_name'
-    )
+    search_fields = ("establishment__rifd", "establishment__owner_name")
 
     # Order the records by issuance date (most recent first)
-    ordering = ('-issuance_date',)
+    ordering = ("-issuance_date",)
 
     # Grouping of fields on the change form for better readability
     fieldsets = (
-        (None, {
-            'fields': ('establishment',)
-        }),
-        ('Dates', {
-            'fields': ('issuance_date', 'expiration_date')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)  # Collapses this section by default
-        }),
+        (None, {"fields": ("establishment",)}),
+        ("Dates", {"fields": ("issuance_date", "expiration_date")}),
+        (
+            "Timestamps",
+            {
+                "fields": ("created_at", "updated_at"),
+                "classes": ("collapse",),  # Collapses this section by default
+            },
+        ),
     )
 
     # Make the timestamp fields read-only to prevent manual editing
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ("created_at", "updated_at")
 
 
 @admin.register(EstablishmentLicence)
@@ -228,61 +224,59 @@ class EstablishmentLicenceAdmin(admin.ModelAdmin):
       - **fieldsets**: Logical grouping of form fields in the detail view.
       - **readonly_fields**: Fields that are read-only in the admin form.
     """
+
     # Display columns for licence number, registration, associated establishment, dates, categories, and timestamps
     list_display = (
-        'number',
-        'register',
-        'establishment',
-        'creation_date',
-        'expiration_date',
-        'main_category',
-        'activity',
-        'sub_category',
-        'created_at',
-        'updated_at'
+        "number",
+        "register",
+        "establishment",
+        "creation_date",
+        "expiration_date",
+        "main_category",
+        "activity",
+        "sub_category",
+        "created_at",
+        "updated_at",
     )
 
     # Allow filtering by dates, categories, and creation timestamp
     list_filter = (
-        'creation_date',
-        'expiration_date',
-        'main_category',
-        'activity',
-        'sub_category',
-        'created_at'
+        "creation_date",
+        "expiration_date",
+        "main_category",
+        "activity",
+        "sub_category",
+        "created_at",
     )
 
     # Enable search by fields of the related registration and category models
     search_fields = (
-        'register__establishment__rifd',
-        'register__establishment__owner_name',
-        'main_category__ar_name',
-        'activity__ar_name',
-        'sub_category__ar_name'
+        "register__establishment__rifd",
+        "register__establishment__owner_name",
+        "main_category__ar_name",
+        "activity__ar_name",
+        "sub_category__ar_name",
     )
 
     # Order the records by creation date (most recent first)
-    ordering = ('-creation_date',)
+    ordering = ("-creation_date",)
 
     # Group the fields into logical sections on the change form
     fieldsets = (
-        (None, {
-            'fields': ('register',)
-        }),
-        ('Licence Dates', {
-            'fields': ('creation_date', 'expiration_date')
-        }),
-        ('Categories and Activity', {
-            'fields': ('main_category', 'activity', 'sub_category')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
+        (None, {"fields": ("register",)}),
+        ("Licence Dates", {"fields": ("creation_date", "expiration_date")}),
+        (
+            "Categories and Activity",
+            {"fields": ("main_category", "activity", "sub_category")},
+        ),
+        (
+            "Timestamps",
+            {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
+        ),
     )
 
     # Make the timestamp fields read-only to prevent manual editing
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ("created_at", "updated_at")
 
     def establishment(self, obj):
         """
@@ -296,7 +290,7 @@ class EstablishmentLicenceAdmin(admin.ModelAdmin):
         return obj.register.establishment
 
     # Set the short description for the custom column in the list display.
-    establishment.short_description = 'Establishment'
+    establishment.short_description = "Establishment"
 
 
 # Register the Establishment model with the custom admin configuration
@@ -315,41 +309,46 @@ class InspectionAssignmentAdmin(admin.ModelAdmin):
       - ordering: Default ordering for the list view.
       - fieldsets: Grouping of fields on the detail page.
     """
+
     list_display = (
-        'establishment',
-        'inspector',
-        'status',
-        'assigned_at',
-        'due_date',
+        "establishment",
+        "inspector",
+        "status",
+        "assigned_at",
+        "due_date",
     )
 
     list_filter = (
-        'status',
-        'assigned_at',
-        'due_date',
-        'inspector',
+        "status",
+        "assigned_at",
+        "due_date",
+        "inspector",
     )
 
     search_fields = (
-        'establishment__representative_name',  # Assumes the Establishment model has a 'name' field.
-        'inspector__username',
-        'inspector__first_name',
-        'inspector__last_name',
+        "establishment__representative_name",  # Assumes the Establishment model has a 'name' field.
+        "inspector__username",
+        "inspector__first_name",
+        "inspector__last_name",
     )
 
-    ordering = ('-assigned_at',)
+    ordering = ("-assigned_at",)
 
     fieldsets = (
-        (None, {
-            'fields': ('establishment', 'inspector', 'status')
-        }),
-        ('Dates & Times', {
-            'fields': ('assigned_at', 'due_date', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-        ('Additional Information', {
-            'fields': ('notes',),
-        }),
+        (None, {"fields": ("establishment", "inspector", "status")}),
+        (
+            "Dates & Times",
+            {
+                "fields": ("assigned_at", "due_date", "updated_at"),
+                "classes": ("collapse",),
+            },
+        ),
+        (
+            "Additional Information",
+            {
+                "fields": ("notes",),
+            },
+        ),
     )
 
-    readonly_fields = ('assigned_at', 'updated_at')
+    readonly_fields = ("assigned_at", "updated_at")

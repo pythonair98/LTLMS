@@ -5,6 +5,7 @@ This module contains forms for adding, editing, and viewing establishments and i
 The forms are used to collect and validate data from users before saving it to the database.
 
 """
+
 from django import forms
 from django.contrib.admin.widgets import AutocompleteSelect
 from django.core.exceptions import ValidationError
@@ -13,7 +14,11 @@ from django.contrib import admin
 from .models import (
     Establishment,
     Inspection,
-    Activity, EstablishmentRegister, EstablishmentLicence, InspectionMedia, InspectionAssignment,
+    Activity,
+    EstablishmentRegister,
+    EstablishmentLicence,
+    InspectionMedia,
+    InspectionAssignment,
 )  # Importing the models used in the form
 import LTLMS.settings as settings  # Importing settings to use custom date formats
 
@@ -30,6 +35,7 @@ class EstablishmentForm(forms.ModelForm):
         Metaclass to specify the model and fields for the form.
 
         """
+
         model = Establishment  # Specifies the model associated with this form
         fields = [
             "rifd",
@@ -71,7 +77,6 @@ class EstablishmentForm(forms.ModelForm):
         ):
             raise ValidationError("Establishment with this Rifd already exists.")
         return rifd
-
 
     def clean_email(self):
         """
@@ -178,21 +183,21 @@ class InspectionForm(forms.ModelForm):
     class Meta:
         model = Inspection
         fields = [
-            'register_number',
-            'notes',
-            'latitude',
-            'longitude',
-            'status',
+            "register_number",
+            "notes",
+            "latitude",
+            "longitude",
+            "status",
         ]
         widgets = {
-            'notes': forms.Textarea(attrs={'rows': 3}),
+            "notes": forms.Textarea(attrs={"rows": 3}),
         }
         labels = {
-            'register_number': 'Register Number',
-            'notes': 'Inspection Notes',
-            'latitude': 'Latitude',
-            'longitude': 'Longitude',
-            'status': 'Inspection Status',
+            "register_number": "Register Number",
+            "notes": "Inspection Notes",
+            "latitude": "Latitude",
+            "longitude": "Longitude",
+            "status": "Inspection Status",
         }
 
 
@@ -208,12 +213,12 @@ class InspectionMediaForm(forms.ModelForm):
     class Meta:
         model = InspectionMedia
         fields = [
-            'media_type',
-            'image',
+            "media_type",
+            "image",
         ]
         labels = {
-            'media_type': 'Media Type',
-            'image': 'Upload Image',
+            "media_type": "Media Type",
+            "image": "Upload Image",
         }
 
 
@@ -227,9 +232,10 @@ class EstablishmentRegisterForm(forms.ModelForm):
       - issuance_date: The date the license is issued.
       - expiration_date: The date the license expires.
     """
+
     class Meta:
         model = EstablishmentRegister
-        fields = ['establishment', 'issuance_date', 'expiration_date']
+        fields = ["establishment", "issuance_date", "expiration_date"]
 
 
 class EstablishmentLicenceForm(forms.ModelForm):
@@ -244,10 +250,17 @@ class EstablishmentLicenceForm(forms.ModelForm):
       - activity: The activity associated with the licence.
       - sub_category: The sub category associated with the licence.
     """
+
     class Meta:
         model = EstablishmentLicence
-        fields = ['register', 'creation_date', 'expiration_date', 'main_category', 'activity', 'sub_category']
-
+        fields = [
+            "register",
+            "creation_date",
+            "expiration_date",
+            "main_category",
+            "activity",
+            "sub_category",
+        ]
 
 
 class InspectionAssignmentForm(forms.ModelForm):
@@ -263,11 +276,11 @@ class InspectionAssignmentForm(forms.ModelForm):
 
     class Meta:
         model = InspectionAssignment
-        fields = ['inspector', 'establishment', 'due_date', 'notes']
+        fields = ["inspector", "establishment", "due_date", "notes"]
         widgets = {
             # Use a datetime-local widget for due_date if you want a nicer date/time picker.
-            'due_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'notes': forms.Textarea(attrs={'rows': 3}),
+            "due_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "notes": forms.Textarea(attrs={"rows": 3}),
         }
 
     def clean(self):
@@ -276,7 +289,10 @@ class InspectionAssignmentForm(forms.ModelForm):
         if establishment:
             # Check if there is an existing active assignment.
             # Here, active means that the status is not 'completed' or 'cancelled'.
-            if InspectionAssignment.objects.filter(establishment=establishment) \
-                    .exclude(status__in=['completed', 'cancelled']).exists():
+            if (
+                InspectionAssignment.objects.filter(establishment=establishment)
+                .exclude(status__in=["completed", "cancelled"])
+                .exists()
+            ):
                 raise forms.ValidationError("تم تعيين هذه المنشأة لمفتش بالفعل.")
         return cleaned_data

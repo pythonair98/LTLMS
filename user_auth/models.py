@@ -124,15 +124,16 @@ class Profiles(models.Model):
     created_at = models.DateTimeField(default=now, editable=False)
     token = models.CharField(max_length=255, null=True, blank=True)
     profile_image = models.ImageField(
-        upload_to='static/files/profile_images/',
+        upload_to="static/files/profile_images/",
         null=True,
         blank=True,
-        default='files/profile_images/default.jpg'  # Optional: specify a default image file
+        default="files/profile_images/default.jpg",  # Optional: specify a default image file
     )
 
     @property
     def get_user_obj(self):
         return self.user
+
     def activate(self):
         """Activate the user account."""
         self.user.is_active = True
@@ -143,7 +144,6 @@ class Profiles(models.Model):
         self.user.is_active = False
         self.save()
 
-
     def get_token(self):
         """Retrieve the user's token."""
         return self.token
@@ -151,9 +151,9 @@ class Profiles(models.Model):
     @property
     def profile_image_path(self):
         """Returns the full path to the user's profile image."""
-        if self.profile_image and hasattr(self.profile_image, 'url'):
+        if self.profile_image and hasattr(self.profile_image, "url"):
             return self.profile_image.url
-        return '/static/files/profile_images/1.jpg'
+        return "/static/files/profile_images/1.jpg"
 
     @property
     def occupation_ar_name(self):
@@ -179,7 +179,6 @@ class Profiles(models.Model):
     def get_username(self):
         """Returns the user's username."""
         return self.user.username
-
 
     def __str__(self):
         """Returns the username."""

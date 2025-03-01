@@ -5,7 +5,6 @@ from django.contrib import messages
 from .forms import CustomUserCreationForm, ProfileForm, ContactForm
 
 
-
 # Create your views here.
 def profiles_list(request):
     """
@@ -22,10 +21,7 @@ def profiles_list(request):
     """
 
     profiles = User.objects.all()
-    return render(request, 'users/profiles_list.html', {'profiles': profiles})
-
-
-
+    return render(request, "users/profiles_list.html", {"profiles": profiles})
 
 
 def create_user_profile(request):
@@ -54,20 +50,24 @@ def create_user_profile(request):
                 profile.contact = contact
                 profile.save()
             messages.success(request, "User and profile created successfully!")
-            return redirect('profiles-list')  # Change to your desired redirect URL
+            return redirect("profiles-list")  # Change to your desired redirect URL
         else:
-            messages.error(request, "There were errors in the form. Please correct them and try again.")
+            messages.error(
+                request,
+                "There were errors in the form. Please correct them and try again.",
+            )
     else:
         user_form = CustomUserCreationForm()
         profile_form = ProfileForm()
         contact_form = ContactForm()
 
     context = {
-        'user_form': user_form,
-        'profile_form': profile_form,
-        'contact_form': contact_form,
+        "user_form": user_form,
+        "profile_form": profile_form,
+        "contact_form": contact_form,
     }
-    return render(request, 'users/create_user_profile.html', context)
+    return render(request, "users/create_user_profile.html", context)
+
 
 def edit_user_profile(request, pk):
     """
@@ -77,7 +77,9 @@ def edit_user_profile(request, pk):
     profile = user.profiles
     contact = profile.contact
     user_form = CustomUserCreationForm(request.POST or None, instance=user)
-    profile_form = ProfileForm(request.POST or None, request.FILES or None, instance=profile)
+    profile_form = ProfileForm(
+        request.POST or None, request.FILES or None, instance=profile
+    )
     contact_form = ContactForm(request.POST or None, instance=contact)
     if request.method == "POST":
         if user_form.is_valid() and profile_form.is_valid() and contact_form.is_valid():
@@ -85,20 +87,32 @@ def edit_user_profile(request, pk):
             profile_form.save()
             contact_form.save()
             messages.success(request, "User and profile updated successfully!")
-            return redirect('profiles-list')  # Change to your desired redirect URL
+            return redirect("profiles-list")  # Change to your desired redirect URL
         else:
-            messages.error(request, "There were errors in the form. Please correct them and try again.")
-            return render(request, 'users/edit_user_profile.html', {
-            'user_form': user_form,
-            'profile_form': profile_form,
-            'contact_form': contact_form,
-        })
+            messages.error(
+                request,
+                "There were errors in the form. Please correct them and try again.",
+            )
+            return render(
+                request,
+                "users/edit_user_profile.html",
+                {
+                    "user_form": user_form,
+                    "profile_form": profile_form,
+                    "contact_form": contact_form,
+                },
+            )
 
-    return render(request, 'users/edit_user_profile.html', {
-        'user_form': user_form,
-        'profile_form': profile_form,
-        'contact_form': contact_form,
-    })
+    return render(
+        request,
+        "users/edit_user_profile.html",
+        {
+            "user_form": user_form,
+            "profile_form": profile_form,
+            "contact_form": contact_form,
+        },
+    )
+
 
 def delete_user_profile(request, pk):
     """
@@ -111,6 +125,4 @@ def delete_user_profile(request, pk):
     contact.delete()
     profile.delete()
     messages.success(request, "User and profile deleted successfully!")
-    return redirect('profiles-list')  # Change to your desired redirect URL
-
-
+    return redirect("profiles-list")  # Change to your desired redirect URL

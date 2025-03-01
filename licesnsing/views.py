@@ -7,11 +7,22 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 
-from .forms import EstablishmentForm, InspectionForm, EstablishmentRegisterForm, EstablishmentLicenceForm, \
-    InspectionMediaForm, InspectionAssignmentForm
-from .models import Establishment, ArduinoReader, EstablishmentLicence, EstablishmentRegister, InspectionAssignment
+from .forms import (
+    EstablishmentForm,
+    InspectionForm,
+    EstablishmentRegisterForm,
+    EstablishmentLicenceForm,
+    InspectionMediaForm,
+    InspectionAssignmentForm,
+)
+from .models import (
+    Establishment,
+    ArduinoReader,
+    EstablishmentLicence,
+    EstablishmentRegister,
+    InspectionAssignment,
+)
 from .utils import process_raw_data, process_form_data
-
 
 
 def add_establishment(request):
@@ -208,7 +219,7 @@ def reader(request):
             return redirect("login")
 
     # If form is invalid, return to the page with errors
-    return render(request, "licesnsing/readRFID.html", {"form": form,"mform":media})
+    return render(request, "licesnsing/readRFID.html", {"form": form, "mform": media})
 
 
 # Main view to handle the POST request from Arduino
@@ -259,22 +270,22 @@ def register_list_create(request):
       registers - QuerySet of all EstablishmentRegister records.
       form      - The EstablishmentRegisterForm instance.
     """
-    if request.method == 'POST':
+    if request.method == "POST":
         form = EstablishmentRegisterForm(request.POST)
         if form.is_valid():
             form.save()
             # After saving, redirect to the same view to display the updated list.
-            return redirect('register-list')  # Ensure your URL name matches this.
+            return redirect("register-list")  # Ensure your URL name matches this.
     else:
         form = EstablishmentRegisterForm()
 
     registers = EstablishmentRegister.objects.all()
     context = {
-        'registers': registers,
-        'today': date.today(),
-        'form': form,
+        "registers": registers,
+        "today": date.today(),
+        "form": form,
     }
-    return render(request, 'licesnsing/register_list_create.html', context)
+    return render(request, "licesnsing/register_list_create.html", context)
 
 
 def register_delete(request, pk):
@@ -294,15 +305,16 @@ def register_delete(request, pk):
     register = get_object_or_404(EstablishmentRegister, pk=pk)
     if register:
         register.delete()
-        return redirect('register-list')  # Ensure your URL name matches this.
+        return redirect("register-list")  # Ensure your URL name matches this.
 
-    context = {'register': register}
-    return render(request, 'licesnsing/register_confirm_delete.html', context)
+    context = {"register": register}
+    return render(request, "licesnsing/register_confirm_delete.html", context)
 
 
 # -------------------------------------------------------------------
 # Views for EstablishmentLicence (Licence)
 # -------------------------------------------------------------------
+
 
 def licence_list_create(request):
     """
@@ -319,21 +331,21 @@ def licence_list_create(request):
       licences - QuerySet of all EstablishmentLicence records.
       form     - The EstablishmentLicenceForm instance.
     """
-    if request.method == 'POST':
+    if request.method == "POST":
         form = EstablishmentLicenceForm(request.POST)
         if form.is_valid():
             form.save()
             # After saving, redirect to the same view to display the updated list.
-            return redirect('licence-list')  # Ensure your URL name matches this.
+            return redirect("licence-list")  # Ensure your URL name matches this.
     else:
         form = EstablishmentLicenceForm()
 
     licences = EstablishmentLicence.objects.all()
     context = {
-        'licences': licences,
-        'form': form,
+        "licences": licences,
+        "form": form,
     }
-    return render(request, 'licesnsing/licence_list_create.html', context)
+    return render(request, "licesnsing/licence_list_create.html", context)
 
 
 def licence_delete(request, pk):
@@ -352,17 +364,20 @@ def licence_delete(request, pk):
     """
     licence = get_object_or_404(EstablishmentLicence, pk=pk)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         licence.delete()
-        return redirect('licence-list')  # Ensure your URL name matches this.
+        return redirect("licence-list")  # Ensure your URL name matches this.
 
-    context = {'licence': licence}
-    return render(request, 'licesnsing/licence_confirm_delete.html', context)
+    context = {"licence": licence}
+    return render(request, "licesnsing/licence_confirm_delete.html", context)
 
 
 def view_inspection_assignments(request):
     assignments = InspectionAssignment.objects.all()
-    return render(request, 'licesnsing/inspectors_assignments.html', {'assignments': assignments})
+    return render(
+        request, "licesnsing/inspectors_assignments.html", {"assignments": assignments}
+    )
+
 
 def edit_assignment(request, pk):
     """
@@ -385,6 +400,8 @@ def edit_assignment(request, pk):
     #     form.save()
 
     return render(request, "licesnsing/edit_assignment.html", {})
+
+
 def delete_assignment(request, pk):
     """
     Deletes an InspectionAssignment based on the provided primary key.
@@ -413,7 +430,6 @@ def delete_assignment(request, pk):
     )
 
 
-
 @login_required
 @require_POST
 def update_assignment_status(request, pk):
@@ -426,18 +442,20 @@ def update_assignment_status(request, pk):
     On success, updates the assignment and redirects to the assignments list view.
     On failure, displays an error message and redirects back.
     """
-    new_status = request.POST.get('status')
+    new_status = request.POST.get("status")
     assignment = get_object_or_404(InspectionAssignment, id=pk)
 
-    valid_statuses = ['pending', 'accepted', 'in_progress', 'completed', 'cancelled']
+    valid_statuses = ["pending", "accepted", "in_progress", "completed", "cancelled"]
     if new_status not in valid_statuses:
         messages.error(request, "الحالة التي قمت بإدخالها خطأ.")
-        return redirect('view_assignments')  # Adjust to your actual URL name for assignments view
+        return redirect(
+            "view_assignments"
+        )  # Adjust to your actual URL name for assignments view
 
     assignment.status = new_status
     assignment.save()
     messages.success(request, "تم تحديث حالة التكليف بنجاح.")
-    return redirect('view_assignments')
+    return redirect("view_assignments")
 
 
 @login_required
@@ -452,16 +470,18 @@ def assign_establishment(request):
       - Validates the form and, if valid, creates a new InspectionAssignment.
       - Redirects to a view (e.g., the assignments list) upon success.
     """
-    if request.method == 'POST':
+    if request.method == "POST":
         form = InspectionAssignmentForm(request.POST)
         if form.is_valid():
             assignment = form.save()
-            messages.success(request, "Establishment assigned for inspection successfully.")
+            messages.success(
+                request, "Establishment assigned for inspection successfully."
+            )
             # Adjust the redirect URL as needed.
-            return redirect('view_assignments')
+            return redirect("view_assignments")
         else:
             messages.error(request, "Please correct the errors below.")
     else:
         form = InspectionAssignmentForm()
 
-    return render(request, 'licesnsing/assign_establishment.html', {'form': form})
+    return render(request, "licesnsing/assign_establishment.html", {"form": form})

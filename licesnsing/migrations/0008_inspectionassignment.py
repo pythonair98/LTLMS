@@ -8,27 +8,81 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('licesnsing', '0007_alter_inspection_latitude_alter_inspection_longitude'),
+        ("licesnsing", "0007_alter_inspection_latitude_alter_inspection_longitude"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='InspectionAssignment',
+            name="InspectionAssignment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('assigned_at', models.DateTimeField(auto_now_add=True, verbose_name='Assigned At')),
-                ('due_date', models.DateTimeField(blank=True, null=True, verbose_name='Due Date')),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('accepted', 'Accepted'), ('in_progress', 'In Progress'), ('completed', 'Completed'), ('cancelled', 'Cancelled')], default='pending', max_length=20, verbose_name='Assignment Status')),
-                ('notes', models.TextField(blank=True, null=True, verbose_name='Assignment Notes')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated At')),
-                ('establishment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='inspection_assignments', to='licesnsing.establishment', verbose_name='Establishment')),
-                ('inspector', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='inspection_assignments', to=settings.AUTH_USER_MODEL, verbose_name='Inspector')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "assigned_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Assigned At"),
+                ),
+                (
+                    "due_date",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="Due Date"
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("accepted", "Accepted"),
+                            ("in_progress", "In Progress"),
+                            ("completed", "Completed"),
+                            ("cancelled", "Cancelled"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                        verbose_name="Assignment Status",
+                    ),
+                ),
+                (
+                    "notes",
+                    models.TextField(
+                        blank=True, null=True, verbose_name="Assignment Notes"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Updated At"),
+                ),
+                (
+                    "establishment",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="inspection_assignments",
+                        to="licesnsing.establishment",
+                        verbose_name="Establishment",
+                    ),
+                ),
+                (
+                    "inspector",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="inspection_assignments",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Inspector",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Inspection Assignment',
-                'verbose_name_plural': 'Inspection Assignments',
-                'ordering': ['-assigned_at'],
+                "verbose_name": "Inspection Assignment",
+                "verbose_name_plural": "Inspection Assignments",
+                "ordering": ["-assigned_at"],
             },
         ),
     ]
