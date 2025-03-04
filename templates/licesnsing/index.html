@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+  <title>Dashboard - Inspection Management</title>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="text-center mb-4">Dashboard</h2>
+
+  <!-- Overall Statistics Cards -->
+  <div class="row mb-4">
+    <!-- Establishments Card -->
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-primary h-100">
+        <div class="card-body">
+          <h5 class="card-title">Establishments</h5>
+          <p class="card-text display-4">{{ total_establishments }}</p>
+        </div>
+      </div>
+    </div>
+    <!-- Assignments Card -->
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-success h-100">
+        <div class="card-body">
+          <h5 class="card-title">Assignments</h5>
+          <p class="card-text display-4">{{ total_assignments }}</p>
+        </div>
+      </div>
+    </div>
+    <!-- Licenses Card -->
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-warning h-100">
+        <div class="card-body">
+          <h5 class="card-title">Licenses</h5>
+          <p class="card-text display-4">{{ total_licenses }}</p>
+        </div>
+      </div>
+    </div>
+    <!-- Inspections Card -->
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-info h-100">
+        <div class="card-body">
+          <h5 class="card-title">Inspections</h5>
+          <p class="card-text display-4">{{ total_inspections }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Statistics -->
+  <div class="row">
+    <!-- Assignments by Status -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <h5 class="mb-0">Assignments by Status</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in assignments_by_status %}
+              <tr>
+                <td>
+                  {% if item.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                  {% elif item.status == 'accepted' %}
+                    <span class="badge bg-info">Accepted</span>
+                  {% elif item.status == 'in_progress' %}
+                    <span class="badge bg-primary">In Progress</span>
+                  {% elif item.status == 'completed' %}
+                    <span class="badge bg-success">Completed</span>
+                  {% elif item.status == 'cancelled' %}
+                    <span class="badge bg-danger">Cancelled</span>
+                  {% else %}
+                    {{ item.status }}
+                  {% endif %}
+                </td>
+                <td>{{ item.count }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" class="text-center">No assignment data available.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latest Records with Tabbed Interface -->
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0">Latest Records</h5>
+        </div>
+        <div class="card-body">
+          <ul class="nav nav-tabs" id="latestRecordsTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="est-tab" data-bs-toggle="tab" data-bs-target="#est" type="button" role="tab" aria-controls="est" aria-selected="true">Establishments</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="assign-tab" data-bs-toggle="tab" data-bs-target="#assign" type="button" role="tab" aria-controls="assign" aria-selected="false">Assignments</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="license-tab" data-bs-toggle="tab" data-bs-target="#license" type="button" role="tab" aria-controls="license" aria-selected="false">Licenses</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="insp-tab" data-bs-toggle="tab" data-bs-target="#insp" type="button" role="tab" aria-controls="insp" aria-selected="false">Inspections</button>
+            </li>
+          </ul>
+          <div class="tab-content mt-3" id="latestRecordsTabContent">
+            <!-- Latest Establishments Tab -->
+            <div class="tab-pane fade show active" id="est" role="tabpanel" aria-labelledby="est-tab">
+              <table class="table table-sm table-bordered">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for est in latest_establishments %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ est.name }}</td>
+                    <td>{{ est.created_at|date:"Y-m-d" }}</td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="3" class="text-center">No recent establishments.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- Latest Assignments Tab -->
+            <div class="tab-pane fade" id="assign" role="tabpanel" aria-labelledby="assign-tab">
+              <table class="table table-sm table-bordered">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Establishment</th>
+                    <th>Inspector</th>
+                    <th>Status</th>
+                    <th>Assigned</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for assign in latest_assignments %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ assign.establishment.name }}</td>
+                    <td>{{ assign.inspector.username }}</td>
+                    <td>{{ assign.status }}</td>
+                    <td>{{ assign.assigned_at|date:"Y-m-d" }}</td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="5" class="text-center">No recent assignments.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- Latest Licenses Tab -->
+            <div class="tab-pane fade" id="license" role="tabpanel" aria-labelledby="license-tab">
+              <table class="table table-sm table-bordered">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>License Number</th>
+                    <th>Issued</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for lic in latest_licenses %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ lic.number }}</td>
+                    <td>{{ lic.created_at|date:"Y-m-d" }}</td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="3" class="text-center">No recent licenses.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- Latest Inspections Tab -->
+            <div class="tab-pane fade" id="insp" role="tabpanel" aria-labelledby="insp-tab">
+              <table class="table table-sm table-bordered">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Register Number</th>
+                    <th>Status</th>
+                    <th>Inspected On</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for insp in latest_inspections %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ insp.register_number }}</td>
+                    <td>{{ insp.status|yesno:"Accepted,Refused" }}</td>
+                    <td>{{ insp.created_at|date:"Y-m-d" }}</td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center">No recent inspections.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

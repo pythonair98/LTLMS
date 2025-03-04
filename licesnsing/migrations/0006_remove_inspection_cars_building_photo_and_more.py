@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
                 (
                     "image",
                     models.ImageField(
-                        upload_to=licesnsing.models.inspection_media_upload_to,
+                        upload_to=licesnsing.models,
                         verbose_name="Image",
                     ),
                 ),

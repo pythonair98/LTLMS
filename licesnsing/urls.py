@@ -16,39 +16,43 @@ from .views import (
     edit_assignment,
     update_assignment_status,
     assign_establishment,
+    create_inspection,
+    dashboard,
 )
 
 urlpatterns = [
+    # Handles adding a new establishment (Establishment)
+    path("", dashboard, name="dashboard"),
     path("add_establishment", add_establishment, name="add_establishment"),
-    # Handles adding a new establishment
     path("view_establishment", view_establishment, name="view_establishment"),
-    # Displays all registered establishments
     path(
         "delete_establishment/<int:register_number>",
         delete_establishment,
         name="delete_establishment",
     ),
-    # Deletes an establishment identified by its register number
     path(
         "edit_establishment/<int:register_number>",
         edit_establishment,
         name="edit_establishment",
     ),
-    # Edits an establishment identified by its register number
+    # Handles the reader view
     path("reader", reader, name="reader"),
+    path("test", create_inspection, name="test"),
     path("api/query", query, name="query"),
     path("api/arduino", api_arduino, name="api_arduino"),
+    # URLs for EstablishmentRegister (Register)
     path("registers/", register_list_create, name="register-list"),
     path("registers/delete/<int:pk>/", register_delete, name="register-delete"),
     path("registers/delete/<int:pk>/", register_delete, name="register-delete"),
     # URLs for EstablishmentLicence (Licence)
-    path("licences/", licence_list_create, name="licence-list"),
+    path("licences", licence_list_create, name="licence-list"),
     path("licences/delete/<int:pk>/", licence_delete, name="licence-delete"),
-    path("assignments/", view_inspection_assignments, name="view_assignments"),
-    path("assignments/delete/<int:pk>/", delete_assignment, name="delete_assignment"),
-    path("assignments/edit/<int:pk>/", edit_assignment, name="edit_assignment"),
+    # URLs for InspectionAssignment
+    path("assignments", view_inspection_assignments, name="view_assignments"),
+    path("assignments/delete/<int:pk>", delete_assignment, name="delete_assignment"),
+    path("assignments/edit/<int:pk>", edit_assignment, name="edit_assignment"),
     path(
-        "assignments/update_status/<int:pk>/",
+        "assignments/update_status/<int:pk>",
         update_assignment_status,
         name="update_assignment_status",
     ),

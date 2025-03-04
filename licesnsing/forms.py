@@ -6,6 +6,8 @@ The forms are used to collect and validate data from users before saving it to t
 
 """
 
+from django.contrib.auth.models import User
+
 from django import forms
 from django.contrib.admin.widgets import AutocompleteSelect
 from django.core.exceptions import ValidationError
@@ -17,7 +19,6 @@ from .models import (
     Activity,
     EstablishmentRegister,
     EstablishmentLicence,
-    InspectionMedia,
     InspectionAssignment,
 )  # Importing the models used in the form
 import LTLMS.settings as settings  # Importing settings to use custom date formats
@@ -171,13 +172,7 @@ class EstablishmentForm(forms.ModelForm):
 
 class InspectionForm(forms.ModelForm):
     """
-    Form for creating or updating an Inspection.
-
-    This form handles the main inspection details such as register number,
-    notes, latitude, longitude, and inspection status.
-
-    The inspector, created_at, is_archived, and archived_at fields are handled
-    automatically and are not included in the form.
+    ModelForm for creating or updating an Inspection record along with its photos.
     """
 
     class Meta:
@@ -188,9 +183,19 @@ class InspectionForm(forms.ModelForm):
             "latitude",
             "longitude",
             "status",
+            "inspector",
+            "register_photo",
+            "license_photo",
+            "establishment_photo",
+            "cars_building_photo",
         ]
         widgets = {
-            "notes": forms.Textarea(attrs={"rows": 3}),
+            "register_number": forms.TextInput(attrs={"class": "form-control"}),
+            "notes": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
+            "latitude": forms.NumberInput(attrs={"class": "form-control"}),
+            "longitude": forms.NumberInput(attrs={"class": "form-control"}),
+            "inspector": forms.Select(attrs={"class": "form-select"}),
+            "status": forms.Select(attrs={"class": "form-select"}),
         }
         labels = {
             "register_number": "Register Number",
@@ -198,27 +203,11 @@ class InspectionForm(forms.ModelForm):
             "latitude": "Latitude",
             "longitude": "Longitude",
             "status": "Inspection Status",
-        }
-
-
-class InspectionMediaForm(forms.ModelForm):
-    """
-    Form for uploading media related to an Inspection.
-
-    This form allows the user to select a media type and upload an image.
-    The 'inspection' field is excluded from the form since it is typically
-    assigned in the view after the main Inspection instance is created.
-    """
-
-    class Meta:
-        model = InspectionMedia
-        fields = [
-            "media_type",
-            "image",
-        ]
-        labels = {
-            "media_type": "Media Type",
-            "image": "Upload Image",
+            "inspector": "Inspector",
+            "register_photo": "Register Photo",
+            "license_photo": "License Photo",
+            "establishment_photo": "Establishment Photo",
+            "cars_building_photo": "Cars Building Photo",
         }
 
 
@@ -286,13 +275,20 @@ class InspectionAssignmentForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         establishment = cleaned_data.get("establishment")
+        # inspector = User.objects.get(pk=cleaned_data.get("inspector"))
+        inspector = cleaned_data.get("inspector")
         if establishment:
             # Check if there is an existing active assignment.
             # Here, active means that the status is not 'completed' or 'cancelled'.
-            if (
+
+            check_exist = (
                 InspectionAssignment.objects.filter(establishment=establishment)
                 .exclude(status__in=["completed", "cancelled"])
                 .exists()
-            ):
-                raise forms.ValidationError("تم تعيين هذه المنشأة لمفتش بالفعل.")
+            )
+            if check_exist:
+
+                raise forms.ValidationError(
+                    f" تم تعيين هذه المنشأة {establishment.representative_name} للمفتش {inspector.get_full_name()} بالفعل ."
+                )
         return cleaned_data

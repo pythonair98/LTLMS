@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+  <title>Create New User</title>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" dir="rtl">
+  <h2 class="text-center mb-4">إنشاء مستخدم جديد</h2>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrfmiddlewaretoken" value="FaiFymJ2h3MAwlWHeoHEFuyZvE7pfoqOAMUxdcna15fyS8ttP8xEydbafuJj56Cj">
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_username" class="form-label requiredField">
+              اسم المستخدم <span class="asteriskField">*</span>
+            </label>
+            <input type="text" name="username" class="form-control textinput" maxlength="150" required id="id_username">
+            <div class="form-text">اسم المستخدم يجب أن يكون 150 حرفًا أو أقل ويحتوي على حروف وأرقام فقط مع @/./+/-/_</div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="id_email" class="form-label">البريد الإلكتروني</label>
+            <input type="email" name="email" class="form-control emailinput" maxlength="254" id="id_email">
+            <div class="form-text">أدخل بريدًا إلكترونيًا صحيحًا للتواصل واستعادة الحساب.</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_first_name" class="form-label">الاسم الأول</label>
+            <input type="text" name="first_name" class="form-control textinput" maxlength="150" id="id_first_name">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="id_last_name" class="form-label">اسم العائلة</label>
+            <input type="text" name="last_name" class="form-control textinput" maxlength="150" id="id_last_name">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_password" class="form-label requiredField">
+              كلمة المرور <span class="asteriskField">*</span>
+            </label>
+            <input type="password" name="password" class="form-control passwordinput" required id="id_password">
+            <div class="form-text">اختر كلمة مرور قوية تحتوي على حروف وأرقام ورموز لحماية حسابك.</div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="id_confirm_password" class="form-label requiredField">
+              تأكيد كلمة المرور <span class="asteriskField">*</span>
+            </label>
+            <input type="password" name="confirm_password" class="form-control passwordinput" required id="id_confirm_password">
+            <div class="form-text">أعد إدخال كلمة المرور للتأكد من تطابقها.</div>
+          </div>
+        </div>
+
+        <!-- Occupation, Team, and Profile Image -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_occupation" class="form-label requiredField">
+              المسمى الوظيفي <span class="asteriskField">*</span>
+            </label>
+            <select name="occupation" class="select form-select" required id="id_occupation">
+              <option value="" >---------</option>
+              <option value="1">MacKensie Kane</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="id_team" class="form-label">الفريق</label>
+            <select name="team" class="select form-select" id="id_team">
+              <option value="">---------</option>
+              <option value="1">Patricia Pennington</option>
+              <option value="2">Hassan</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <div class="form-check">
+              <input type="checkbox" name="is_active" class="form-check-input" id="id_is_active" checked>
+              <label for="id_is_active" class="form-check-label">مفعل</label>
+              <div class="form-text">يحدد ما إذا كان هذا الحساب نشطًا. ألغِ التحديد لإيقاف الحساب بدلًا من حذفه.</div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="form-check">
+              <input type="checkbox" name="is_staff" class="form-check-input" id="id_is_staff">
+              <label for="id_is_staff" class="form-check-label">مسؤول</label>
+              <div class="form-text">يمنح المستخدم إمكانية الوصول إلى لوحة تحكم الإدارة.</div>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="form-check">
+              <input type="checkbox" name="is_superuser" class="form-check-input" id="id_is_superuser">
+              <label for="id_is_superuser" class="form-check-label">مدير عام</label>
+              <div class="form-text">يمنح المستخدم جميع الأذونات تلقائيًا.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mt-3">
+          <button type="submit" class="btn btn-primary px-4">حفظ المستخدم</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

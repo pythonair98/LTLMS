@@ -4,10 +4,12 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+
 }
 
 body {
   font-family: "Poppins", sans-serif;
+
 }
 
 header a {
@@ -53,6 +55,7 @@ ul li {
 ul li:hover {
   transform: scale(1.1);
   transition: 0.3s;
+  color: whitesmoke;
 }
 
 #login,

@@ -13,11 +13,18 @@ Models:
 
 """
 
+import os
+
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.timezone import now
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.files.storage import FileSystemStorage
+
+# Create a FileSystemStorage instance pointing to the static folder (or a subfolder of it)
+static_storage = FileSystemStorage(location=os.path.join(settings.BASE_DIR, "static"))
 
 
 class Activity(models.Model):
@@ -220,44 +227,70 @@ class Inspection(models.Model):
         (False, "Refused"),
     )
 
+    # Inspection Details
     register_number = models.CharField(
         max_length=255, unique=True, verbose_name="Register Number"
     )
     notes = models.TextField(null=True, blank=True, verbose_name="Inspection Notes")
-    latitude = models.IntegerField(
-        verbose_name="Latitude",
-    )
-    longitude = models.IntegerField(
-        verbose_name="Longitude",
-    )
+    latitude = models.IntegerField(verbose_name="Latitude")
+    longitude = models.IntegerField(verbose_name="Longitude")
     status = models.BooleanField(
         choices=STATUS_CHOICES, verbose_name="Inspection Status", default=False
     )
-
-    # Foreign Key to link the inspection to a specific user (the inspector)
     inspector = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="inspections",
         verbose_name="Inspector",
     )
-
-    # Date and Time of Inspection
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="Date and Time of Inspection"
     )
     is_archived = models.BooleanField(default=False)
     archived_at = models.DateTimeField(null=True, blank=True)
 
+    # Media fields merged from the separate model
+    register_photo = models.ImageField(
+        upload_to="inspections/register_photos/",
+        null=True,
+        blank=True,
+        verbose_name="Register Photo",
+        storage=static_storage,
+    )
+    license_photo = models.ImageField(
+        upload_to="inspections/license_photos/",
+        null=True,
+        blank=True,
+        verbose_name="License Photo",
+        storage=static_storage,
+    )
+    establishment_photo = models.ImageField(
+        upload_to="inspections/establishment_photos/",
+        null=True,
+        blank=True,
+        verbose_name="Establishment Photo",
+        storage=static_storage,
+    )
+    cars_building_photo = models.ImageField(
+        upload_to="inspections/cars_building_photos/",
+        null=True,
+        blank=True,
+        verbose_name="Cars Building Photo",
+        storage=static_storage,
+    )
+
     def __str__(self):
         return f"Inspection {self.register_number} - {'Accepted' if self.status else 'Refused'}"
 
     def save(self, *args, **kwargs):
-        # Here you can add custom actions (like sending an email, logging, etc.)
+        # Optional: Custom actions before saving can be added here.
         super().save(*args, **kwargs)
 
     def send_email_notification(self):
-        """Send an email notification when the inspection status is updated."""
+        """
+        Send an email notification when the inspection status is updated.
+        (Assumes that the inspector's email should be notified.)
+        """
         from django.core.mail import send_mail
 
         subject = "Inspection Update"
@@ -265,57 +298,13 @@ class Inspection(models.Model):
             f"Inspection for {self.register_number} has been "
             f"{'Accepted' if self.status else 'Refused'}."
         )
-        email_recipient = (
-            self.establishment.email
-        )  # Assuming there is an 'email' field on the related Establishment model
+        email_recipient = self.inspector.email
         send_mail(subject, message, "noreply@example.com", [email_recipient])
 
     def clean(self):
-        """Optional custom validation logic."""
+        # Optional: Add any custom validation logic here.
         if self.latitude and self.longitude:
-            # Example of validation to check for specific range or something else.
             pass
-
-
-def inspection_media_upload_to(instance, filename):
-    """
-    Returns a dynamic upload path for inspection media.
-    The path format will be: inspections/<media_type>/<filename>
-    """
-    return f"inspections/{instance.media_type}/{filename}"
-
-
-class InspectionMedia(models.Model):
-    """
-    Stores media files (photos) associated with an Inspection.
-
-    Each instance represents a single uploaded image along with a type indicating
-    what kind of photo it is (e.g., register photo, license photo, etc.).
-    """
-
-    MEDIA_TYPE_CHOICES = (
-        ("register_photo", "Register Photo"),
-        ("license_photo", "License Photo"),
-        ("establishment_photo", "Establishment Photo"),
-        ("cars_building_photo", "Cars Building Photo"),
-    )
-
-    inspection = models.ForeignKey(
-        Inspection,
-        on_delete=models.CASCADE,
-        related_name="media",
-        verbose_name="Inspection",
-    )
-    media_type = models.CharField(
-        max_length=50, choices=MEDIA_TYPE_CHOICES, verbose_name="Media Type"
-    )
-    image = models.ImageField(
-        upload_to=inspection_media_upload_to, verbose_name="Image"
-    )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Uploaded at")
-
-    def __str__(self):
-        return f"{self.inspection.register_number} - {self.get_media_type_display()}"
 
 
 class EstablishmentRegister(models.Model):

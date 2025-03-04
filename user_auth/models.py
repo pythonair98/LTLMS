@@ -100,7 +100,7 @@ class Team(models.Model):
         Retrieves all users in this team who have an occupation_id of 4.
         This assumes the occupation_id 4 represents a specific role within the team.
         """
-        return Profiles.objects.filter(occupation__power=4, team_id=self.id)
+        return Profiles.objects.filter(team_id=self.id).count()
 
 
 class Profiles(models.Model):
@@ -118,7 +118,7 @@ class Profiles(models.Model):
     """
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    contact = models.OneToOneField(Contact, on_delete=models.CASCADE)
+    contact = models.OneToOneField(Contact, on_delete=models.CASCADE,null=True, blank=True)
     occupation = models.ForeignKey(Occupation, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(default=now, editable=False)

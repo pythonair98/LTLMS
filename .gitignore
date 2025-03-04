@@ -1,1 +1,3 @@
 /.venv/
+/static/inspections/
+/static/inspections/*

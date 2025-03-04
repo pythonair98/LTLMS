@@ -6,13 +6,13 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
+from django.db.models import Count
 
 from .forms import (
     EstablishmentForm,
     InspectionForm,
     EstablishmentRegisterForm,
     EstablishmentLicenceForm,
-    InspectionMediaForm,
     InspectionAssignmentForm,
 )
 from .models import (
@@ -21,10 +21,55 @@ from .models import (
     EstablishmentLicence,
     EstablishmentRegister,
     InspectionAssignment,
+    Inspection,
 )
 from .utils import process_raw_data, process_form_data
 
 
+@login_required(login_url="login")
+def dashboard(request):
+    """
+    Renders a dashboard with key statistics and latest records.
+
+    Statistics include:
+      - Total Establishments
+      - Total Inspection Assignments and breakdown by status
+      - Total Licenses
+      - Total Inspections
+
+    Also, recent (latest) records for each table are shown in tabbed tables.
+    """
+    total_establishments = Establishment.objects.count()
+    total_assignments = InspectionAssignment.objects.count()
+    assignments_by_status = (
+        InspectionAssignment.objects.values("status")
+        .annotate(count=Count("id"))
+        .order_by("status")
+    )
+    total_licenses = EstablishmentLicence.objects.count()
+    total_inspections = Inspection.objects.count()
+
+    # Get latest records (adjust ordering fields as needed)
+    latest_establishments = Establishment.objects.order_by("-created_at")[:5]
+    latest_assignments = InspectionAssignment.objects.order_by("-assigned_at")[:5]
+    latest_licenses = EstablishmentLicence.objects.order_by("-number")[:5]
+    latest_inspections = Inspection.objects.order_by("-created_at")[:5]
+
+    context = {
+        "total_establishments": total_establishments,
+        "total_assignments": total_assignments,
+        "assignments_by_status": assignments_by_status,
+        "total_licenses": total_licenses,
+        "total_inspections": total_inspections,
+        "latest_establishments": latest_establishments,
+        "latest_assignments": latest_assignments,
+        "latest_licenses": latest_licenses,
+        "latest_inspections": latest_inspections,
+    }
+    return render(request, "licesnsing/index.html", context)
+
+
+@login_required(login_url="login")
 def add_establishment(request):
     """
     Handles the creation of a new establishment.
@@ -52,6 +97,7 @@ def add_establishment(request):
     return render(request, "licesnsing/add_establishment.html", {"form": form})
 
 
+@login_required(login_url="login")
 def view_establishment(request):
     """
     Displays a list of all registered establishments.
@@ -70,6 +116,7 @@ def view_establishment(request):
     )
 
 
+@login_required(login_url="login")
 def delete_establishment(request, register_number):
     """
     Deletes an establishment based on the provided register number.
@@ -98,6 +145,7 @@ def delete_establishment(request, register_number):
     )
 
 
+@login_required(login_url="login")
 def edit_establishment(request, register_number):
     """
     Edits an existing establishment's details.
@@ -194,7 +242,6 @@ def reader(request):
     """Main view to handle reader requests."""
 
     form = InspectionForm(request.POST, request.FILES)
-    media = InspectionMediaForm(request.POST, request.FILES)
 
     if form.is_valid():
         form.save()
@@ -219,7 +266,7 @@ def reader(request):
             return redirect("login")
 
     # If form is invalid, return to the page with errors
-    return render(request, "licesnsing/readRFID.html", {"form": form, "mform": media})
+    return render(request, "licesnsing/readRFID.html", {"form": form})
 
 
 # Main view to handle the POST request from Arduino
@@ -255,6 +302,7 @@ def api_arduino(request):
     return JsonResponse({"error": "Forbidden method"}, status=403)
 
 
+@login_required(login_url="login")
 def register_list_create(request):
     """
     View to display a list of all EstablishmentRegister records and provide a form
@@ -288,6 +336,7 @@ def register_list_create(request):
     return render(request, "licesnsing/register_list_create.html", context)
 
 
+@login_required(login_url="login")
 def register_delete(request, pk):
     """
     View to delete a specific EstablishmentRegister record.
@@ -316,6 +365,7 @@ def register_delete(request, pk):
 # -------------------------------------------------------------------
 
 
+@login_required(login_url="login")
 def licence_list_create(request):
     """
     View to display a list of all EstablishmentLicence records and provide a form
@@ -348,6 +398,7 @@ def licence_list_create(request):
     return render(request, "licesnsing/licence_list_create.html", context)
 
 
+@login_required(login_url="login")
 def licence_delete(request, pk):
     """
     View to delete a specific EstablishmentLicence record.
@@ -372,6 +423,7 @@ def licence_delete(request, pk):
     return render(request, "licesnsing/licence_confirm_delete.html", context)
 
 
+@login_required(login_url="login")
 def view_inspection_assignments(request):
     assignments = InspectionAssignment.objects.all()
     return render(
@@ -379,6 +431,7 @@ def view_inspection_assignments(request):
     )
 
 
+@login_required(login_url="login")
 def edit_assignment(request, pk):
     """
     Edits an existing InspectionAssignment.
@@ -402,6 +455,7 @@ def edit_assignment(request, pk):
     return render(request, "licesnsing/edit_assignment.html", {})
 
 
+@login_required(login_url="login")
 def delete_assignment(request, pk):
     """
     Deletes an InspectionAssignment based on the provided primary key.
@@ -474,14 +528,32 @@ def assign_establishment(request):
         form = InspectionAssignmentForm(request.POST)
         if form.is_valid():
             assignment = form.save()
-            messages.success(
-                request, "Establishment assigned for inspection successfully."
-            )
+            messages.success(request, "تم توجيه التكليف بنجاح")
             # Adjust the redirect URL as needed.
             return redirect("view_assignments")
         else:
-            messages.error(request, "Please correct the errors below.")
+            messages.error(request, "حدث خطأ اثناء التعيين.")
     else:
         form = InspectionAssignmentForm()
 
     return render(request, "licesnsing/assign_establishment.html", {"form": form})
+
+
+@login_required(login_url="login")
+def create_inspection(request):
+    if request.method == "POST":
+        form = InspectionForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Inspection created successfully!")
+            return redirect("reader")  # Change to your desired URL name.
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = InspectionForm()
+        registers = EstablishmentRegister.objects.all()
+        return render(
+            request,
+            "licesnsing/create_inspection.html",
+            {"form": form, "registers": registers},
+        )

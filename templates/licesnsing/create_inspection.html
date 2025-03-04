@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}
+  <title>Create Inspection</title>
+{% endblock %}
+{% block content %}
+<div class="container mt-4" dir="rtl">
+  <h2 class="text-center mb-4">إنشاء تقرير تفتيش</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Inspection Details Card -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">تفاصيل التفتيش</h5>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="id_register_number" class="form-label requiredField">
+            Register Number <span class="asteriskField">*</span>
+          </label>
+            <select type="text" name="register_number" class="form-control" required id="id_register_number">
+            {% for register in registers %}
+              <option value="{{ register.id }}">{{ register.id }}</option>
+            {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+          <label for="id_notes" class="form-label">Inspection Notes</label>
+          <textarea name="notes" cols="40" rows="3" class="form-control" id="id_notes"></textarea>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_latitude" class="form-label requiredField">
+              Latitude <span class="asteriskField">*</span>
+            </label>
+            <input type="number" name="latitude" class="form-control" required id="id_latitude">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="id_longitude" class="form-label requiredField">
+              Longitude <span class="asteriskField">*</span>
+            </label>
+            <input type="number" name="longitude" class="form-control" required id="id_longitude">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="id_status" class="form-label requiredField">
+            Inspection Status <span class="asteriskField">*</span>
+          </label>
+          <select name="status" class="form-select" id="id_status">
+            <option value="True">Accepted</option>
+            <option value="False" selected>Refused</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="id_inspector" class="form-label requiredField">
+            Inspector <span class="asteriskField">*</span>
+          </label>
+          <select name="inspector" class="form-select" required id="id_inspector">
+            <option value="{{ user.id }}" selected>{{ user.get_fullname }}</option>
+
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inspection Photos Card -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">صور التفتيش</h5>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="id_register_photo" class="form-label">Register Photo</label>
+          <input type="file" name="register_photo" class="form-control" accept="image/*" capture="environment" id="id_register_photo">
+        </div>
+        <div class="mb-3">
+          <label for="id_license_photo" class="form-label">License Photo</label>
+          <input type="file" name="license_photo" class="form-control" accept="image/*" capture="environment" id="id_license_photo">
+        </div>
+        <div class="mb-3">
+          <label for="id_establishment_photo" class="form-label">Establishment Photo</label>
+          <input type="file" name="establishment_photo" class="form-control" accept="image/*" capture="environment" id="id_establishment_photo">
+        </div>
+        <div class="mb-3">
+          <label for="id_cars_building_photo" class="form-label">Cars Building Photo</label>
+          <input type="file" name="cars_building_photo" class="form-control" accept="image/*" capture="environment" id="id_cars_building_photo">
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-success px-4">Save Inspection</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
