@@ -1,3 +1,5 @@
 /.venv/
 /static/inspections/
 /static/inspections/*
+/licesnsing/migrations
+/user_auth/migrations
