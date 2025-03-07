@@ -93,8 +93,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",  # MariaDB uses the MySQL backend
         "NAME": "ltlms",  # Replace with your database name
-        "USER": "root",
-        "PASSWORD": "hassan1998",
+        "USER": "myuser",
+        "PASSWORD": "mypassword",
         "HOST": "localhost",
         "PORT": "3307",
         "OPTIONS": {
