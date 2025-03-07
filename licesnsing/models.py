@@ -113,7 +113,8 @@ class SubCategory(models.Model):
 
 
 class Establishment(models.Model):
-    rifd = models.CharField(max_length=100, unique=True, primary_key=True)
+    id = models.AutoField(primary_key=True)
+    rifd = models.CharField(max_length=100, unique=True)
     establishment_name = models.CharField(max_length=200)
     # register_number = models.CharField(max_length=100, primary_key=True)
     # register_issuance_date = models.DateField(default=timezone.now)
@@ -147,7 +148,10 @@ class Establishment(models.Model):
     def __str__(self):
         return f" {self.establishment_name}"
 
-
+    def get_register(self):
+        return  EstablishmentRegister.objects.get(establishment_id=self.id) if True else None
+    def get_license(self):
+        return EstablishmentLicence.objects.get(register_id=self.get_register().id) if True else None
 class ArduinoReader(models.Model):
     """
     This model stores RFID readings received from an Arduino device.
@@ -232,8 +236,8 @@ class Inspection(models.Model):
         max_length=255, unique=True, verbose_name="Register Number"
     )
     notes = models.TextField(null=True, blank=True, verbose_name="Inspection Notes")
-    latitude = models.IntegerField(verbose_name="Latitude")
-    longitude = models.IntegerField(verbose_name="Longitude")
+    latitude = models.CharField(verbose_name="Latitude",max_length=20)
+    longitude = models.CharField(verbose_name="Longitude",max_length=20)
     status = models.BooleanField(
         choices=STATUS_CHOICES, verbose_name="Inspection Status", default=False
     )

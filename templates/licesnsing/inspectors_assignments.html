@@ -23,7 +23,7 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ assignment.establishment }}</td>
-                    <td>{{ assignment.inspector.first_name }} {{ assignment.inspector.last_name }}</td>
+                    <td>{{ assignment.inspector.get_full_name }} {{ assignment.inspector.last_name }}</td>
                     <td>
                         <form method="post" action="{% url 'update_assignment_status' assignment.id %}">
                             {% csrf_token %}

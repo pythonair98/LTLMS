@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ﻧﻤﻮﺫﺝ ﻣﻌﺎﻳﻨﺔ</title>
+    <!-- google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+    />
+    <script src="/static/js/index.js"></script>
+    <!-- bootstrap css cdn -->
+    <link
+            rel="stylesheet"
+            href="https://cdn.rtlcss.com/bootstrap/v4.5.3/css/bootstrap.min.css"
+            integrity="sha384-JvExCACAZcHNJEc7156QaHXTnQL3hQBixvj5RV5buE7vgnNEzzskDtx9NQ4p6BJe"
+            crossorigin="anonymous"
+    />
+    <!-- custom style -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/report_style.css' )}}"/>
+
+</head>
+<body onload="printPdfReport();" id="body">
+<!-- Start header -->
+<div class="container header d-flex justify-content-between mt-5 mb-4">
+    <div class="logo">
+        <img src='{{ url_for("static",filename="img/mot_logo_ar.png") }}' height="100px"/>
+    </div>
+    <div class="header-content">
+        <label for="header-content-label">التاريخ/Date:</label>
+        <input
+                dir="ltr"
+                id="header-content-label"
+                type=""
+                placeholder=""
+                value="{{ current_date }}"
+                class="text-center"
+        />
+        <p>ﺇﺩﺍﺭﺓ ﺗرﺍﺧﻴﺺ ﺍﻟﻨﻘﻞ ﺍﻟﺒﺮﻱ</p>
+        <p>Land Transport Licensing Department</p>
+    </div>
+</div>
+<!--End header  -->
+<div class="container">
+    <h5 class="text-center mb-5 font-weight-bold heading">
+        Inspection Application Form - ﻧﻤﻮﺫﺝ ﻣﻌﺎﻳﻨﺔ
+    </h5>
+    <form action="" method="get" autocomplete="on">
+        <h6 class="font-weight-bold">
+            ﻗﺴﻢ ﺍﻟﺮﻗﺎﺑﺔ ﻭﺍﻟﺘﻔﺘﻴﺶ/Inspection and Control Section :
+        </h6>
+
+        <div class="form-check border-line">
+
+
+            <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="items"
+
+                    {{ "checked" if licence.activity.en_name == 'Limousine' }}
+
+            value="أﻧشطة ليموزين/Limousine"
+            id="checklimousine"
+            />
+            <label class="form-check-label" for="checklimousine">
+                أﻧشطة ليموزين/Limousine
+            </label>
+            <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="items"
+                    value="تأجيرالسيارات بالسائق/Car Rental with Driver"
+                    id="rentalwith"
+                    {{ "checked" if licence.activity.en_name == 'Rental With Driver' }}
+            />
+            <label class="form-check-label" for="rentalwith">
+                تأجيرالسيارات بالسائق/Car Rental with Driver
+            </label>
+            <input
+                    class="form-check-input"
+                    type="checkbox"
+                    name="items"
+                    value="ﺃﻧشطة تأجير السيارات بدون سائق/Car Rental without Driver"
+                    {{ "checked" if licence.activity.en_name == 'Rental Without Driver' }}
+            id="rentalwithout"
+            />
+            <label class="form-check-label" for="rentalwithout">
+                ﺃﻧشطة تأجير السيارات بدون سائق/Car Rental without Driver
+            </label>
+        </div>
+        <h6 class="font-weight-bold establish_data">
+            بيانات المنشأة/Establishment Information:
+        </h6>
+        <div class="form-group row border-line">
+            <label for="commerceName" class="col-sm-3 col-form-label"
+            >ﺍﻻﺳﻢ ﺍﻟﺘﺠﺎﺭﻱ/Commercial Name</label
+            >
+            <div class="col-sm-9">
+                <input
+                        type="text"
+                        class="form-control"
+                        name="commericalName"
+                        id="commerceName"
+                        value="{{establishment.ar_name}} / {{ establishment.en_name }}"
+                        required
+                />
+            </div>
+        </div>
+        <div class="form-group border-line row">
+            <label for="commerceNumer" class="col-sm-4 col-form-label"
+            >ﺭﻗﻢ ﺍﻟﺴﺠﻞ ﺍﻟﺘﺠﺎﺭﻱ/Commercial Reg. No.:</label
+            >
+            <div class="col-sm-8">
+                <input
+                        type="text"
+                        name="commerceNumer"
+                        class="form-control"
+                        id="commerceNumer"
+                        value="{{ licence.register_id }}"
+                        required
+                />
+            </div>
+        </div>
+
+        <div class="form-group row border-line">
+            <label for="establishType" class="col-sm-3 col-form-label"
+            >ﻧﻮﻉ ﺍﻟﻤﻨﺸﺄﺓ/Establishment Type:</label
+            >
+            <div class="col-sm-9">
+                <input
+                        type="text"
+                        class="form-control"
+                        name="establishType"
+                        id="establishType"
+                        value="{{ licence.main_category.ar_name }}"
+                        required
+                />
+            </div>
+        </div>
+
+        <div class="form-group row border-line">
+            <div class="row col-sm-6">
+                <label for="startDate" class="col-sm-7 col-form-label"
+                >تاريخ ﺇﺻﺪﺍﺭ ﺍﻟﺴﺠﻞ/Commercial Reg. Issuance Date:</label
+                >
+                <div class="col-sm-5">
+                    <input
+                            type="text"
+                            name="startDate"
+                            class="form-control"
+                            id="startDate"
+                            value="{{ register.issuance_date }}"
+                            required
+                    />
+                </div>
+            </div>
+
+            <div class="row end-date col-sm-6">
+                <div class="form-group row">
+                    <label for="endDate" class="col-sm-8 col-form-label"
+                    >تاريخ إنتهاء ﺍﻟﺴﺠﻞ/Commercial Reg. Expiration Date:</label
+                    >
+                    <div class="col-sm-4">
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="endDate"
+                                required
+                                value="{{ register.expiration_date }}"
+                                name="endDate"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row border-line">
+            <label for="postBox" class="col-sm-3 col-form-label"
+            >ﺻﻨﺪﻭﻕ البريد /P.O. Box:</label
+            >
+            <div class="col-sm-9">
+                <input
+                        type="text"
+                        name="postBox"
+                        class="form-control"
+                        id="postBox"
+                        value="{{ establishment.box_O_P }}"
+                        required
+                />
+            </div>
+        </div>
+
+        <div class="form-group row border-line">
+            <label for="inputemail" class="col-sm-3 col-form-label"
+            >البريد ﺍﻹﻟﻜﺘرﻭﻧﻲ/Email:</label
+            >
+            <div class="col-sm-9">
+                <input
+                        type="email"
+                        name="email"
+                        class="form-control"
+                        id="inputemail"
+                        value="{{ establishment.email }}"
+                        required
+                />
+            </div>
+        </div>
+
+        <h6 class="font-weight-bold">ﻣﻮﻗﻊ ﺍﻟﻤﻨﺸﺄﺓ/Establishment Location:</h6>
+
+        <p class="border-line establish_data">ﻣﻘﺮ ﺍﻟﻤﻨﺸﺄﺓ ﺍﻟﺮﺋﻴﺴﻲ/:Establishment HQ</p>
+        <div class="establish row border-line">
+            <div class="col-sm-4 form-group row">
+                <label for="establishHomeSteet" class="col-sm-6 col-form-label">رقم المنطقة/Zone number:</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" name="establishHomeSteet" id="establishHomeSteet" required
+                           value="{{ establishment.zone_number }}"/>
+                </div>
+            </div>
+
+            <div class="col-sm-4 form-group row">
+                <label for="streetNumber" class="col-sm-6 col-form-label">رقم الشارع /Street No.:</label>
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" name="streetNumber" id="streetNumber" required
+                           value="{{ establishment.street_number }}"/>
+                </div>
+            </div>
+
+            <div class="col-sm-4 form-group row">
+                <label for="buildingNumber" class="col-sm-5 col-form-label">ﺭﻗﻢ ﺍﻟﻤﺒﻨﻰ/Building. No.:</label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control" name="buildingNumber" id="buildingNumber" required
+                           value="{{ establishment.building_number }}"/>
+                </div>
+            </div>
+        </div>
+
+        <h6 class="font-weight-bold establish_data">
+            ﻭﺳﻴﻠﺔ ﺍﻻﺗﺼﺎﻝ ﺑﺎﻟﻤﻨﺸﺄﺓ/Establishment Contact Details:
+        </h6>
+
+        <div class="form-group row border-line">
+            <div class="row start-date col-sm-6">
+                <label for="establishOwner" class="col-sm-4 col-form-label">ﻣﺎﻟﻚ ﺍﻟﻤﻨﺸﺄﺓ/Owner</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" name="establishOwner" id="establishOwner" required
+                           value="{{ onwner_data.ar_name }} / {{ onwner_data.en_name }}"/>
+                </div>
+            </div>
+
+            <div class="row end-date col-sm-6">
+                <div class="form-group row">
+                    <label for="inputTel" class="col-sm-4 col-form-label">الهاتف/Telephone</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" name="inputTel" id="inputTel" required
+                               value="{{ onwner_data.phone_number }}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row border-line">
+            <div class="row start-date col-sm-6">
+                <label for="establishManger" class="col-sm-5 col-form-label">
+                    المدير ﺍﻟﺘﻨﻔﻴﺬﻱ ﻟﻠﻤﻨﺸﺄﺓ/Executive Director:</label>
+                <div class="col-sm-6">
+                    <input
+                            type="text"
+                            class="form-control"
+                            name="establishManger"
+                            id="establishManger"
+                            required
+                            value="{{ establishment.director_name }}"
+                    />
+                </div>
+            </div>
+
+            <div class="row end-date col-sm-6">
+                <div class="form-group row">
+                    <label for="managerTel" class="col-sm-4 col-form-label"
+                    >الهاتف/Telephone</label
+                    >
+                    <div class="col-sm-8">
+                        <input
+                                type="tel"
+                                class="form-control"
+                                id="managerTel"
+                                name="managerTel"
+                                required
+                                value="{{ establishment.director_number }}"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group row border-line">
+            <div class="row start-date col-sm-6">
+                <label for="establishRresent" class="col-sm-5 col-form-label"
+                >ﻣﻨﺪﻭﺏ ﺍﻟﻤﻨﺸﺄﺓ /Representative:</label
+                >
+                <div class="col-sm-7">
+                    <input
+                            type="text"
+                            class="form-control"
+                            name="establishRresent"
+                            id="establishRresent"
+                            required
+                            value="{{ establishment.representative_name }}"
+                    />
+                </div>
+            </div>
+
+            <div class="row end-date col-sm-6">
+                <div class="form-group row">
+                    <label for="represenTel" class="col-sm-4 col-form-label"
+                    >الهاتف/Telephone</label
+                    >
+                    <div class="col-sm-8">
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="represenTel"
+                                name="represenTel"
+                                required
+                                value="{{ establishment.representative_number }}"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h6 class="font-weight-bold">
+            (بيانات المعاين)ﺍﻟﻤﻔﺘﺶ/ Inspector’s Information:
+        </h6>
+
+        <div class="form-group row border-line">
+            <div class="row start-date col-sm-6">
+                <label for="observerName" class="col-sm-5 col-form-label"
+                >ﺍﺳﻢ ﺍﻟﻤﻌﺎين/Name:</label
+                >
+                <div class="col-sm-7">
+                    <input
+                            type="text"
+                            name="observerName"
+                            class="form-control"
+                            id="observerName"
+                            value="{{ inspector_data.ar_name }} {{ inspector_data.en_name }}"
+                            required
+                    />
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="form-group row border-line">
+            <div class="row start-date col-sm-6">
+                <label for="observeDate" class="col-sm-5 col-form-label"
+                >تاريخ ﺍﻟﻤﻌﺎﻳﻨﺔ /Inspection Date:</label
+                >
+                <div class="col-sm-7">
+                    <input
+                            type="text"
+                            name="observeDate"
+                            class="form-control"
+                            id="observeDate"
+                            required
+                            value="{{inspection.create_date.strftime(" %d-%m-%Y")}}"
+                    />
+                </div>
+            </div>
+
+            <div class="row end-date col-sm-6">
+                <div class="form-group row">
+                    <label for="observeTime" class="col-sm-6 col-form-label"
+                    >وقت المعاينة/Inspection Time:</label
+                    >
+                    <div class="col-sm-6">
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="observeTime"
+                                name="observeTime"
+                                required
+                                value="{{inspection.create_date.strftime(" %H:%M")}}"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {#
+        <div class="form-group border-line">#}
+            {# <label for="notesTextarea">الملاحظات/Notes:</label>#}
+            {# <textarea#}
+            {# class="form-control"#}
+            {# id="notesTextarea"#}
+            {# name="notesTextarea"#}
+            {# required#}
+            {# >{{ inspection.notes }}</textarea>#}
+            {#
+        </div>
+        #}
+        <div class="form-group border-line">
+            <label for="tests">الملاحظات/Notes:</label><br>
+            <span id="tests" class="form-group">
+              {{ inspection.notes }}
+          </span>
+        </div>
+
+
+    </form>
+</div>
+
+<!-- js bootstrap cdn -->
+<script
+        src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"
+></script>
+<script
+        src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"
+></script>
+<script
+        src="https://cdn.rtlcss.com/bootstrap/v4.5.3/js/bootstrap.min.js"
+        integrity="sha384-VmD+lKnI0Y4FPvr6hvZRw6xvdt/QZoNHQ4h5k0RL30aGkR9ylHU56BzrE2UoohWK"
+        crossorigin="anonymous"
+></script>
+</body>
+</html>

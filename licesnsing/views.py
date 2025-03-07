@@ -23,7 +23,7 @@ from .models import (
     InspectionAssignment,
     Inspection,
 )
-from .utils import process_raw_data, process_form_data
+from .utils import process_raw_data, process_form_data, mark_inspection_as_done, get_establishment_obj_by_register
 
 
 @login_required(login_url="login")
@@ -238,34 +238,63 @@ def query(request):
 
 @login_required
 def reader(request):
-    # TODO handle inspection and make the fields non-editable
-    """Main view to handle reader requests."""
+    """
+    Main view to handle inspection (reader) requests.
 
-    form = InspectionForm(request.POST, request.FILES)
+    Process:
+      1. On POST:
+         - Instantiate InspectionForm with POST and FILES.
+         - Validate the form.
+         - Check if an inspection with the given register_number already exists.
+         - If not, save the inspection.
+         - Retrieve the RFID (assumed to be in the 'rifd' field of the form).
+         - Query the ArduinoReader for a matching record (code == rifd, queried is False, status is "processed").
+         - If found, mark it as queried, clean up all queried records, and show a success message.
+         - If not, clean up and show a warning message.
+      2. On GET:
+         - Display an empty InspectionForm.
+    """
+    if request.method == "POST":
+        form = InspectionForm(request.POST, request.FILES)
+        if form.is_valid():
+            register_number = form.cleaned_data.get("register_number")
 
-    if form.is_valid():
-        form.save()
-        rifd = form.cleaned_data["rifd"]
-        a_read = (
-            ArduinoReader.objects.filter(code=rifd, queried=False, status="processed")
-            .order_by("-id")
-            .first()
-        )
+            # Check if inspection for this establishment already exists.
+            if Inspection.objects.filter(register_number=register_number).exists():
+                messages.error(request, "تم تسجيل معاينة لهذه المنشأة بالفعل")
+                return redirect("reader")
 
-        if a_read:
-            a_read.queried = True
-            a_read.save()
-            # Clean up and provide feedback
-            ArduinoReader.objects.filter(queried=True).delete()
-            messages.success(request, "تم إرسال المعاينة")
-            return redirect("login")
+            # Save the inspection record.
+            form.save()
+            # mark inspection as done
+            mark_inspection_as_done(get_establishment_obj_by_register(register_number))
+            messages.success(request,"تم إرسال المعاينة بنجاح")
+            # Retrieve the RFID from the form data.
+            rifd = form.cleaned_data.get("rifd")
+
+            # Query ArduinoReader for a matching record.
+            arduino_record = (
+                ArduinoReader.objects.filter(code=rifd, queried=False, status="processed")
+                .order_by("-id")
+                .first()
+            )
+
+            if arduino_record:
+                # Mark the ArduinoReader record as queried.
+                arduino_record.queried = True
+                arduino_record.save()
+
+                # Clean up all ArduinoReader records that have been queried.
+                ArduinoReader.objects.filter(queried=True).delete()
+
+                messages.success(request, "تم إرسال المعاينة")
+                return redirect("reader")
 
         else:
-            ArduinoReader.objects.filter(queried=True).delete()
-            messages.warning(request, f"لقد تم معاينة هذا الرمز {rifd} بالفعل")
-            return redirect("login")
+            messages.error(request, "الرجاء تصحيح الأخطاء في النموذج.")
+    else:
+        form = InspectionForm()
 
-    # If form is invalid, return to the page with errors
     return render(request, "licesnsing/readRFID.html", {"form": form})
 
 
@@ -527,7 +556,7 @@ def assign_establishment(request):
     if request.method == "POST":
         form = InspectionAssignmentForm(request.POST)
         if form.is_valid():
-            assignment = form.save()
+            form.save()
             messages.success(request, "تم توجيه التكليف بنجاح")
             # Adjust the redirect URL as needed.
             return redirect("view_assignments")

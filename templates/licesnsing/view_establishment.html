@@ -34,11 +34,25 @@
                 <tr>
                     <th scope="row">{{ est.rifd }}</th>
                     <td>{{ est.establishment_name }}</td>
-                    <td>{{ est.register_number }}</td>
-                    <td>{{ est.register_expiration_date }}</td>
-                    <td>{{  est.register_expiration_date }}</td>
-                    <td>{{ est.license_number }}</td>
-                    <td>{{est.license_expiration_date }}</td>
+                    <td>{{ est.get_register.id }}</td>
+                    <td>{{ est.get_register.expiration_date }}</td>
+                <td>
+                  {% if est.get_register.expiration_date > today %}
+                    ساري المفعول
+                  {% else %}
+                    منتهي
+                  {% endif %}
+                </td>
+                    <td>{{ est.get_license.number }}</td>
+                    <td>
+                  {% if est.get_license.expiration_date > today %}
+                    ساري المفعول
+                  {% else %}
+                    منتهي
+                  {% endif %}
+                </td>
+
+            
                     <td>{{ est.owner_name }}</td>
                     <td>
                         <a href="/edit_establishment/{{est.register_number}}">

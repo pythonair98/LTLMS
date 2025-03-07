@@ -1,12 +1,12 @@
 """
 Forms for adding, editing, and viewing establishments and inspections.
 
-This module contains forms for adding, editing, and viewing establishments and inspections.
-The forms are used to collect and validate data from users before saving it to the database.
+This module contains forms for adding, editing,
+and viewing establishments and inspections.
+The forms are used to collect and validate
+data from users before saving it to the database.
 
 """
-
-from django.contrib.auth.models import User
 
 from django import forms
 from django.contrib.admin.widgets import AutocompleteSelect
@@ -91,16 +91,16 @@ class EstablishmentForm(forms.ModelForm):
         ):
             raise ValidationError("Establishment with this Email already exists.")
         return email
-
+    def get_register_number_for_form(self):
+        """
+        Returns the register number for the form.
+        """
+        return EstablishmentRegister.objects.filter(establishment=self.instance).first().id
     # Establishment details
     rifd = forms.CharField(label="رقم RFID:", required=True)
     establishment_name = forms.CharField(
         label="اسم المنشأة/Commercial Name:", required=True
     )
-    register_number = forms.CharField(
-        label="رقم السجل التجاري/Commercial Reg. No:", required=True
-    )
-    license_number = forms.CharField(label="رقم الرخصة/License No:", required=True)
 
     # Date fields with date picker widgets
     register_issuance_date = forms.DateField(
@@ -192,8 +192,8 @@ class InspectionForm(forms.ModelForm):
         widgets = {
             "register_number": forms.TextInput(attrs={"class": "form-control"}),
             "notes": forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
-            "latitude": forms.NumberInput(attrs={"class": "form-control"}),
-            "longitude": forms.NumberInput(attrs={"class": "form-control"}),
+            "latitude": forms.TextInput(attrs={"class": "form-control"}),
+            "longitude": forms.TextInput(attrs={"class": "form-control"}),
             "inspector": forms.Select(attrs={"class": "form-select"}),
             "status": forms.Select(attrs={"class": "form-select"}),
         }

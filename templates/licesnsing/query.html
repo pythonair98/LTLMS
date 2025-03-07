@@ -155,8 +155,18 @@
                 <form action="/reader" method="post">
                     <div class="card-body">
                         {% csrf_token %}
-                    <div class="row ">
+
+
+
+
+
+
+
+                        <div class="row ">
                         <div class="col-md-6">
+                            <input type="hidden" name="rifd" value="{{ eform.rifd.value }}">
+                        <input type="hidden" name="register_number" value="{{ eform.get_register_number_for_form.id }}">
+                        <input type="hidden" name="inspector" value="{{ user.id }}">
                             <div class="form-group">
                                 {{ eform.rifd.label}} {{ eform.rifd|add_class:"form-control"}}
                             </div>

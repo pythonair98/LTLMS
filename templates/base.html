@@ -1,160 +1,173 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="en">
-
 <head>
     {% block head %}
     {% load static %}
-        {% load crispy_forms_filters %}
-{% load crispy_forms_filters widget_tweaks %}  {# Load widget_tweaks for styling #}
-
-
-
+    {% load crispy_forms_filters %}
+    {% load crispy_forms_filters widget_tweaks %}
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8" />
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link href="/static/css/base.css" rel="stylesheet" />
-        <link rel="stylesheet" href="{% static  'css/navstyle.css' %}" />
-        <script src="{% static 'js/index.js' %}"></script>
-        <script src="https://demos.jquerymobile.com/1.4.5/popup-iframe/popup-iframe-video.js" id="video-script"></script>
-    <script src="https://demos.jquerymobile.com/1.4.5/popup-iframe/popup-iframe-map.js" id="map-script"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
-        <script>
+    <link rel="stylesheet" href="{% static 'css/navstyle.css' %}" />
+    <script src="{% static 'js/index.js' %}"></script>
+    <script>
         function toggleMobileMenu(menu) {
-                menu.classList.toggle('open');
-            }
-        </script>
-        <style>
+            menu.classList.toggle('open');
+        }
+    </script>
+    <style>
         body {
             text-align: right;
             font-family: "Cairo", sans-serif;
         }
-
         textarea {
             resize: none;
         }
     </style>
-    <nav class="navbar top-nav navbar-expand-lg" style="background-color: #8A1538;">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/index">الرئيسية</a>
-            <button class="navbar-toggler" onclick="toggleMobileMenu(this)"  type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
-                    aria-controls="navbarSupportedContent" aria-label="Toggle navigation">
-                <span   class="navbar-toggler-icon" ></span>
-            </button>
-            <div  class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                    <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/reader">معاينة منشاة</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active"  style="display: inline-block" href="/est">إضافة منشأة</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/view_est">عرض المنشآت</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/view_ins">عرض المعاينات</a>
-                    </li>
-                        <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/view_archived_ins">عرض المعاينات المؤرشفة</a>
-                    </li>
-
-                        <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/site_settings">أعدادات النظام</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/profiles">عرض المستخدمين</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/create_user">إنشاء مستخدم</a>
-                    </li>
-
-
-
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/logout">تسجيل الخروج</a>
-                    </li>
-
-                </ul>
-            </div>
-        </div>
-    <div id="hamburger-icon" onclick="toggleMobileMenu(this)">
-        <div class="bar1"></div>
-        <div class="bar2"></div>
-        <div class="bar3"></div>
-        <ul class="mobile-menu">
-
-                    <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/reader">معاينة منشاة</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link active"  style="display: inline-block" href="/est">إضافة منشأة</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/view_est">عرض المنشآت</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/view_ins">عرض المعاينات</a>
-                    </li>
-                        <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/view_archived_ins">عرض المعاينات المؤرشفة</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/view_users">عرض المستخدمين</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link active" style="display: inline-block" href="/create_user">إنشاء مستخدم</a>
-                    </li>
-
-
-
-
-
-
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/logout">تسجيل الخروج</a>
-                    </li>
-
-                </ul>
-
-      </div>
-    </nav>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
+    <!-- Bootstrap 5 Bundle JS (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
     $(document).ready(function(){
         $(".alert").fadeTo(4000, 500).slideUp(500, function(){
             $(this).remove();
         });
     });
-</script>
-
+    </script>
     {% endblock %}
 </head>
-
 <body>
+    <nav class="navbar top-nav navbar-expand-lg" style="background-color: #8A1538;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">الرئيسية</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-md-5 mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'reader' %}">معاينة منشاة</a>
+                    </li>
+                    <!-- Dropdown for المنشآت -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="estDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            المنشآت
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="estDropdown">
+                            <li><a class="dropdown-item" href="{% url 'add_establishment' %}">إضافة منشأة</a></li>
+                            <li><a class="dropdown-item" href="{% url 'view_establishment' %}">عرض المنشآت</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="estDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            السجلات
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="estDropdown">
+                            <li><a class="dropdown-item" href="{% url 'register-list' %}">إضافة سجل</a></li>
+                            <li><a class="dropdown-item" href="{% url 'register-list' %}">عرض السجلات</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="estDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            التراخيص
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="estDropdown">
+                            <li><a class="dropdown-item" href="{% url 'licence-list' %}">إضافة ترخيص</a></li>
+                            <li><a class="dropdown-item" href="{% url 'licence-list' %}">عرض التراخيص</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Dropdown for المعاينات -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="insDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            المعاينات
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="insDropdown">
+                            <li><a class="dropdown-item" href="/view_ins">عرض المعاينات</a></li>
+                            <li><a class="dropdown-item" href="/view_archived_ins">عرض المعاينات المؤرشفة</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="insDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            
+                            التكليفات
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="insDropdown">
+                            <li><a class="dropdown-item" href="{% url 'assign_establishment' %}">تكليف مفتش</a></li>
+                            <li><a class="dropdown-item" href="{% url 'view_assignments' %}">عرض التكليفات</a></li>
+                        </ul>
+                    </li>
+                    <!-- Dropdown for المستخدمين -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            المستخدمين
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="/profiles">عرض المستخدمين</a></li>
+                            <li><a class="dropdown-item" href="/create_user">إنشاء مستخدم</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">إعدادات النظام</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'logout' %}">تسجيل الخروج</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="hamburger-icon" onclick="toggleMobileMenu(this)">
+            <div class="bar1"></div>
+            <div class="bar2"></div>
+            <div class="bar3"></div>
+            <ul class="mobile-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/reader">معاينة منشاة</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/est">إضافة منشأة</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/view_est">عرض المنشآت</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/view_ins">عرض المعاينات</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/view_archived_ins">عرض المعاينات المؤرشفة</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/view_users">عرض المستخدمين</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/create_user">إنشاء مستخدم</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/logout">تسجيل الخروج</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <br>
+    <br>
+    <br>
 {% if messages %}
     <div class="container mt-3">
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show text-center" role="alert">
                 {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
     </div>
 {% endif %}
 {% block content %}
- {% endblock %}
-</body>
 
+{% endblock %}
+</body>
 </html>

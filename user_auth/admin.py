@@ -163,7 +163,7 @@ class TeamAdmin(admin.ModelAdmin):
     - Displays team members dynamically.
     """
 
-    list_display = ("id", "ar_name", "en_name", "date_created", "team_members_count")
+    list_display = ("id", "ar_name", "en_name", "date_created", "get_team_members")
     search_fields = ("ar_name", "en_name")
     list_filter = ("date_created",)
     ordering = ("-date_created",)

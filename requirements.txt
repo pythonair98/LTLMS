@@ -1,3 +1,7 @@
 Django~=5.1.5
 requests~=2.32.3
 PyMySQL~=1.1.1
+crispy-bootstrap5
+crispy-tailwind
+django-widget-tweaks
+django-crispy-forms
