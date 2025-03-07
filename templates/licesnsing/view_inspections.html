@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">قائمة المعاينات</h2>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>رقم السجل</th>
+                <th>المفتش</th>
+                <th>الحالة</th>
+                <th>الموقع</th>
+                <th>التاريخ</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inspection in inspections %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ inspection.register_number }}</td>
+                <td>{{ inspection.inspector.get_full_name }}</td>
+                <td>
+                    {% if inspection.status %}
+                        <span class="badge bg-success">مقبول</span>
+                    {% else %}
+                        <span class="badge bg-danger">مرفوض</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <!-- Map Button to Show Coordinates -->
+                    <button class="btn btn-info btn-sm" onclick="showMap('{{ inspection.latitude }}', '{{ inspection.longitude }}')">
+                        عرض الموقع
+                    </button>
+                </td>
+                <td>{{ inspection.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <a href="#" class="btn btn-primary btn-sm">عرض</a>
+                    {% if not inspection.is_archived %}
+                        <a href="{% url 'archive_inspection' inspection.id %}" class="btn btn-warning btn-sm">أرشفة</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">لا توجد معاينات متاحة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Map Modal -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mapModalLabel">خريطة الموقع</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="map" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LeafletJS & Bootstrap -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+function showMap(lat, lng) {
+    var modal = new bootstrap.Modal(document.getElementById('mapModal'));
+    modal.show();
+
+    setTimeout(() => {
+        var map = L.map('map').setView([lat, lng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([lat, lng]).addTo(map).bindPopup("الموقع المحدد").openPopup();
+    }, 500);
+}
+</script>
+{% endblock %}

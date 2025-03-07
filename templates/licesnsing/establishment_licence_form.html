@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">إضافة رخصة جديدة</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">التسجيل</label>
+            {{ form.register }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">تاريخ الإنشاء</label>
+            {{ form.creation_date }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">تاريخ الانتهاء</label>
+            {{ form.expiration_date }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">الفئة الرئيسية</label>
+            {{ form.main_category }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">النشاط</label>
+            {{ form.activity }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">الفئة الفرعية</label>
+            {{ form.sub_category }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">حفظ الرخصة</button>
+        <a href="{% url 'licence-list' %}" class="btn btn-secondary">إلغاء</a>
+    </form>
+</div>
+{% endblock %}

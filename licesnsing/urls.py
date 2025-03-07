@@ -17,7 +17,8 @@ from .views import (
     update_assignment_status,
     assign_establishment,
     create_inspection,
-    dashboard,
+    dashboard, view_inspections, archive_inspection, view_archive, add_establishment_register,
+    add_establishment_licence,
 )
 
 urlpatterns = [
@@ -57,4 +58,10 @@ urlpatterns = [
         name="update_assignment_status",
     ),
     path("assign-establishment/", assign_establishment, name="assign_establishment"),
+    path("inspections", view_inspections, name="view_inspections"),
+    path("archived_inspection", view_archive, name="archived_inspection"),
+    path('inspections/<int:pk>/archive/', archive_inspection, name='archive_inspection'),
+    path("register/add/", add_establishment_register, name="add_register"),
+    path("add_establishment_licence", add_establishment_licence, name="add_licence"),
+
 ]

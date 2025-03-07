@@ -586,3 +586,82 @@ def create_inspection(request):
             "licesnsing/create_inspection.html",
             {"form": form, "registers": registers},
         )
+
+
+@login_required(login_url="login")
+def view_inspections(request):
+    """
+    View to display a list of all Inspection records.
+
+    :param request:
+    :return:
+    """
+    inspections = Inspection.objects.all()
+    return render(request, 'licesnsing/view_inspections.html', {'inspections': inspections})
+
+@login_required(login_url="login")
+def archive_inspection(request, pk):
+    """
+    Archive an inspection. Archived inspections are not displayed in the main list.
+
+    :param request:
+    :param pk:
+    :return:
+    """
+    inspection = get_object_or_404(Inspection, pk=pk)
+    inspection.is_archived = True
+    inspection.save()
+    messages.success(request, "تم أرشفة المعاينة بنجاح!")
+    return redirect('view_inspections')
+
+
+@login_required(login_url="login")
+def view_archive(request):
+    """
+    View to display a list of all archived Inspection records.
+
+    :param request:
+    :return:
+    """
+    inspections = Inspection.objects.filter(is_archived=True)
+    return render(request, 'licesnsing/view_archived.html', {'inspections': inspections})
+
+@login_required
+def add_establishment_register(request):
+    if request.method == "POST":
+        form = EstablishmentRegisterForm(request.POST)
+        if form.is_valid():
+            establishment = form.cleaned_data["establishment"]
+
+            # Check if this establishment already has a register
+            if EstablishmentRegister.objects.filter(establishment=establishment).exists():
+                messages.error(request, "هذا السجل موجود بالفعل لهذه المؤسسة!")
+            else:
+                form.save()
+                messages.success(request, "تمت إضافة السجل بنجاح!")
+                return redirect("register-list")  # Redirect to the register list view
+
+    else:
+        form = EstablishmentRegisterForm()
+
+    return render(request, "licesnsing/establishment_register_form.html", {"form": form})
+
+@login_required
+def add_establishment_licence(request):
+    if request.method == "POST":
+        form = EstablishmentLicenceForm(request.POST)
+        if form.is_valid():
+            register = form.cleaned_data["register"]
+
+            # Check if this register already has a license
+            if EstablishmentLicence.objects.filter(register=register).exists():
+                messages.error(request, "يوجد بالفعل رخصة لهذا التسجيل!")
+            else:
+                form.save()
+                messages.success(request, "تمت إضافة الرخصة بنجاح!")
+                return redirect("licence-list")  # Redirect to the license list view
+
+    else:
+        form = EstablishmentLicenceForm()
+
+    return render(request, "licesnsing/establishment_licence_form.html", {"form": form})

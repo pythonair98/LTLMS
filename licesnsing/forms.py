@@ -212,34 +212,20 @@ class InspectionForm(forms.ModelForm):
 
 
 class EstablishmentRegisterForm(forms.ModelForm):
-    """
-    Form for creating a new EstablishmentRegister record.
-
-    Fields:
-      - rfid: Unique RFID identifier.
-      - establishment: The issuing establishment.
-      - issuance_date: The date the license is issued.
-      - expiration_date: The date the license expires.
-    """
-
     class Meta:
         model = EstablishmentRegister
         fields = ["establishment", "issuance_date", "expiration_date"]
+        widgets = {
+            "issuance_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "expiration_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "establishment": forms.Select(attrs={"class": "form-control"}),
+        }
 
+
+from django import forms
+from .models import EstablishmentLicence
 
 class EstablishmentLicenceForm(forms.ModelForm):
-    """
-    Form for creating a new EstablishmentLicence record.
-
-    Fields:
-      - register: The associated EstablishmentRegister record.
-      - creation_date: The date the licence is created.
-      - expiration_date: The date the licence expires.
-      - main_category: The main category associated with the licence.
-      - activity: The activity associated with the licence.
-      - sub_category: The sub category associated with the licence.
-    """
-
     class Meta:
         model = EstablishmentLicence
         fields = [
@@ -248,8 +234,16 @@ class EstablishmentLicenceForm(forms.ModelForm):
             "expiration_date",
             "main_category",
             "activity",
-            "sub_category",
+            "sub_category"
         ]
+        widgets = {
+            "creation_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "expiration_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "register": forms.Select(attrs={"class": "form-control"}),
+            "main_category": forms.Select(attrs={"class": "form-control"}),
+            "activity": forms.Select(attrs={"class": "form-control"}),
+            "sub_category": forms.Select(attrs={"class": "form-control"}),
+        }
 
 
 class InspectionAssignmentForm(forms.ModelForm):

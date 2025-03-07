@@ -42,7 +42,7 @@
 <body>
     <nav class="navbar top-nav navbar-expand-lg" style="background-color: #8A1538;">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'dashboard' %}">الرئيسية</a>
+            <a class="navbar-brand" style="margin-left: 180px" href="{% url 'dashboard' %}">الرئيسية</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
                     aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -67,7 +67,7 @@
                             السجلات
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="estDropdown">
-                            <li><a class="dropdown-item" href="{% url 'register-list' %}">إضافة سجل</a></li>
+                            <li><a class="dropdown-item" href="{% url 'add_register' %}">إضافة سجل</a></li>
                             <li><a class="dropdown-item" href="{% url 'register-list' %}">عرض السجلات</a></li>
                         </ul>
                     </li>
@@ -77,7 +77,7 @@
                             التراخيص
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="estDropdown">
-                            <li><a class="dropdown-item" href="{% url 'licence-list' %}">إضافة ترخيص</a></li>
+                            <li><a class="dropdown-item" href="{% url 'add_licence' %}">إضافة ترخيص</a></li>
                             <li><a class="dropdown-item" href="{% url 'licence-list' %}">عرض التراخيص</a></li>
                         </ul>
                     </li>
@@ -88,8 +88,8 @@
                             المعاينات
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="insDropdown">
-                            <li><a class="dropdown-item" href="/view_ins">عرض المعاينات</a></li>
-                            <li><a class="dropdown-item" href="/view_archived_ins">عرض المعاينات المؤرشفة</a></li>
+                            <li><a class="dropdown-item" href="{% url 'view_inspections' %}">عرض المعاينات</a></li>
+                            <li><a class="dropdown-item" href="{% url 'archived_inspection' %}">عرض المعاينات المؤرشفة</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -113,10 +113,10 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">إعدادات النظام</a>
+                        <a class="nav-link" href="#">إعدادات النظام</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'logout' %}">تسجيل الخروج</a>
+                        <a class="nav-link" style="" href="{% url 'logout' %}">تسجيل الخروج</a>
                     </li>
                 </ul>
             </div>
