@@ -91,7 +91,7 @@ def add_establishment(request):
         if form.is_valid():
             form.save()
             messages.success(request, "تم إضافة المنشأة بنجاح")
-            return render(request, "licesnsing/add_establishment.html", {"form": form})
+            return redirect("view_establishment")
         messages.error(request, "حدث خطأ أثناء إضافة المنشأة")
 
     return render(request, "licesnsing/add_establishment.html", {"form": form})
