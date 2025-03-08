@@ -543,7 +543,7 @@ def update_assignment_status(request, pk):
         return redirect(
             "view_assignments"
         )  # Adjust to your actual URL name for assignments view
-    if new_status == "accepted":
+    if new_status == "accepted" or "completed" or "cancelled":
         assignment.delete()
     else:
         assignment.status = new_status
