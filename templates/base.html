@@ -114,9 +114,9 @@
                             المستخدمين
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="/profiles">عرض المستخدمين</a></li>
+                            <li><a class="dropdown-item" href="{% url 'profiles-list' %}">عرض المستخدمين</a></li>
                             <li><a class="dropdown-item" href="{% url 'teams' %}">عرض الفرق</a></li>
-                            <li><a class="dropdown-item" href="/create_user">إنشاء مستخدم</a></li>
+                            <li><a class="dropdown-item" href="{% url 'register' %}">إنشاء مستخدم</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">

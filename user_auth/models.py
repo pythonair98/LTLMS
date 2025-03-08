@@ -184,7 +184,7 @@ class Profiles(models.Model):
 
     def __str__(self):
         """Returns the username."""
-        return self.contact.ar_full_name
+        return self.user.first_name
 
     class Meta:
         permissions = [

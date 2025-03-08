@@ -2,12 +2,14 @@ from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.db.models import Count
 
+from user_auth.models import Profiles, Occupation
 from .forms import (
     EstablishmentForm,
     InspectionForm,
@@ -574,15 +576,16 @@ def assign_establishment(request):
         else:
             print(form.errors)
             messages.warning(request, form.errors.as_text())
-    else:
-        form = InspectionAssignmentForm()
+    inspectors = Profiles.objects.filter(occupation__power=6)
+    print(inspectors)
+    form = InspectionAssignmentForm()
     unassigned_establishments = Establishment.objects.exclude(
     inspection_assignments__isnull=False
 )
 
     if len(unassigned_establishments) == 0:
         messages.warning(request, "حميع المنشأت قد تم تعيينها.")
-    return render(request, "licesnsing/assign_establishment.html", {"form": form, "unassigned_establishments": unassigned_establishments})
+    return render(request, "licesnsing/assign_establishment.html", {"form": form, "unassigned_establishments": unassigned_establishments, "inspectors": inspectors})
 
 
 @login_required(login_url="login")

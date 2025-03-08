@@ -147,19 +147,20 @@ def create_new_user(request):
             profile.user = user
             profile.save()
             messages.success(request, "تم انشاء المستخدم بنجاح!")
-            return redirect(
-                "profiles-list"
-            )  # Replace with your desired redirect URL name.
+
         else:
             messages.error(request, "Please correct the errors below.")
+        return redirect(
+            "profiles-list"
+        )  # Replace with your desired redirect URL name.
     else:
         form = UserFullForm()
         profile_form = ProfileForm(request.POST, request.FILES)
         occupations = Occupation.objects.all()
         teams = Team.objects.all()
-    return render(
-        request, "users/register.html", {"form": form, "profile_form": profile_form, "occupations": occupations, "teams": teams}
-    )
+        return render(
+            request, "users/register.html", {"form": form, "profile_form": profile_form, "occupations": occupations, "teams": teams}
+        )
 
 
 def logout_view(request):
