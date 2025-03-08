@@ -144,24 +144,12 @@ class UserFullForm(forms.ModelForm):
 
 class UserEditForm(forms.ModelForm):
     """
-    Form for creating or updating a Django User with all relevant fields.
-
-    Includes password input with confirmation. On save, the password is hashed.
+    Form for editing user details without modifying the password.
     """
-
-
 
     class Meta:
         model = User
-        fields = [
-            "username",
-            "first_name",
-            "last_name",
-            "email",
-            "is_active",
-            "is_staff",
-            "is_superuser",
-        ]
+        fields = ["username", "first_name", "last_name", "email", "is_active", "is_staff", "is_superuser"]
         widgets = {
             "username": forms.TextInput(attrs={"class": "form-control"}),
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
@@ -171,12 +159,8 @@ class UserEditForm(forms.ModelForm):
             "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_superuser": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
-        labels = {
-            "username": "Username",
-            "first_name": "First Name",
-            "last_name": "Last Name",
-            "email": "Email Address",
-            "is_active": "Active",
-            "is_staff": "Staff",
-            "is_superuser": "Superuser",
-        }
+
+    def __init__(self, *args, **kwargs):
+        """Prevent password fields from appearing when editing."""
+        super().__init__(*args, **kwargs)
+        self.fields["username"].disabled = True  # Optional: prevent username edits

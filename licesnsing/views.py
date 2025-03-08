@@ -543,9 +543,11 @@ def update_assignment_status(request, pk):
         return redirect(
             "view_assignments"
         )  # Adjust to your actual URL name for assignments view
-
-    assignment.status = new_status
-    assignment.save()
+    if new_status == "accepted":
+        assignment.delete()
+    else:
+        assignment.status = new_status
+        assignment.save()
     messages.success(request, "تم تحديث حالة التكليف بنجاح.")
     return redirect("view_assignments")
 
@@ -570,11 +572,17 @@ def assign_establishment(request):
             # Adjust the redirect URL as needed.
             return redirect("view_assignments")
         else:
-            messages.error(request, "حدث خطأ اثناء التعيين.")
+            print(form.errors)
+            messages.warning(request, form.errors.as_text())
     else:
         form = InspectionAssignmentForm()
+    unassigned_establishments = Establishment.objects.exclude(
+    inspection_assignments__isnull=False
+)
 
-    return render(request, "licesnsing/assign_establishment.html", {"form": form})
+    if len(unassigned_establishments) == 0:
+        messages.warning(request, "حميع المنشأت قد تم تعيينها.")
+    return render(request, "licesnsing/assign_establishment.html", {"form": form, "unassigned_establishments": unassigned_establishments})
 
 
 @login_required(login_url="login")

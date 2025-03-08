@@ -231,16 +231,18 @@ def user_edit(request, id):
     :param id:
     :return:
     """
+
     user = get_object_or_404(User, id=id)
-    form = UserEditForm(instance=user)
+
     if request.method == "POST":
         form = UserEditForm(request.POST, instance=user)
         if form.is_valid():
-            form.save()
-            messages.success(request, "تم تحديث المستخدم بنجاح!")
-            return redirect("profiles-list")
+            form.save()  # ✅ Save user details WITHOUT changing the password
+            return redirect("profiles-list")  # Redirect after successful update
+    else:
+        form = UserEditForm(instance=user)
 
-    return render(request,"users/edit_user.html", {"form": form, "user": user})
+    return render(request, "users/edit_user.html", {"form": form, "user": user})
 
 
 def user_deactivate(request, id):

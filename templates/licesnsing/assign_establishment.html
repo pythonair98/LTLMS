@@ -3,18 +3,57 @@
 {% load static %}
 
 {% block title %}
-  <title>Assign Establishment for Inspection</title>
+    <title>Assign Establishment for Inspection</title>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4" dir="rtl">
-  <h2 class="text-center">تعيين منشأة للتفتيش</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form|crispy }}
-    <div class="text-center">
-      <button type="submit" class="btn btn-primary">تعيين</button>
+    <div class="container mt-4" dir="rtl">
+        <h2 class="text-center">تعيين منشأة للتفتيش</h2>
+        <form method="post">
+            <input type="hidden" name="csrfmiddlewaretoken"
+                   value="A0sCl3MKfPBcN1e2b9DS9KEyP2fssWYrUFSbEYMYUjC47vs6gl7JmhZ7Ibiq3Kqw">
+
+
+            <div id="div_id_inspector" class="mb-3"><label
+                    for="id_inspector" class="form-label requiredField">
+                Inspector<span class="asteriskField">*</span> </label> <select name="inspector"
+                                                                               class="select form-select" required
+                                                                               id="id_inspector">
+                <option value="" selected>---------</option>
+                <option value="3">xabodanip</option>
+                <option value="5">Ruiz</option>
+                <option value="6">Ibrahim</option>
+                <option value="7">makijuru</option>
+                <option value="8">wadawdwadwa</option>
+                <option value="9">hassan</option>
+
+            </select></div>
+            <div id="div_id_establishment" class="mb-3"><label
+                    for="id_establishment" class="form-label requiredField">
+                Establishment<span class="asteriskField">*</span> </label> <select name="establishment"
+                                                                                   class="select form-select" required
+                                                                                   id="id_establishment">
+                <option value="" selected>---------</option>
+                {% for unassigned_establishment in unassigned_establishments %}
+
+                <option value="{{ unassigned_establishment.id }}"> {{ unassigned_establishment.representative_name}}</option>
+                {% endfor %}
+
+            </select></div>
+            <div id="div_id_due_date" class="mb-3"><label
+                    for="id_due_date" class="form-label">
+                Due Date
+            </label> <input type="datetime-local" name="due_date" class="datetimeinput form-control" id="id_due_date">
+            </div>
+            <div id="div_id_notes" class="mb-3"><label
+                    for="id_notes" class="form-label">
+                Assignment Notes
+            </label> <textarea name="notes" cols="40" rows="3" class="textarea form-control" id="id_notes">
+</textarea></div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">تعيين</button>
+            </div>
+        </form>
     </div>
-  </form>
-</div>
 {% endblock %}
