@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+  <title>Create New User</title>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" dir="rtl">
+  <h2 class="text-center mb-4">إنشاء مستخدم جديد</h2>
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_username" class="form-label requiredField">
+              اسم المستخدم <span class="asteriskField">*</span>
+            </label>
+            <input type="text" name="username" class="form-control textinput" maxlength="150" value="{{ user.username }}" disabled id="id_username">
+            <div class="form-text">اسم المستخدم يجب أن يكون 150 حرفًا أو أقل ويحتوي على حروف وأرقام فقط مع @/./+/-/_</div>
+          </div>
+            <div class="col-md-6 mb-3">
+            <label for="first_name" class="form-label requiredField">
+              الاسم الاول <span class="asteriskField">*</span>
+            </label>
+            <input type="text" name="username" class="form-control textinput" maxlength="150" value="{{ user.first_name }}" required id="first_name">
+            <div class="form-text">الاسم الاول</div>
+          </div>
+
+            <div class="col-md-6 mb-3">
+            <label for="last_name" class="form-label requiredField">
+              اسم العائلة <span class="asteriskField">*</span>
+            </label>
+            <input type="text" name="username" class="form-control textinput" maxlength="150" value="{{ user.last_name }}" required id="last_name">
+
+          </div>
+
+
+
+
+          <div class="col-md-6 mb-3">
+            <label for="id_email" class="form-label">البريد الإلكتروني</label>
+            <input type="email" name="email" value="{{ user.email }}" class="form-control emailinput" maxlength="254" id="id_email">
+            <div class="form-text">أدخل بريدًا إلكترونيًا صحيحًا للتواصل واستعادة الحساب.</div>
+          </div>
+        </div>
+
+        <!-- Occupation, Team, and Profile Image -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="id_occupation" class="form-label requiredField">
+              المسمى الوظيفي <span class="asteriskField">*</span>
+            </label>
+            <select name="occupation" class="select form-select" required id="id_occupation">
+              <option value="" >---------</option>
+              <option value="1">MacKensie Kane</option>
+              <option selected value="{{ user.profiles.occupation.id }}">{{user.profiles.occupation.ar_name}}</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="id_team" class="form-label">الفريق</label>
+            <select name="team" class="select form-select" id="id_team">
+              <option value="">---------</option>
+                <option selected value="{{ user.profiles.team.id }}">{{user.profiles.team.ar_name}}</option>
+              <option value="1">Patricia Pennington</option>
+              <option value="2">Hassan</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="row">
+  <div class="col-md-4 mb-3">
+    <div class="form-check">
+      <input type="checkbox" name="is_active" class="form-check-input" id="id_is_active"
+        {% if user.is_active %}checked{% endif %}>
+      <label for="id_is_active" class="form-check-label">مفعل</label>
+      <div class="form-text">يحدد ما إذا كان هذا الحساب نشطًا. ألغِ التحديد لإيقاف الحساب بدلًا من حذفه.</div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="form-check">
+      <input type="checkbox" name="is_staff" class="form-check-input" id="id_is_staff"
+        {% if user.is_staff %}checked{% endif %}>
+      <label for="id_is_staff" class="form-check-label">مسؤول</label>
+      <div class="form-text">يمنح المستخدم إمكانية الوصول إلى لوحة تحكم الإدارة.</div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="form-check">
+      <input type="checkbox" name="is_superuser" class="form-check-input" id="id_is_superuser"
+        {% if user.is_superuser %}checked{% endif %}>
+      <label for="id_is_superuser" class="form-check-label">مدير عام</label>
+      <div class="form-text">يمنح المستخدم جميع الأذونات تلقائيًا.</div>
+    </div>
+  </div>
+</div>
+
+        <div class="text-center mt-3">
+          <button type="submit" class="btn btn-primary px-4">حفظ المستخدم</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,13 +1,19 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.contrib import messages
-from .forms import CustomUserCreationForm, ProfileForm, ContactForm, UserFullForm
+from .forms import (
+    CustomUserCreationForm,
+    ProfileForm,
+    ContactForm,
+    UserFullForm,
+    TeamForm, UserEditForm,
+)
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 
-from .models import Team
+from .models import Team, Occupation
 
 
 # Create your views here.
@@ -30,51 +36,6 @@ def profiles_list(request):
     return render(request, "users/profiles_list.html", {"profiles": profiles})
 
 
-@login_required(login_url="login")
-def create_user_profile(request):
-    """
-    Create a new User along with an associated Profile and Contact in one form.
-
-    On GET: Display empty forms for the User, Profile, and Contact.
-    On POST: Validate all forms and, if valid, create a new User,
-             create a Contact, and then create a Profile linking them.
-    """
-    if request.method == "POST":
-        print(request.FILES)
-        user_form = CustomUserCreationForm(request.POST)
-        profile_form = ProfileForm(request.POST, request.FILES)
-        contact_form = ContactForm(request.POST)
-
-        # Use an atomic transaction to ensure all-or-nothing saving
-        if user_form.is_valid() and profile_form.is_valid() and contact_form.is_valid():
-            with transaction.atomic():
-                # Save the user first
-                user = user_form.save()
-                # Save the contact information
-                contact = contact_form.save()
-                # Create the profile instance but do not commit to the DB yet
-                profile = profile_form.save(commit=False)
-                profile.user = user
-                profile.contact = contact
-                profile.save()
-            messages.success(request, "User and profile created successfully!")
-            return redirect("profiles-list")  # Change to your desired redirect URL
-        else:
-            messages.error(
-                request,
-                "There were errors in the form. Please correct them and try again.",
-            )
-    else:
-        user_form = CustomUserCreationForm()
-        profile_form = ProfileForm()
-        contact_form = ContactForm()
-
-    context = {
-        "user_form": user_form,
-        "profile_form": profile_form,
-        "contact_form": contact_form,
-    }
-    return render(request, "users/create_user_profile.html", context)
 
 
 @login_required(login_url="login")
@@ -145,14 +106,16 @@ def login_view(request):
     GET: Displays the login form.
     POST: Validates the submitted form and logs in the user if credentials are correct.
     """
-    #get next page args
-    next_url = request.GET.get('next')
+    # get next page args
+    next_url = request.GET.get("next")
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
             messages.success(request, f"مرحباً, {user.username}!")
+            if not next_url:
+                next_url = "dashboard"
             return redirect(
                 next_url
             )  # Replace 'dashboard' with your desired redirect URL name.
@@ -165,7 +128,7 @@ def login_view(request):
 
 
 @login_required(login_url="login")
-def register(request):
+def create_new_user(request):
     """
     View to create a new Django User using UserFullForm.
 
@@ -192,10 +155,13 @@ def register(request):
     else:
         form = UserFullForm()
         profile_form = ProfileForm(request.POST, request.FILES)
-    return render(request, "users/register.html", {"form": form, "profile_form": profile_form})
+        occupations = Occupation.objects.all()
+        teams = Team.objects.all()
+    return render(
+        request, "users/register.html", {"form": form, "profile_form": profile_form, "occupations": occupations, "teams": teams}
+    )
 
 
-@login_required(login_url="login")
 def logout_view(request):
     """
 
@@ -205,10 +171,126 @@ def logout_view(request):
     logout(request)
     return render(request, "users/login.html")
 
-@login_required(login_url='login')
+
+@login_required(login_url="login")
 def view_teams(request):
     """
     View to display all teams in the database.
     """
     teams = Team.objects.all()
-    return render(request, 'users/view_teams.html', {'teams': teams})
+    return render(request, "users/view_teams.html", {"teams": teams})
+
+
+def team_edit(request, id):
+    team = get_object_or_404(Team, id=id)
+    if request.method == "POST":
+        form = TeamForm(request.POST, instance=team)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "تم تحديث الفريق بنجاح!")
+            return redirect("teams")
+    else:
+        form = TeamForm(instance=team)
+    return redirect("teams")
+
+
+def team_delete(request, id):
+    team = get_object_or_404(Team, id=id)
+    if request.method == "POST":
+        team.delete()
+        messages.success(request, "تم حذف الفريق بنجاح!")
+        return redirect("teams")  # Redirect to a list of teams after deletion
+    return redirect("teams")
+
+
+def team_create(request):
+    if request.method == "POST":
+        form = TeamForm(request.POST)
+        if form.is_valid():
+            # Save the new team to the database
+            form.save()
+            messages.success(request, "تم انشاء الفريق بنجاح!")
+            # You can return a success response or redirect
+            return redirect(
+                "teams"
+            )  # Redirect to the teams list page or another view after saving
+        else:
+            # Return errors if the form is invalid
+            messages.error(request, "الرجاء التاكد من اسم الفريق!")
+            return redirect("teams")
+    else:
+        # GET request (for showing the empty form)
+        form = TeamForm()
+        return redirect("teams")
+
+
+def user_edit(request, id):
+    """
+    Edit a user account.
+    :param request:
+    :param id:
+    :return:
+    """
+    user = get_object_or_404(User, id=id)
+    form = UserEditForm(instance=user)
+    if request.method == "POST":
+        form = UserEditForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "تم تحديث المستخدم بنجاح!")
+            return redirect("profiles-list")
+
+    return render(request,"users/edit_user.html", {"form": form, "user": user})
+
+
+def user_deactivate(request, id):
+    """
+    Deactivate a user account.
+
+    :param request:
+    :param id:
+    :return:
+    """
+    user = get_object_or_404(User, id=id)
+    if user:
+        user.is_active = False
+        user.save()
+        messages.success(request, "تم تعطيل المستخدم بنجاح!")
+    else:
+        messages.error(request, "حدث خطأ اثناء تعطيل المستخدم!")
+    return redirect("profiles-list")
+
+
+def user_activate(request, id):
+    """
+    Activate a user account.
+    :param request:
+    :param id:
+    :return:
+    """
+    user = get_object_or_404(User, id=id)
+    if user:
+        user.is_active = True
+        user.save()
+        messages.success(request, "تم تفعيل المستخدم بنجاح!")
+        return redirect("profiles-list")
+    else:
+        messages.error(request, "حدث خطأ اثناء تفعيل المستخدم!")
+    return redirect("profiles-list")
+
+
+def user_delete(request, id):
+    """
+    Delete a user account.
+    :param request:
+    :param id:
+    :return:
+    """
+    user = get_object_or_404(User, id=id)
+    if user:
+        user.delete()
+        messages.success(request, "تم حذف المستخدم بنجاح!")
+        return redirect("profiles-list")
+    else:
+        messages.error(request, "حدث خطأ اثناء حذف المستخدم!")
+    return redirect("profiles-list")

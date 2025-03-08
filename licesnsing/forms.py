@@ -91,11 +91,15 @@ class EstablishmentForm(forms.ModelForm):
         ):
             raise ValidationError("Establishment with this Email already exists.")
         return email
+
     def get_register_number_for_form(self):
         """
         Returns the register number for the form.
         """
-        return EstablishmentRegister.objects.filter(establishment=self.instance).first().id
+        return (
+            EstablishmentRegister.objects.filter(establishment=self.instance).first().id
+        )
+
     # Establishment details
     rifd = forms.CharField(label="رقم RFID:", required=True)
     establishment_name = forms.CharField(
@@ -216,14 +220,19 @@ class EstablishmentRegisterForm(forms.ModelForm):
         model = EstablishmentRegister
         fields = ["establishment", "issuance_date", "expiration_date"]
         widgets = {
-            "issuance_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-            "expiration_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "issuance_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}
+            ),
+            "expiration_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}
+            ),
             "establishment": forms.Select(attrs={"class": "form-control"}),
         }
 
 
 from django import forms
 from .models import EstablishmentLicence
+
 
 class EstablishmentLicenceForm(forms.ModelForm):
     class Meta:
@@ -234,11 +243,15 @@ class EstablishmentLicenceForm(forms.ModelForm):
             "expiration_date",
             "main_category",
             "activity",
-            "sub_category"
+            "sub_category",
         ]
         widgets = {
-            "creation_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-            "expiration_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "creation_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}
+            ),
+            "expiration_date": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}
+            ),
             "register": forms.Select(attrs={"class": "form-control"}),
             "main_category": forms.Select(attrs={"class": "form-control"}),
             "activity": forms.Select(attrs={"class": "form-control"}),

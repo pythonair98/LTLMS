@@ -118,7 +118,9 @@ class Profiles(models.Model):
     """
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    contact = models.OneToOneField(Contact, on_delete=models.CASCADE,null=True, blank=True)
+    contact = models.OneToOneField(
+        Contact, on_delete=models.CASCADE, null=True, blank=True
+    )
     occupation = models.ForeignKey(Occupation, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(default=now, editable=False)

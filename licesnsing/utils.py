@@ -4,7 +4,12 @@ import os
 import datetime
 from django.contrib.auth.models import User
 
-from licesnsing.models import Inspection, InspectionAssignment, Establishment, EstablishmentRegister
+from licesnsing.models import (
+    Inspection,
+    InspectionAssignment,
+    Establishment,
+    EstablishmentRegister,
+)
 
 
 def send_mail(subject, body, sender, recipients):
@@ -70,6 +75,7 @@ def mark_inspection_as_done(establishment):
     except Exception as e:
         print(f"Error marking inspection as done: {e}")
 
+
 def get_establishment_obj_by_register(register_id):
     """Get establishment object by register id."""
     try:
@@ -78,6 +84,7 @@ def get_establishment_obj_by_register(register_id):
     except Exception as e:
         print(f"Error getting establishment by register id: {e}")
         return None
+
 
 # Helper function to handle inspection logic
 def process_inspection(form_data, photos):

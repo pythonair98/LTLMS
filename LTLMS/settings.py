@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 import pymysql
+
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,7 +33,7 @@ SECRET_KEY = "django-insecure-b5af10c63e**-73bnz^c*+rk5u%-9)!@#5uy5^#^*%r09rm7r1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1","0.0.0.0","192.168.223.8","213.6.135.126"]
+ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "192.168.223.8", "213.6.135.126"]
 
 
 # Application definition
@@ -83,7 +84,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "LTLMS.wsgi.application"
-
+LOGIN_URL = "login"
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

@@ -4,29 +4,197 @@
 {% load static %}
 
 {% block title %}
-  <title>Create User and Profile</title>
+    <title>Create User and Profile</title>
 {% endblock %}
 
 {% block content %}
-<div class="container" dir="rtl">
-  <h2 class="text-center">إنشاء مستخدم جديد مع ملفه الشخصي</h2>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <fieldset>
-      <legend>معلومات المستخدم</legend>
-      {{ user_form|crispy }}
-    </fieldset>
-    <fieldset>
-      <legend>معلومات الملف الشخصي</legend>
-      {{ profile_form|crispy }}
-    </fieldset>
-    <fieldset>
-      <legend>معلومات جهة الاتصال</legend>
-      {{ contact_form|crispy }}
-    </fieldset>
-    <div class="text-center">
-      <button type="submit" class="btn btn-primary">إنشاء المستخدم</button>
+    <div class="container" dir="rtl">
+        <h2 class="text-center">إنشاء مستخدم جديد مع ملفه الشخصي</h2>
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrfmiddlewaretoken"
+                   value="s8gdfCYzjFPovNSACUJ0SbQAWrDgQWEsh4VxlVa0iwDdz5beozK36U7dX7c70LeN">
+            <fieldset>
+                <legend>معلومات المستخدم</legend>
+
+
+                <div id="div_id_username" class="mb-3"><label
+                        for="id_username" class="form-label requiredField">
+                    اسم المستخدم<span class="asteriskField">*</span> </label> <input type="text" name="username"
+                                                                                     maxlength="150" autofocus
+                                                                                     class="textinput form-control"
+                                                                                     required
+                                                                                     aria-describedby="id_username_helptext"
+                                                                                     id="id_username">
+                    <div id="id_username_helptext" class="form-text">Required. 150 characters or fewer. Letters, digits
+                        and @/./+/-/_ only.
+                    </div>
+                </div>
+                <div id="div_id_email" class="mb-3"><label
+                        for="id_email" class="form-label requiredField">
+                    البريد الاكتروني<span class="asteriskField">*</span> </label> <input type="email" name="email"
+                                                                                         maxlength="320"
+                                                                                         class="emailinput form-control"
+                                                                                         required
+                                                                                         aria-describedby="id_email_helptext"
+                                                                                         id="id_email">
+                    <div id="id_email_helptext" class="form-text">Required. Enter a valid email address.</div>
+                </div>
+
+
+                <div id="first_name" class="mb-3"><label
+                        for="first_name" class="form-label requiredField">
+                    البريد الاكتروني<span class="asteriskField">*</span> </label> <input type="text" name="first_name"
+                                                                                         maxlength="320"
+                                                                                         class="form-control"
+                                                                                         required
+                                                                                         aria-describedby="id_email_helptext"
+                                                                                         id="first_name">
+                </div>
+
+
+
+                <div id="last_name" class="mb-3"><label
+                        for="last_name" class="form-label requiredField">
+                    البريد الاكتروني<span class="asteriskField">*</span> </label> <input type="text" name="last_name"
+                                                                                         maxlength="320"
+                                                                                         class="form-control"
+                                                                                         required
+                                                                                         id="last_name">
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                <div id="div_id_password1" class="mb-3"><label
+                        for="id_password1" class="form-label">
+                    كلمة المرور
+                </label> <input type="password" name="password1" autocomplete="new-password"
+                                class="passwordinput form-control" aria-describedby="id_password1_helptext"
+                                id="id_password1">
+                    <div id="id_password1_helptext" class="form-text">
+                        <ul>
+                            <li>Your password can’t be too similar to your other personal information.</li>
+                            <li>Your password must contain at least 8 characters.</li>
+                            <li>Your password can’t be a commonly used password.</li>
+                            <li>Your password can’t be entirely numeric.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="div_id_password2" class="mb-3"><label
+                        for="id_password2" class="form-label">
+                    تاكيد كلمة المرور
+                </label> <input type="password" name="password2" autocomplete="new-password"
+                                class="passwordinput form-control" aria-describedby="id_password2_helptext"
+                                id="id_password2">
+                    <div id="id_password2_helptext" class="form-text">Enter the same password as before, for
+                        verification.
+                    </div>
+                </div>
+
+            </fieldset>
+            <fieldset>
+                <legend>معلومات الملف الشخصي</legend>
+
+
+                <div id="div_id_occupation" class="mb-3"><label
+                        for="id_occupation" class="form-label requiredField">
+                    المسمى الوظيفي<span class="asteriskField">*</span> </label> <select name="occupation"
+                                                                                        class="select form-select"
+                                                                                        required id="id_occupation">
+                    <option value="" selected>---------</option>
+                    <option value="1">Head of Licsesing</option>
+                    <option value="2">Head of inspection Dept</option>
+                    <option value="3">Inspector</option>
+
+                </select></div>
+                <div id="div_id_team" class="mb-3"><label
+                        for="id_team" class="form-label">
+                    الفريق
+                </label> <select name="team" class="select form-select" id="id_team">
+                    <option value="" selected>---------</option>
+                    <option value="2">Caesar Eatonصصص</option>
+                    <option value="3">Test</option>
+
+                </select></div>
+
+            </fieldset>
+{#            <fieldset>#}
+{#                <legend>معلومات جهة الاتصال</legend>#}
+{##}
+{##}
+{#                <div id="div_id_ar_name" class="mb-3"><label#}
+{#                        for="id_ar_name" class="form-label requiredField">#}
+{#                    Ar name<span class="asteriskField">*</span> </label> <input type="text" name="ar_name"#}
+{#                                                                                maxlength="200"#}
+{#                                                                                class="textinput form-control" required#}
+{#                                                                                id="id_ar_name"></div>#}
+{#                <div id="div_id_en_name" class="mb-3"><label#}
+{#                        for="id_en_name" class="form-label">#}
+{#                    En name#}
+{#                </label> <input type="text" name="en_name" maxlength="200" class="textinput form-control"#}
+{#                                id="id_en_name"></div>#}
+{#                <div id="div_id_ar_fname" class="mb-3"><label#}
+{#                        for="id_ar_fname" class="form-label">#}
+{#                    Ar fname#}
+{#                </label> <input type="text" name="ar_fname" maxlength="100" class="textinput form-control"#}
+{#                                id="id_ar_fname"></div>#}
+{#                <div id="div_id_ar_lname" class="mb-3"><label#}
+{#                        for="id_ar_lname" class="form-label">#}
+{#                    Ar lname#}
+{#                </label> <input type="text" name="ar_lname" maxlength="100" class="textinput form-control"#}
+{#                                id="id_ar_lname"></div>#}
+{#                <div id="div_id_en_fname" class="mb-3"><label#}
+{#                        for="id_en_fname" class="form-label">#}
+{#                    En fname#}
+{#                </label> <input type="text" name="en_fname" maxlength="100" class="textinput form-control"#}
+{#                                id="id_en_fname"></div>#}
+{#                <div id="div_id_en_lname" class="mb-3"><label#}
+{#                        for="id_en_lname" class="form-label">#}
+{#                    En lname#}
+{#                </label> <input type="text" name="en_lname" maxlength="100" class="textinput form-control"#}
+{#                                id="id_en_lname"></div>#}
+{#                <div id="div_id_phone_number" class="mb-3"><label#}
+{#                        for="id_phone_number" class="form-label requiredField">#}
+{#                    Phone number<span class="asteriskField">*</span> </label> <input type="text" name="phone_number"#}
+{#                                                                                     maxlength="20"#}
+{#                                                                                     class="textinput form-control"#}
+{#                                                                                     required id="id_phone_number">#}
+{#                </div>#}
+{#                <div id="div_id_email" class="mb-3"><label#}
+{#                        for="id_email" class="form-label requiredField">#}
+{#                    Email<span class="asteriskField">*</span> </label> <input type="email" name="email" maxlength="255"#}
+{#                                                                              class="emailinput form-control" required#}
+{#                                                                              id="id_email"></div>#}
+{##}
+{#            </fieldset>#}
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">إنشاء المستخدم</button>
+            </div>
+        </form>
     </div>
-  </form>
-</div>
 {% endblock %}

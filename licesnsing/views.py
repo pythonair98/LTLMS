@@ -23,7 +23,12 @@ from .models import (
     InspectionAssignment,
     Inspection,
 )
-from .utils import process_raw_data, process_form_data, mark_inspection_as_done, get_establishment_obj_by_register
+from .utils import (
+    process_raw_data,
+    process_form_data,
+    mark_inspection_as_done,
+    get_establishment_obj_by_register,
+)
 
 
 @login_required(login_url="login")
@@ -169,7 +174,9 @@ def edit_establishment(request, register_number):
     return render(request, "licesnsing/edit_establishment.html", {"form": form})
 
 
-@login_required  # Ensures only authenticated users can access this endpoint
+@login_required(
+    login_url="login"
+)  # Ensures only authenticated users can access this endpoint
 @require_http_methods(["GET", "POST"])  # Allows only GET and POST requests
 def query(request):
     """
@@ -236,7 +243,7 @@ def query(request):
     )
 
 
-@login_required
+@login_required(login_url="login")
 def reader(request):
     """
     Main view to handle inspection (reader) requests.
@@ -268,13 +275,15 @@ def reader(request):
             form.save()
             # mark inspection as done
             mark_inspection_as_done(get_establishment_obj_by_register(register_number))
-            messages.success(request,"تم إرسال المعاينة بنجاح")
+            messages.success(request, "تم إرسال المعاينة بنجاح")
             # Retrieve the RFID from the form data.
             rifd = form.cleaned_data.get("rifd")
 
             # Query ArduinoReader for a matching record.
             arduino_record = (
-                ArduinoReader.objects.filter(code=rifd, queried=False, status="processed")
+                ArduinoReader.objects.filter(
+                    code=rifd, queried=False, status="processed"
+                )
                 .order_by("-id")
                 .first()
             )
@@ -597,7 +606,10 @@ def view_inspections(request):
     :return:
     """
     inspections = Inspection.objects.all()
-    return render(request, 'licesnsing/view_inspections.html', {'inspections': inspections})
+    return render(
+        request, "licesnsing/view_inspections.html", {"inspections": inspections}
+    )
+
 
 @login_required(login_url="login")
 def archive_inspection(request, pk):
@@ -612,7 +624,7 @@ def archive_inspection(request, pk):
     inspection.is_archived = True
     inspection.save()
     messages.success(request, "تم أرشفة المعاينة بنجاح!")
-    return redirect('view_inspections')
+    return redirect("view_inspections")
 
 
 @login_required(login_url="login")
@@ -624,7 +636,10 @@ def view_archive(request):
     :return:
     """
     inspections = Inspection.objects.filter(is_archived=True)
-    return render(request, 'licesnsing/view_archived.html', {'inspections': inspections})
+    return render(
+        request, "licesnsing/view_archived.html", {"inspections": inspections}
+    )
+
 
 @login_required
 def add_establishment_register(request):
@@ -634,7 +649,9 @@ def add_establishment_register(request):
             establishment = form.cleaned_data["establishment"]
 
             # Check if this establishment already has a register
-            if EstablishmentRegister.objects.filter(establishment=establishment).exists():
+            if EstablishmentRegister.objects.filter(
+                establishment=establishment
+            ).exists():
                 messages.error(request, "هذا السجل موجود بالفعل لهذه المؤسسة!")
             else:
                 form.save()
@@ -644,7 +661,10 @@ def add_establishment_register(request):
     else:
         form = EstablishmentRegisterForm()
 
-    return render(request, "licesnsing/establishment_register_form.html", {"form": form})
+    return render(
+        request, "licesnsing/establishment_register_form.html", {"form": form}
+    )
+
 
 @login_required
 def add_establishment_licence(request):

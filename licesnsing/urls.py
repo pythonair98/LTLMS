@@ -17,13 +17,18 @@ from .views import (
     update_assignment_status,
     assign_establishment,
     create_inspection,
-    dashboard, view_inspections, archive_inspection, view_archive, add_establishment_register,
+    dashboard,
+    view_inspections,
+    archive_inspection,
+    view_archive,
+    add_establishment_register,
     add_establishment_licence,
 )
 
 urlpatterns = [
     # Handles adding a new establishment (Establishment)
     path("", dashboard, name="dashboard"),
+    path("/", dashboard, name="dashboard"),
     path("add_establishment", add_establishment, name="add_establishment"),
     path("view_establishment", view_establishment, name="view_establishment"),
     path(
@@ -60,8 +65,9 @@ urlpatterns = [
     path("assign-establishment/", assign_establishment, name="assign_establishment"),
     path("inspections", view_inspections, name="view_inspections"),
     path("archived_inspection", view_archive, name="archived_inspection"),
-    path('inspections/<int:pk>/archive/', archive_inspection, name='archive_inspection'),
+    path(
+        "inspections/<int:pk>/archive/", archive_inspection, name="archive_inspection"
+    ),
     path("register/add/", add_establishment_register, name="add_register"),
     path("add_establishment_licence", add_establishment_licence, name="add_licence"),
-
 ]

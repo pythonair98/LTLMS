@@ -12,7 +12,8 @@
   <div class="card shadow-sm">
     <div class="card-body">
       <form method="post" enctype="multipart/form-data">
-        <input type="hidden" name="csrfmiddlewaretoken" value="FaiFymJ2h3MAwlWHeoHEFuyZvE7pfoqOAMUxdcna15fyS8ttP8xEydbafuJj56Cj">
+        {% csrf_token %}
+
 
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -22,6 +23,25 @@
             <input type="text" name="username" class="form-control textinput" maxlength="150" required id="id_username">
             <div class="form-text">اسم المستخدم يجب أن يكون 150 حرفًا أو أقل ويحتوي على حروف وأرقام فقط مع @/./+/-/_</div>
           </div>
+            <div class="col-md-6 mb-3">
+            <label for="first_name" class="form-label requiredField">
+              الاسم الاول <span class="asteriskField">*</span>
+            </label>
+            <input type="text" name="username" class="form-control textinput" maxlength="150" required id="first_name">
+            <div class="form-text">الاسم الاول</div>
+          </div>
+
+            <div class="col-md-6 mb-3">
+            <label for="last_name" class="form-label requiredField">
+              اسم العائلة <span class="asteriskField">*</span>
+            </label>
+            <input type="text" name="username" class="form-control textinput" maxlength="150" required id="last_name">
+
+          </div>
+
+
+
+
           <div class="col-md-6 mb-3">
             <label for="id_email" class="form-label">البريد الإلكتروني</label>
             <input type="email" name="email" class="form-control emailinput" maxlength="254" id="id_email">
@@ -64,14 +84,24 @@
               المسمى الوظيفي <span class="asteriskField">*</span>
             </label>
             <select name="occupation" class="select form-select" required id="id_occupation">
-              <option value="" >---------</option>
-              <option value="1">MacKensie Kane</option>
+            <option value="" >---------</option>
+                {% for occ in occupations %}
+                	    <option value="{{ occ.id }}">{{ occ.ar_name}}</option>
+                {% endfor %}
+
+
+
             </select>
           </div>
           <div class="col-md-6 mb-3">
             <label for="id_team" class="form-label">الفريق</label>
             <select name="team" class="select form-select" id="id_team">
-              <option value="">---------</option>
+                    <option value="">---------</option>
+                {% for team in teams %}
+                	<option value="{{ team.id }}">{{ team.ar_name }}</option>
+                {% endfor %}
+
+
               <option value="1">Patricia Pennington</option>
               <option value="2">Hassan</option>
             </select>

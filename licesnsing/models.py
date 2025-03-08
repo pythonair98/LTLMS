@@ -124,8 +124,12 @@ class Establishment(models.Model):
     # license_expiration_date = models.DateField(default=timezone.now)
     # link main category and sub category to the establishment
 
-    main_category = models.ForeignKey(MainCategory, on_delete=models.CASCADE)
-    sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
+    main_category = models.ForeignKey(
+        MainCategory, on_delete=models.CASCADE, null=True, blank=True
+    )
+    sub_category = models.ForeignKey(
+        SubCategory, on_delete=models.CASCADE, null=True, blank=True
+    )
     owner_name = models.CharField(max_length=200)
     owner_number = models.CharField(max_length=50)
     director_name = models.CharField(max_length=200)
@@ -149,9 +153,20 @@ class Establishment(models.Model):
         return f" {self.establishment_name}"
 
     def get_register(self):
-        return  EstablishmentRegister.objects.get(establishment_id=self.id) if True else None
+        return (
+            EstablishmentRegister.objects.get(establishment_id=self.id)
+            if True
+            else None
+        )
+
     def get_license(self):
-        return EstablishmentLicence.objects.get(register_id=self.get_register().id) if True else None
+        return (
+            EstablishmentLicence.objects.get(register_id=self.get_register().id)
+            if True
+            else None
+        )
+
+
 class ArduinoReader(models.Model):
     """
     This model stores RFID readings received from an Arduino device.
@@ -236,8 +251,8 @@ class Inspection(models.Model):
         max_length=255, unique=True, verbose_name="Register Number"
     )
     notes = models.TextField(null=True, blank=True, verbose_name="Inspection Notes")
-    latitude = models.CharField(verbose_name="Latitude",max_length=20)
-    longitude = models.CharField(verbose_name="Longitude",max_length=20)
+    latitude = models.CharField(verbose_name="Latitude", max_length=20)
+    longitude = models.CharField(verbose_name="Longitude", max_length=20)
     status = models.BooleanField(
         choices=STATUS_CHOICES, verbose_name="Inspection Status", default=False
     )
