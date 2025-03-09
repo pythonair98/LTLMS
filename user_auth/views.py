@@ -13,7 +13,7 @@ from .forms import (
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 
-from .models import Team, Occupation
+from .models import Team, Occupation, Profiles
 
 
 # Create your views here.
@@ -141,15 +141,18 @@ def create_new_user(request):
         profile_form = ProfileForm(request.POST, request.FILES)
 
         if form.is_valid() and profile_form.is_valid():
-
-            user = form.save()
+            user = form.save(commit=False)
+            if not user.pk:  # New user creation, no pk means a new user
+                user.set_password(form.cleaned_data["password"])
+            user.save()
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
             messages.success(request, "تم انشاء المستخدم بنجاح!")
 
         else:
-            messages.error(request, "Please correct the errors below.")
+            messages.warning(request, "Please correct the errors below.")
+            messages.error(request, form.errors.as_data())
         return redirect(
             "profiles-list"
         )  # Replace with your desired redirect URL name.
@@ -204,6 +207,7 @@ def team_delete(request, id):
     return redirect("teams")
 
 
+
 def team_create(request):
     if request.method == "POST":
         form = TeamForm(request.POST)
@@ -234,16 +238,20 @@ def user_edit(request, id):
     """
 
     user = get_object_or_404(User, id=id)
-
+    profile = get_object_or_404(Profiles, user=user)
     if request.method == "POST":
         form = UserEditForm(request.POST, instance=user)
+        profile_ = ProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()  # ✅ Save user details WITHOUT changing the password
+            profile_.save() # ✅ Save user details WITHOUT changing the password
+            messages.success(request, "تم تحديث المستخدم بنجاح!")
             return redirect("profiles-list")  # Redirect after successful update
     else:
         form = UserEditForm(instance=user)
-
-    return render(request, "users/edit_user.html", {"form": form, "user": user})
+    occupations = Occupation.objects.all()
+    teams = Team.objects.all()
+    return render(request, "users/edit_user.html", {"form": form, "user": user, "occupations": occupations, "teams": teams})
 
 
 def user_deactivate(request, id):
