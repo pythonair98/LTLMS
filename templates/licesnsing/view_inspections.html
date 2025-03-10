@@ -11,6 +11,7 @@
                 <th>رقم السجل</th>
                 <th>المفتش</th>
                 <th>الحالة</th>
+                <th>الملاحظات</th>
                 <th>الموقع</th>
                 <th>التاريخ</th>
                 <th>الإجراءات</th>
@@ -29,6 +30,7 @@
                         <span class="badge bg-danger">مرفوض</span>
                     {% endif %}
                 </td>
+             <td>{{ inspection.notes }}</td>
                 <td>
                     <!-- Map Button to Show Coordinates -->
                     <button class="btn btn-info btn-sm" onclick="showMap('{{ inspection.latitude }}', '{{ inspection.longitude }}')">

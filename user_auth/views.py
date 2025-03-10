@@ -8,7 +8,8 @@ from .forms import (
     ProfileForm,
     ContactForm,
     UserFullForm,
-    TeamForm, UserEditForm,
+    TeamForm,
+    UserEditForm,
 )
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
@@ -34,8 +35,6 @@ def profiles_list(request):
 
     profiles = User.objects.all()
     return render(request, "users/profiles_list.html", {"profiles": profiles})
-
-
 
 
 @login_required(login_url="login")
@@ -153,16 +152,21 @@ def create_new_user(request):
         else:
             messages.warning(request, "Please correct the errors below.")
             messages.error(request, form.errors.as_data())
-        return redirect(
-            "profiles-list"
-        )  # Replace with your desired redirect URL name.
+        return redirect("profiles-list")  # Replace with your desired redirect URL name.
     else:
         form = UserFullForm()
         profile_form = ProfileForm(request.POST, request.FILES)
         occupations = Occupation.objects.all()
         teams = Team.objects.all()
         return render(
-            request, "users/register.html", {"form": form, "profile_form": profile_form, "occupations": occupations, "teams": teams}
+            request,
+            "users/register.html",
+            {
+                "form": form,
+                "profile_form": profile_form,
+                "occupations": occupations,
+                "teams": teams,
+            },
         )
 
 
@@ -207,7 +211,6 @@ def team_delete(request, id):
     return redirect("teams")
 
 
-
 def team_create(request):
     if request.method == "POST":
         form = TeamForm(request.POST)
@@ -244,14 +247,18 @@ def user_edit(request, id):
         profile_ = ProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()  # ✅ Save user details WITHOUT changing the password
-            profile_.save() # ✅ Save user details WITHOUT changing the password
+            profile_.save()  # ✅ Save user details WITHOUT changing the password
             messages.success(request, "تم تحديث المستخدم بنجاح!")
             return redirect("profiles-list")  # Redirect after successful update
     else:
         form = UserEditForm(instance=user)
     occupations = Occupation.objects.all()
     teams = Team.objects.all()
-    return render(request, "users/edit_user.html", {"form": form, "user": user, "occupations": occupations, "teams": teams})
+    return render(
+        request,
+        "users/edit_user.html",
+        {"form": form, "user": user, "occupations": occupations, "teams": teams},
+    )
 
 
 def user_deactivate(request, id):

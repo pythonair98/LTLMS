@@ -151,7 +151,7 @@ class Establishment(models.Model):
 
     def __str__(self):
         return f" {self.establishment_name}"
-
+    @property
     def get_register(self):
         return (
             EstablishmentRegister.objects.get(establishment_id=self.id)
@@ -161,7 +161,7 @@ class Establishment(models.Model):
 
     def get_license(self):
         return (
-            EstablishmentLicence.objects.get(register_id=self.get_register().id)
+            EstablishmentLicence.objects.get(register_id=self.get_register.id)
             if True
             else None
         )

@@ -2,14 +2,13 @@ from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from django.db.models import Count
 
-from user_auth.models import Profiles, Occupation
+from user_auth.models import Profiles
 from .forms import (
     EstablishmentForm,
     InspectionForm,
@@ -215,6 +214,7 @@ def query(request):
                             "datafound": True,
                             "iform": InspectionForm(),
                             "found": True,
+                            "register_number" : establishment.get_register.id
                         },
                     ).content.decode("utf-8"),
                 }
@@ -302,7 +302,8 @@ def reader(request):
                 return redirect("reader")
 
         else:
-            messages.error(request, "الرجاء تصحيح الأخطاء في النموذج.")
+            print(form.errors.as_data())
+            messages.warning(request, "الرجاء تصحيح الأخطاء في النموذج.")
     else:
         form = InspectionForm()
 
@@ -580,16 +581,29 @@ def assign_establishment(request):
     print(inspectors)
     form = InspectionAssignmentForm()
     unassigned_establishments = Establishment.objects.exclude(
-    inspection_assignments__isnull=False
-)
+        inspection_assignments__isnull=False
+    )
 
     if len(unassigned_establishments) == 0:
         messages.warning(request, "حميع المنشأت قد تم تعيينها.")
-    return render(request, "licesnsing/assign_establishment.html", {"form": form, "unassigned_establishments": unassigned_establishments, "inspectors": inspectors})
+    return render(
+        request,
+        "licesnsing/assign_establishment.html",
+        {
+            "form": form,
+            "unassigned_establishments": unassigned_establishments,
+            "inspectors": inspectors,
+        },
+    )
 
 
 @login_required(login_url="login")
 def create_inspection(request):
+    """
+    View to create a new Inspection record.
+    :param request:
+    :return:
+    """
     if request.method == "POST":
         form = InspectionForm(request.POST, request.FILES)
         if form.is_valid():
@@ -616,7 +630,7 @@ def view_inspections(request):
     :param request:
     :return:
     """
-    inspections = Inspection.objects.all()
+    inspections = Inspection.objects.filter(is_archived=False)
     return render(
         request, "licesnsing/view_inspections.html", {"inspections": inspections}
     )
@@ -679,6 +693,11 @@ def add_establishment_register(request):
 
 @login_required
 def add_establishment_licence(request):
+    """
+    View to add a new EstablishmentLicence record.
+    :param request:
+    :return:
+    """
     if request.method == "POST":
         form = EstablishmentLicenceForm(request.POST)
         if form.is_valid():
