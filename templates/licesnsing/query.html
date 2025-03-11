@@ -152,7 +152,7 @@
                     <h3>بيانات المعاينة</h3>
                 </div>
                 <br><br>
-                <form action="/reader" method="post">
+                <form action="/reader" method="post" enctype="multipart/form-data">
                     <div class="card-body">
                         {% csrf_token %}
 
@@ -196,13 +196,21 @@
                             </div>
                         </div>
                     </div>
-                        <div class="row ">
+                       <div class="row ">
                         <div class="col-md-6 ">
-                            {{ mform|crispy }}
+                            <input type="file" id="register_photo" name="register_photo" accept="image/png, image/jpeg" />
                         </div>
                     </div><div class="row ">
                         <div class="col-md-6 ">
-                            {{ iform.register_photo }}
+                            <input type="file" id="license_photo" name="license_photo" accept="image/png, image/jpeg" />
+                        </div>
+                    </div><div class="row ">
+                        <div class="col-md-6 ">
+                            <input type="file" id="establishment_photo" name="establishment_photo" accept="image/png, image/jpeg" />
+                        </div>
+                    </div><div class="row ">
+                        <div class="col-md-6 ">
+                            <input type="file" id="cars_building_photo" name="cars_building_photo" accept="image/png, image/jpeg" />
                         </div>
                     </div>
                 </div>

@@ -115,10 +115,12 @@ def view_establishment(request):
         HttpResponse: Renders the 'view_establishment.html' template with all establishments.
     """
     establishments = Establishment.objects.all()
+
     return render(
         request,
         "licesnsing/view_establishment.html",
-        {"establishments": establishments},
+
+        {"establishments": establishments,"today": date.today(),},
     )
 
 
@@ -266,6 +268,8 @@ def reader(request):
     if request.method == "POST":
         form = InspectionForm(request.POST, request.FILES)
         if form.is_valid():
+            print(form.cleaned_data)
+            print(request.FILES)
             register_number = form.cleaned_data.get("register_number")
 
             # Check if inspection for this establishment already exists.
