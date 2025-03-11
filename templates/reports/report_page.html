@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="text-center mb-4">أستخراج تقارير</h1>
+  <div class="row row-cols-1 row-cols-md-5 g-4">
+    {% for report in reports %}
+    <div class="col">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-body d-flex flex-column text-center">
+          <h5 class="card-title">{{ report.name }}</h5>
+          <p class="card-text flex-grow-1">{{ report.description }}</p>
+           <a href="" class="btn btn-lg" style="background-color:#8A1538; color:white;">
+            <i class="fas fa-cogs"></i>أستخراج التقرير
+          </a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="alert alert-warning text-center">
+        No report types available.
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
