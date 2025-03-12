@@ -268,8 +268,6 @@ def reader(request):
     if request.method == "POST":
         form = InspectionForm(request.POST, request.FILES)
         if form.is_valid():
-            print(form.cleaned_data)
-            print(request.FILES)
             register_number = form.cleaned_data.get("register_number")
 
             # Check if inspection for this establishment already exists.
@@ -306,7 +304,6 @@ def reader(request):
                 return redirect("reader")
 
         else:
-            print(form.errors.as_data())
             messages.warning(request, "الرجاء تصحيح الأخطاء في النموذج.")
     else:
         form = InspectionForm()
