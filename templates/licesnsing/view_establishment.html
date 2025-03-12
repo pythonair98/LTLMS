@@ -58,6 +58,13 @@
                         <a href="/edit_establishment/{{est.register_number}}">
                             <button class="btn btn-primary" type="submit">تعديل</button>
                         </a>
+                         {% if est.get_register %}
+
+                              {% else %}
+                                <a href="{% url 'add_register' %}">
+                            <button class="btn " style="background-color:#8A1538; color:white;" type="submit">أضافة سجل</button>
+                        </a>
+                              {% endif %}
                     </td>
                     <td>
                         <button class="btn btn-danger" type="button" onclick="confirmToPost('/delete_establishment/{{est.register_number}}')">حذف</button>
