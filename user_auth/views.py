@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.contrib import messages
+
+from licesnsing.utils import inspector_assignments
 from .forms import (
     CustomUserCreationForm,
     ProfileForm,
@@ -109,8 +111,11 @@ def login_view(request):
     next_url = request.GET.get("next")
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
+
         if form.is_valid():
             user = form.get_user()
+            if inspector_assignments(user) > 0:
+                messages.info(request, "يوجد لديك تكليفات عدد: " + str(inspector_assignments(user)))
             login(request, user)
             messages.success(request, f"مرحباً, {user.username}!")
             if not next_url:
@@ -177,7 +182,7 @@ def logout_view(request):
     :return:
     """
     logout(request)
-    return render(request, "users/login.html")
+    return redirect("login")
 
 
 @login_required(login_url="login")

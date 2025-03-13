@@ -44,6 +44,7 @@
             <td>
               <!-- Edit Button -->
               <a href="{% url 'user_edit' profile.id %}" class="btn btn-primary btn-sm">تعديل</a>
+              <a href="{% url 'user_delete' profile.id %}" class="btn btn-danger btn-sm">حذف</a>
 
               <!-- Deactivate Button -->
               {% if profile.is_active %}
@@ -53,9 +54,7 @@
               {% endif %}
 
               <!-- Delete Button with Confirmation -->
-              <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ profile.id }}">
-                حذف
-              </button>
+              <a href="{% url 'user_delete' profile.id %}" class="btn btn-danger btn-sm">حذف</a>
 
             </td>
           </tr>

@@ -148,44 +148,50 @@
                         </ul>
                     </li>
                     {% endif %}
-
+                    {% if request.user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" style="" href="{% url 'logout' %}">تسجيل الخروج</a>
                     </li>
+                        {% else %}
+                        <li class="nav-item">
+                        <a class="nav-link" style="" href="{% url 'login' %}">تسجيل الدخول</a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
-        <div id="hamburger-icon" onclick="toggleMobileMenu(this)">
-            <div class="bar1"></div>
-            <div class="bar2"></div>
-            <div class="bar3"></div>
-            <ul class="mobile-menu">
-                <li class="nav-item">
-                    <a class="nav-link active" href="/reader">معاينة منشاة</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/est">إضافة منشأة</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/view_est">عرض المنشآت</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/view_ins">عرض المعاينات</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/view_archived_ins">عرض المعاينات المؤرشفة</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/view_users">عرض المستخدمين</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/create_user">إنشاء مستخدم</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/logout">تسجيل الخروج</a>
-                </li>
-            </ul>
-        </div>
+{#        <div id="hamburger-icon" onclick="toggleMobileMenu(this)">#}
+{#            <div class="bar1"></div>#}
+{#            <div class="bar2"></div>#}
+{#            <div class="bar3"></div>#}
+{#            <ul class="mobile-menu">#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link active" href="/reader">معاينة منشاة</a>#}
+{#                </li>#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link active" href="/est">إضافة منشأة</a>#}
+{#                </li>#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link active" href="/view_est">عرض المنشآت</a>#}
+{#                </li>#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link active" href="/view_ins">عرض المعاينات</a>#}
+{#                </li>#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link active" href="/view_archived_ins">عرض المعاينات المؤرشفة</a>#}
+{#                </li>#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link active" href="/view_users">عرض المستخدمين</a>#}
+{#                </li>#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link active" href="/create_user">إنشاء مستخدم</a>#}
+{#                </li>#}
+{#                #}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link active" href="/logout">تسجيل الخروج</a>#}
+{#                </li>#}
+{#            </ul>#}
+{#        </div>#}
     </nav>
     <br>
     <br>

@@ -131,7 +131,7 @@
                   {% for est in latest_establishments %}
                   <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ est.name }}</td>
+                    <td>{{ est.establishment_name }}</td>
                     <td>{{ est.created_at|date:"Y-m-d" }}</td>
                   </tr>
                   {% empty %}
@@ -158,7 +158,7 @@
                   {% for assign in latest_assignments %}
                   <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ assign.establishment.name }}</td>
+                    <td>{{ assign.establishment.establishment_name }}</td>
                     <td>{{ assign.inspector.username }}</td>
                     <td>{{ assign.status }}</td>
                     <td>{{ assign.assigned_at|date:"Y-m-d" }}</td>

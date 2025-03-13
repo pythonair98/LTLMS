@@ -129,3 +129,14 @@ def process_form_data(request):
     except Exception as e:
         logging.error(f"Error processing form data: {e}")
         return None
+
+def inspector_assignments(user):
+    """Get inspector assignments."""
+    try:
+        inspector = user
+        assignments = InspectionAssignment.objects.filter(inspector=inspector,status="pending").count()
+
+        return assignments if assignments else 0
+    except Exception as e:
+        logging.error(f"Error getting inspector assignments: {e}")
+        return None
