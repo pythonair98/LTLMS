@@ -32,11 +32,11 @@
           {% for lic in licences %}
           <tr>
             <!-- Display the license primary key or another unique identifier -->
-            <th scope="row">{{ lic.number }}</th>
+            <th scope="row">{{ lic.counter }}</th>
             <!-- License number can be the same as the primary key -->
-            <td>{{ lic.number }}</td>
+            <td>{{ lic }}</td>
             <!-- Display the associated register's number -->
-            <td>{{ lic.register.id }}</td>
+            <td>{{ lic.register }}</td>
             <!-- Date fields for the license -->
             <td>{{ lic.creation_date }}</td>
             <td>{{ lic.expiration_date }}</td>

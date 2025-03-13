@@ -1,0 +1,78 @@
+{% extends "base.html" %}  {# Ensure this extends your main template #}
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="mb-3">📋 تكليفاتي</h2>
+
+    <!-- Status Filter -->
+    <div class="mb-3">
+        <label for="statusFilter" class="form-label">فرز حسب: الحالة</label>
+        <select id="statusFilter" class="form-select" onchange="filterAssignments()">
+            <option value="">الجميع</option>
+            <option value="pending">أنتظار</option>
+            <option value="accepted">مقبولة</option>
+            <option value="in_progress">قيد المعاينة</option>
+            <option value="completed">مكتلمة</option>
+            <option value="cancelled">ملغاة</option>
+        </select>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>المنشأة</th>
+                <th>وجهت في</th>
+                <th>اخر موعد</th>
+                <th>الحالة</th>
+                <th>الملاحظات</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assignment in assignments %}
+            <tr class="assignment-row" data-status="{{ assignment.status }}">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ assignment.establishment }}</td>
+                <td>{{ assignment.assigned_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ assignment.due_date|default:"-" }}</td>
+                <td>
+                    <span class="badge bg-{% if assignment.status == 'pending' %}warning
+                                      {% elif assignment.status == 'accepted' %}primary
+                                      {% elif assignment.status == 'in_progress' %}info
+                                      {% elif assignment.status == 'completed' %}success
+                                      {% else %}danger{% endif %}">
+                        {{ assignment.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ assignment.notes|default:"لا يوجد ملاحظات!" }}</td>
+                <td>
+                    {{ assignment.status }}
+
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">لا يوجد تكليفات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function filterAssignments() {
+        var selectedStatus = document.getElementById("statusFilter").value;
+        var rows = document.querySelectorAll(".assignment-row");
+
+        rows.forEach(row => {
+            if (selectedStatus === "" || row.dataset.status === selectedStatus) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+</script>
+
+{% endblock %}

@@ -27,7 +27,7 @@
             <label for="first_name" class="form-label requiredField">
               الاسم الاول <span class="asteriskField">*</span>
             </label>
-            <input type="text" name="username" class="form-control textinput" maxlength="150" required id="first_name">
+            <input type="text" name="first_name" class="form-control textinput" maxlength="150" required id="first_name">
             <div class="form-text">الاسم الاول</div>
           </div>
 
@@ -35,7 +35,7 @@
             <label for="last_name" class="form-label requiredField">
               اسم العائلة <span class="asteriskField">*</span>
             </label>
-            <input type="text" name="username" class="form-control textinput" maxlength="150" required id="last_name">
+            <input type="text" name="last_name" class="form-control textinput" maxlength="150" required id="last_name">
 
           </div>
 
@@ -91,10 +91,6 @@
                 {% for team in teams %}
                 	<option value="{{ team.id }}">{{ team.ar_name }}</option>
                 {% endfor %}
-
-
-              <option value="1">Patricia Pennington</option>
-              <option value="2">Hassan</option>
             </select>
           </div>
 

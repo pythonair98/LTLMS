@@ -1,4 +1,8 @@
 from django.shortcuts import render
+from datetime import datetime
+
+from licesnsing.models import EstablishmentRegister, Inspection
+
 
 def report_index(request):
     reports = [
@@ -98,3 +102,19 @@ def report_index(request):
 def all_establishment_report(request):
     # Query the data from the model
     pass
+
+
+
+def inspection_report(request):
+    register = EstablishmentRegister.objects.all()[0]
+    establishment = register.establishment
+    inspection = Inspection.objects.all()[0]
+    current_date = datetime.now()
+    context = {
+        'current_date': current_date,
+        'register': register,
+        'establishment': establishment,
+        'inspection': inspection
+    }
+
+    return render(request, 'reports/new_report.html', context=context)

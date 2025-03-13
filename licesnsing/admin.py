@@ -1,3 +1,5 @@
+from django.utils.html import format_html
+
 from .models import (
     Establishment,
     Activity,
@@ -6,7 +8,7 @@ from .models import (
     SubCategory,
     EstablishmentLicence,
     EstablishmentRegister,
-    InspectionAssignment,
+    InspectionAssignment, Inspection,
 )
 
 from django.utils.translation import gettext_lazy as _
@@ -352,3 +354,67 @@ class InspectionAssignmentAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ("assigned_at", "updated_at")
+
+
+@admin.register(Inspection)
+class InspectionAdmin(admin.ModelAdmin):
+    list_display = (
+        "register_number",
+        "inspector",
+        "created_at",
+        "notes",
+        "status",
+        "is_archived",
+        "preview_register_photo",
+        "preview_license_photo",
+        "preview_establishment_photo",
+        "preview_cars_building_photo",
+    )
+    list_filter = ("status", "inspector", "created_at", "is_archived")
+    search_fields = ("register_number", "notes")
+    ordering = ("-created_at",)
+    actions = ["archive_selected"]
+    readonly_fields = ("created_at", "archived_at")
+
+    fieldsets = (
+        ("Inspection Details", {
+            "fields": ("register_number", "inspector", "notes", "status"),
+        }),
+        ("Location", {
+            "fields": ("latitude", "longitude"),
+        }),
+        ("Media Files", {
+            "fields": ("register_photo", "license_photo", "establishment_photo", "cars_building_photo"),
+        }),
+        ("Archiving", {
+            "fields": ("is_archived", "archived_at"),
+        }),
+    )
+
+    def preview_register_photo(self, obj):
+        return self._image_preview(obj.register_photo.url)
+
+    def preview_license_photo(self, obj):
+        return self._image_preview(obj.license_photo.url)
+
+    def preview_establishment_photo(self, obj):
+        return self._image_preview(obj.establishment_photo.url)
+
+    def preview_cars_building_photo(self, obj):
+        return self._image_preview(obj.cars_building_photo.url)
+
+    def _image_preview(self, image_field):
+        if image_field:
+            return format_html('<img src="/static{}" width="80" style="border-radius: 5px;" />', image_field)
+        return "No Image"
+
+    preview_register_photo.short_description = "Register Photo"
+    preview_license_photo.short_description = "License Photo"
+    preview_establishment_photo.short_description = "Establishment Photo"
+    preview_cars_building_photo.short_description = "Cars Building Photo"
+
+    def archive_selected(self, request, queryset):
+        queryset.update(is_archived=True)
+        self.message_user(request, "Selected inspections have been archived.")
+
+    archive_selected.short_description = "Archive selected inspections"

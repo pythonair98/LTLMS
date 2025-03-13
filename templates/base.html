@@ -59,6 +59,10 @@
                         <a class="nav-link active" href="{% url 'reader' %}">معاينة منشاة</a>
                     </li>
                     <!-- Dropdown for المنشآت -->
+                    {% if request.user.is_authenticated and request.user.profiles.power < 6 %}
+
+                    	
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="estDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             المنشآت
@@ -132,6 +136,19 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">إعدادات النظام</a>
                     </li>
+                    {% elif request.user.is_authenticated and request.user.profiles.power == 6 %}
+
+                        <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="estDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            التكليفات
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="estDropdown">
+                            <li><a class="dropdown-item" href="{% url 'get_inspector_assignments' %}">عرض التكليفات</a></li>
+                            <li><a class="dropdown-item" href="{% url 'get_inspector_inspections' %}">عرض المعاينات</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
                     <li class="nav-item">
                         <a class="nav-link" style="" href="{% url 'logout' %}">تسجيل الخروج</a>
                     </li>

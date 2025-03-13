@@ -305,6 +305,7 @@ def reader(request):
 
         else:
             messages.warning(request, "الرجاء تصحيح الأخطاء في النموذج.")
+            print(form.errors.as_data())
     else:
         form = InspectionForm()
 
@@ -716,3 +717,30 @@ def add_establishment_licence(request):
         form = EstablishmentLicenceForm()
 
     return render(request, "licesnsing/establishment_licence_form.html", {"form": form})
+
+
+@login_required(login_url='login')
+def get_inspector_assignments(request):
+    """
+    View to display all inspection assignments for the currently logged-in inspector.
+    :param request:
+    :return:
+    """
+    inspector = request.user
+    assignments = InspectionAssignment.objects.filter(inspector=inspector)
+    return render(
+        request, "licesnsing/inspector_assignments.html", {"assignments": assignments}
+    )
+
+@login_required(login_url='login')
+def get_inspector_inspections(request):
+    """
+    View to display all inspections for the currently logged-in inspector.
+    :param request:
+    :return:
+    """
+    inspector = request.user
+    inspections = Inspection.objects.filter(inspector=inspector)
+    return render(
+        request, "licesnsing/inspector_inspections.html", {"inspections": inspections}
+    )

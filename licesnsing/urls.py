@@ -23,6 +23,8 @@ from .views import (
     view_archive,
     add_establishment_register,
     add_establishment_licence,
+get_inspector_assignments,
+get_inspector_inspections
 )
 
 urlpatterns = [
@@ -70,4 +72,7 @@ urlpatterns = [
     ),
     path("register/add/", add_establishment_register, name="add_register"),
     path("add_establishment_licence", add_establishment_licence, name="add_licence"),
+    path("get_inspector_assignments", get_inspector_assignments, name="get_inspector_assignments"),
+    path("get_inspector_inspections", get_inspector_inspections, name="get_inspector_inspections"),
+
 ]

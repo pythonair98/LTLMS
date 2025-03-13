@@ -242,8 +242,8 @@ class ArduinoReader(models.Model):
 
 class Inspection(models.Model):
     STATUS_CHOICES = (
-        (True, "Accepted"),
-        (False, "Refused"),
+        (True, "مستوفي الشروط"),
+        (False, "غير مستوفي الشروط"),
     )
 
     # Inspection Details
@@ -300,7 +300,8 @@ class Inspection(models.Model):
 
     def __str__(self):
         return f"Inspection {self.register_number} - {'Accepted' if self.status else 'Refused'}"
-
+    def get_register(self):
+        return EstablishmentRegister.objects.get(id=self.register_number)
     def save(self, *args, **kwargs):
         # Optional: Custom actions before saving can be added here.
         super().save(*args, **kwargs)
@@ -379,7 +380,7 @@ class EstablishmentRegister(models.Model):
     )
 
     def __str__(self):
-        return f"Registration {self.establishment.rifd} for {self.establishment.establishment_name}"
+        return f"{self.establishment.establishment_name} - سجل {self.id}"
 
     @property
     def licences(self):
@@ -470,7 +471,7 @@ class EstablishmentLicence(models.Model):
     )
 
     def __str__(self):
-        return f"Licence #{self.number} for registration {self.register.establishment.rifd}"
+        return f"{self.register.establishment.establishment_name} - رخصة {self.number}"
 
     @property
     def establishment(self):

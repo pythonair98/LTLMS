@@ -1,0 +1,97 @@
+{% extends "base.html" %}  {# Ensure this extends your main template #}
+{% block content %}
+
+<div class="container mt-4">
+    <h2 class="mb-3">🔍 المعاينات الخاصة بي</h2>
+
+    <!-- Status Filter -->
+    <div class="mb-3">
+        <label for="statusFilter" class="form-label">فرز حسب الحالة:</label>
+        <select id="statusFilter" class="form-select" onchange="filterInspections()">
+            <option value="">الجميع</option>
+            <option value="True">مستوفي الشروط</option>
+            <option value="False">غير مستوفي الشروط</option>
+        </select>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th> رقم السجل</th>
+                <th> تاريخ المعاينة</th>
+                <th> الموقع الجغرافي</th>
+                <th> حالة القبول</th>
+                <th> المرفقات</th>
+                <th> إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inspection in inspections %}
+            <tr class="inspection-row" data-status="{{ inspection.status }}">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ inspection.get_register }}</td>
+                <td>{{ inspection.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <a href="https://www.google.com/maps?q={{ inspection.latitude }},{{ inspection.longitude }}"
+                       target="_blank" class="btn btn-sm btn-secondary">
+                        View on Map
+                    </a>
+                </td>
+                <td>
+                    <span class="badge bg-{% if inspection.status %}success{% else %}danger{% endif %}">
+                        {{ inspection.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    {% if inspection.register_photo %}
+                        <a href="/static{{ inspection.register_photo.url }}" target="_blank">
+                            <img src="/static{{ inspection.register_photo.url }}" width="50">
+                        </a>
+                    {% endif %}
+                    {% if inspection.license_photo %}
+                        <a href="/static{{ inspection.license_photo.url }}" target="_blank">
+                            <img src="/static{{ inspection.license_photo.url }}" width="50">
+                        </a>
+                    {% endif %}
+                    {% if inspection.establishment_photo %}
+                        <a href="/static{{ inspection.establishment_photo.url }}" target="_blank">
+                            <img src="/static{{ inspection.establishment_photo.url }}" width="50">
+                        </a>
+                    {% endif %}
+                    {% if inspection.cars_building_photo %}
+                        <a href="/static{{ inspection.cars_building_photo.url }}" target="_blank">
+                            <img src="/static{{ inspection.cars_building_photo.url }}" width="50">
+                        </a>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="#" class="btn btn-sm btn-primary">تعديل</a>
+                    <a href="#" class="btn btn-sm btn-danger">حذف</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">لا يوجد معايانات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function filterInspections() {
+        var selectedStatus = document.getElementById("statusFilter").value;
+        var rows = document.querySelectorAll(".inspection-row");
+
+        rows.forEach(row => {
+            if (selectedStatus === "" || row.dataset.status === selectedStatus) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+</script>
+
+{% endblock %}

@@ -12,7 +12,7 @@
             href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap"
             rel="stylesheet"
     />
-    <script src="/static/js/index.js"></script>
+    <script src="/js/index.js"></script>
     <!-- bootstrap css cdn -->
     <link
             rel="stylesheet"
@@ -21,14 +21,18 @@
             crossorigin="anonymous"
     />
     <!-- custom style -->
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/report_style.css' )}}"/>
+    {% load static %}
+<link rel="stylesheet" href="{% static 'css/report_style.css' %}" />
+
 
 </head>
 <body onload="printPdfReport();" id="body">
 <!-- Start header -->
 <div class="container header d-flex justify-content-between mt-5 mb-4">
     <div class="logo">
-        <img src='{{ url_for("static",filename="img/mot_logo_ar.png") }}' height="100px"/>
+        <img src="{% static 'img/mot_logo_ar.png' %}" height="100px" />
+
+
     </div>
     <div class="header-content">
         <label for="header-content-label">التاريخ/Date:</label>
@@ -62,10 +66,11 @@
                     type="checkbox"
                     name="items"
 
-                    {{ "checked" if licence.activity.en_name == 'Limousine' }}
+                    {% if licence.activity.en_name == 'Limousine' %}checked{% endif %}
 
-            value="أﻧشطة ليموزين/Limousine"
-            id="checklimousine"
+
+                    value="أﻧشطة ليموزين/Limousine"
+                    id="checklimousine"
             />
             <label class="form-check-label" for="checklimousine">
                 أﻧشطة ليموزين/Limousine
@@ -76,7 +81,8 @@
                     name="items"
                     value="تأجيرالسيارات بالسائق/Car Rental with Driver"
                     id="rentalwith"
-                    {{ "checked" if licence.activity.en_name == 'Rental With Driver' }}
+                    {% if licence.activity.en_name == 'Rental With Driver' %}checked{% endif %}
+
             />
             <label class="form-check-label" for="rentalwith">
                 تأجيرالسيارات بالسائق/Car Rental with Driver
@@ -86,8 +92,9 @@
                     type="checkbox"
                     name="items"
                     value="ﺃﻧشطة تأجير السيارات بدون سائق/Car Rental without Driver"
-                    {{ "checked" if licence.activity.en_name == 'Rental Without Driver' }}
-            id="rentalwithout"
+                    {% if licence.activity.en_name == 'Rental Without Driver' %}checked{% endif %}
+
+                    id="rentalwithout"
             />
             <label class="form-check-label" for="rentalwithout">
                 ﺃﻧشطة تأجير السيارات بدون سائق/Car Rental without Driver
@@ -106,7 +113,7 @@
                         class="form-control"
                         name="commericalName"
                         id="commerceName"
-                        value="{{establishment.ar_name}} / {{ establishment.en_name }}"
+                        value="{{ establishment.ar_name }} / {{ establishment.en_name }}"
                         required
                 />
             </div>
@@ -121,7 +128,7 @@
                         name="commerceNumer"
                         class="form-control"
                         id="commerceNumer"
-                        value="{{ licence.register_id }}"
+                        value="{{ register.id }}"
                         required
                 />
             </div>
@@ -364,15 +371,16 @@
                 >تاريخ ﺍﻟﻤﻌﺎﻳﻨﺔ /Inspection Date:</label
                 >
                 <div class="col-sm-7">
-                    <input
-                            type="text"
-                            name="observeDate"
-                            class="form-control"
-                            id="observeDate"
-                            required
-                            value="{{inspection.create_date.strftime(" %d-%m-%Y")}}"
-                    />
-                </div>
+    <input
+        type="text"
+        name="observeDate"
+        class="form-control"
+        id="observeDate"
+        required
+        value="{{ inspection.create_date|date:'d-m-Y' }}"
+    />
+</div>
+
             </div>
 
             <div class="row end-date col-sm-6">
@@ -387,25 +395,12 @@
                                 id="observeTime"
                                 name="observeTime"
                                 required
-                                value="{{inspection.create_date.strftime(" %H:%M")}}"
+                                value="{{ inspection.created_at|date:'d-m-Y' }}"
                         />
                     </div>
                 </div>
             </div>
         </div>
-
-        {#
-        <div class="form-group border-line">#}
-            {# <label for="notesTextarea">الملاحظات/Notes:</label>#}
-            {# <textarea#}
-            {# class="form-control"#}
-            {# id="notesTextarea"#}
-            {# name="notesTextarea"#}
-            {# required#}
-            {# >{{ inspection.notes }}</textarea>#}
-            {#
-        </div>
-        #}
         <div class="form-group border-line">
             <label for="tests">الملاحظات/Notes:</label><br>
             <span id="tests" class="form-group">
