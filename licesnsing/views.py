@@ -288,10 +288,15 @@ def inspect_establishment(request,id):
                 }
             )
 
-
-
-
-
+@login_required(login_url='login')
+def inspection_delete(request,id):
+    inspection = Inspection.objects.get(id=id)
+    if inspection:
+        inspection.delete()
+        messages.success(request,"تم حذف المعاينة بنجاح")
+    else:
+        messages.warning(request,"حدث خطأ اثناء حذف المعاينة")
+    return redirect("view_inspections")
 
 # @login_required(login_url="login")
 # def reader(request):
@@ -359,36 +364,36 @@ def inspect_establishment(request,id):
 
 
 # Main view to handle the POST request from Arduino
-@csrf_exempt
-def api_arduino(request):
-    """
-    This view handles communication with the Arduino and saves the received code.
-    """
-    if request.method == "POST":
-        # Check if there's raw data in the request body
-        if request.body:
-            code = process_raw_data(request)
-            if code:
-                # Save the code to the database
-                ArduinoReader.objects.create(code=code)
-                return JsonResponse(
-                    {"message": "Code received successfully"}, status=200
-                )
-
-        # Check if there's form data in the request
-        elif "UIDresult" in request.POST:
-            code = process_form_data(request)
-            if code:
-                # Save the code to the database
-                ArduinoReader.objects.create(code=code)
-                return JsonResponse(
-                    {"message": "Code received successfully"}, status=200
-                )
-
-        # If no valid data found, return an error
-        return JsonResponse({"error": "Invalid request"}, status=400)
-
-    return JsonResponse({"error": "Forbidden method"}, status=403)
+# @csrf_exempt
+# def api_arduino(request):
+#     """
+#     This view handles communication with the Arduino and saves the received code.
+#     """
+#     if request.method == "POST":
+#         # Check if there's raw data in the request body
+#         if request.body:
+#             code = process_raw_data(request)
+#             if code:
+#                 # Save the code to the database
+#                 ArduinoReader.objects.create(code=code)
+#                 return JsonResponse(
+#                     {"message": "Code received successfully"}, status=200
+#                 )
+#
+#         # Check if there's form data in the request
+#         elif "UIDresult" in request.POST:
+#             code = process_form_data(request)
+#             if code:
+#                 # Save the code to the database
+#                 ArduinoReader.objects.create(code=code)
+#                 return JsonResponse(
+#                     {"message": "Code received successfully"}, status=200
+#                 )
+#
+#         # If no valid data found, return an error
+#         return JsonResponse({"error": "Invalid request"}, status=400)
+#
+#     return JsonResponse({"error": "Forbidden method"}, status=403)
 
 
 @login_required(login_url="login")

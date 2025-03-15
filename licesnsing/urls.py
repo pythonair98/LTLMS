@@ -7,7 +7,6 @@ from .views import (
     edit_establishment,
     reader,
     query,
-    api_arduino,
     register_list_create,
     register_delete,
     licence_list_create,
@@ -25,7 +24,7 @@ from .views import (
     add_establishment_register,
     add_establishment_licence,
     get_inspector_assignments,
-    get_inspector_inspections, inspect_establishment,
+    get_inspector_inspections, inspect_establishment, inspection_delete,
 )
 
 # URL patterns for routing different views in the Django application
@@ -46,7 +45,6 @@ urlpatterns = [
 
     # API Endpoints
     path("api/query", query, name="query"),
-    path("api/arduino", api_arduino, name="api_arduino"),
 
     # Establishment Register-related URLs
     path("registers/", register_list_create, name="register-list"),
@@ -69,6 +67,7 @@ urlpatterns = [
     path("inspections", view_inspections, name="view_inspections"),
     path("archived_inspection", view_archive, name="archived_inspection"),
     path("inspections/<int:pk>/archive/", archive_inspection, name="archive_inspection"),
+    path("inspections/<int:id>/delete/", inspection_delete, name="inspection_delete"),
     path("inspect_establishment/<int:id>", inspect_establishment, name="inspect_establishment"),
 
     # Additional Establishment Management URLs
