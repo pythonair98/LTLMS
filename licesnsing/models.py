@@ -151,6 +151,7 @@ class Establishment(models.Model):
 
     def __str__(self):
         return f" {self.establishment_name}"
+
     @property
     def get_register(self):
         return (
@@ -300,8 +301,10 @@ class Inspection(models.Model):
 
     def __str__(self):
         return f"Inspection {self.register_number} - {'Accepted' if self.status else 'Refused'}"
+
     def get_register(self):
         return EstablishmentRegister.objects.get(id=self.register_number)
+
     def save(self, *args, **kwargs):
         # Optional: Custom actions before saving can be added here.
         super().save(*args, **kwargs)

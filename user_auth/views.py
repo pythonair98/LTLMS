@@ -115,7 +115,10 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             if inspector_assignments(user) > 0:
-                messages.info(request, "يوجد لديك تكليفات عدد: " + str(inspector_assignments(user)))
+                messages.info(
+                    request,
+                    "يوجد لديك تكليفات عدد: " + str(inspector_assignments(user)),
+                )
             login(request, user)
             messages.success(request, f"مرحباً, {user.username}!")
             if not next_url:

@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "widget_tweaks",
     "reports.apps.ReportsConfig",
-'django_extensions'
+    "django_extensions",
 ]
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"

@@ -119,8 +119,10 @@ def view_establishment(request):
     return render(
         request,
         "licesnsing/view_establishment.html",
-
-        {"establishments": establishments,"today": date.today(),},
+        {
+            "establishments": establishments,
+            "today": date.today(),
+        },
     )
 
 
@@ -216,7 +218,7 @@ def query(request):
                             "datafound": True,
                             "iform": InspectionForm(),
                             "found": True,
-                            "register_number" : establishment.get_register.id
+                            "register_number": establishment.get_register.id,
                         },
                     ).content.decode("utf-8"),
                 }
@@ -246,70 +248,114 @@ def query(request):
         }
     )
 
-
 @login_required(login_url="login")
 def reader(request):
-    """
-    Main view to handle inspection (reader) requests.
-
-    Process:
-      1. On POST:
-         - Instantiate InspectionForm with POST and FILES.
-         - Validate the form.
-         - Check if an inspection with the given register_number already exists.
-         - If not, save the inspection.
-         - Retrieve the RFID (assumed to be in the 'rifd' field of the form).
-         - Query the ArduinoReader for a matching record (code == rifd, queried is False, status is "processed").
-         - If found, mark it as queried, clean up all queried records, and show a success message.
-         - If not, clean up and show a warning message.
-      2. On GET:
-         - Display an empty InspectionForm.
-    """
+    establishments = Establishment.objects.all()
+    return render(request, "licesnsing/readRFID.html", {"establishments": establishments})
+@login_required(login_url="login")
+def inspect_establishment(request,id):
+    establishment = Establishment.objects.get(id=id)
     if request.method == "POST":
         form = InspectionForm(request.POST, request.FILES)
+        register_number = request.POST.get("register_number")
+        if Inspection.objects.filter(register_number=register_number).exists():
+            messages.warning(request, "تم تسجيل معاينة لهذه المنشأة بالفعل")
+            return redirect("reader")
         if form.is_valid():
-            register_number = form.cleaned_data.get("register_number")
-
-            # Check if inspection for this establishment already exists.
-            if Inspection.objects.filter(register_number=register_number).exists():
-                messages.error(request, "تم تسجيل معاينة لهذه المنشأة بالفعل")
-                return redirect("reader")
-
-            # Save the inspection record.
             form.save()
             # mark inspection as done
             mark_inspection_as_done(get_establishment_obj_by_register(register_number))
             messages.success(request, "تم إرسال المعاينة بنجاح")
-            # Retrieve the RFID from the form data.
-            rifd = form.cleaned_data.get("rifd")
-
-            # Query ArduinoReader for a matching record.
-            arduino_record = (
-                ArduinoReader.objects.filter(
-                    code=rifd, queried=False, status="processed"
-                )
-                .order_by("-id")
-                .first()
+            return redirect("reader")
+    elif request.method == "GET":
+        if establishment:
+            # Render a form pre-filled with the establishment data
+            return JsonResponse(
+                {
+                    "found": True,
+                    "template": render(
+                        request,
+                        "licesnsing/query.html",
+                        {
+                            "eform": EstablishmentForm(instance=establishment),
+                            "establishment": establishment,
+                            "datafound": True,
+                            "iform": InspectionForm(),
+                            "found": True,
+                            "register_number": establishment.get_register.id,
+                        },
+                    ).content.decode("utf-8"),
+                }
             )
 
-            if arduino_record:
-                # Mark the ArduinoReader record as queried.
-                arduino_record.queried = True
-                arduino_record.save()
 
-                # Clean up all ArduinoReader records that have been queried.
-                ArduinoReader.objects.filter(queried=True).delete()
 
-                messages.success(request, "تم إرسال المعاينة")
-                return redirect("reader")
 
-        else:
-            messages.warning(request, "الرجاء تصحيح الأخطاء في النموذج.")
-            print(form.errors.as_data())
-    else:
-        form = InspectionForm()
 
-    return render(request, "licesnsing/readRFID.html", {"form": form})
+
+# @login_required(login_url="login")
+# def reader(request):
+#     """
+#     Main view to handle inspection (reader) requests.
+#
+#     Process:
+#       1. On POST:
+#          - Instantiate InspectionForm with POST and FILES.
+#          - Validate the form.
+#          - Check if an inspection with the given register_number already exists.
+#          - If not, save the inspection.
+#          - Retrieve the RFID (assumed to be in the 'rifd' field of the form).
+#          - Query the ArduinoReader for a matching record (code == rifd, queried is False, status is "processed").
+#          - If found, mark it as queried, clean up all queried records, and show a success message.
+#          - If not, clean up and show a warning message.
+#       2. On GET:
+#          - Display an empty InspectionForm.
+#     """
+#     if request.method == "POST":
+#         form = InspectionForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             register_number = form.cleaned_data.get("register_number")
+#
+#             # Check if inspection for this establishment already exists.
+#             if Inspection.objects.filter(register_number=register_number).exists():
+#                 messages.error(request, "تم تسجيل معاينة لهذه المنشأة بالفعل")
+#                 return redirect("reader")
+#
+#             # Save the inspection record.
+#             form.save()
+#             # mark inspection as done
+#             mark_inspection_as_done(get_establishment_obj_by_register(register_number))
+#             messages.success(request, "تم إرسال المعاينة بنجاح")
+#             # Retrieve the RFID from the form data.
+#             rifd = form.cleaned_data.get("rifd")
+#
+#             # Query ArduinoReader for a matching record.
+#             arduino_record = (
+#                 ArduinoReader.objects.filter(
+#                     code=rifd, queried=False, status="processed"
+#                 )
+#                 .order_by("-id")
+#                 .first()
+#             )
+#
+#             if arduino_record:
+#                 # Mark the ArduinoReader record as queried.
+#                 arduino_record.queried = True
+#                 arduino_record.save()
+#
+#                 # Clean up all ArduinoReader records that have been queried.
+#                 ArduinoReader.objects.filter(queried=True).delete()
+#
+#                 messages.success(request, "تم إرسال المعاينة")
+#                 return redirect("reader")
+#
+#         else:
+#             messages.warning(request, "الرجاء تصحيح الأخطاء في النموذج.")
+#             print(form.errors.as_data())
+#     else:
+#         form = InspectionForm()
+#
+#     return render(request, "licesnsing/readRFID.html", {"form": form})
 
 
 # Main view to handle the POST request from Arduino
@@ -719,7 +765,7 @@ def add_establishment_licence(request):
     return render(request, "licesnsing/establishment_licence_form.html", {"form": form})
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 def get_inspector_assignments(request):
     """
     View to display all inspection assignments for the currently logged-in inspector.
@@ -732,7 +778,8 @@ def get_inspector_assignments(request):
         request, "licesnsing/inspector_assignments.html", {"assignments": assignments}
     )
 
-@login_required(login_url='login')
+
+@login_required(login_url="login")
 def get_inspector_inspections(request):
     """
     View to display all inspections for the currently logged-in inspector.

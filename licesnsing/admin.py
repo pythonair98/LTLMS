@@ -8,7 +8,8 @@ from .models import (
     SubCategory,
     EstablishmentLicence,
     EstablishmentRegister,
-    InspectionAssignment, Inspection,
+    InspectionAssignment,
+    Inspection,
 )
 
 from django.utils.translation import gettext_lazy as _
@@ -377,18 +378,35 @@ class InspectionAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "archived_at")
 
     fieldsets = (
-        ("Inspection Details", {
-            "fields": ("register_number", "inspector", "notes", "status"),
-        }),
-        ("Location", {
-            "fields": ("latitude", "longitude"),
-        }),
-        ("Media Files", {
-            "fields": ("register_photo", "license_photo", "establishment_photo", "cars_building_photo"),
-        }),
-        ("Archiving", {
-            "fields": ("is_archived", "archived_at"),
-        }),
+        (
+            "Inspection Details",
+            {
+                "fields": ("register_number", "inspector", "notes", "status"),
+            },
+        ),
+        (
+            "Location",
+            {
+                "fields": ("latitude", "longitude"),
+            },
+        ),
+        (
+            "Media Files",
+            {
+                "fields": (
+                    "register_photo",
+                    "license_photo",
+                    "establishment_photo",
+                    "cars_building_photo",
+                ),
+            },
+        ),
+        (
+            "Archiving",
+            {
+                "fields": ("is_archived", "archived_at"),
+            },
+        ),
     )
 
     def preview_register_photo(self, obj):
@@ -405,7 +423,10 @@ class InspectionAdmin(admin.ModelAdmin):
 
     def _image_preview(self, image_field):
         if image_field:
-            return format_html('<img src="/static{}" width="80" style="border-radius: 5px;" />', image_field)
+            return format_html(
+                '<img src="/static{}" width="80" style="border-radius: 5px;" />',
+                image_field,
+            )
         return "No Image"
 
     preview_register_photo.short_description = "Register Photo"

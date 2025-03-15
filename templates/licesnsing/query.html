@@ -1,15 +1,11 @@
 {% load widget_tweaks %}
 {% load crispy_forms_filters %}
 {% load crispy_forms_tags %}
-
+{% load  static %}
 <html lang="ar">
 
 <body dir="rtl">
-    {% if found %} {% if datafound %}
     <div class="container">
-        <br/>
-        <h3 class="text-center">تمت قراءة المعرف بنجاح</h3>
-        <br>
         <form class="form-horizontal" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="card">
@@ -152,7 +148,7 @@
                     <h3>بيانات المعاينة</h3>
                 </div>
                 <br><br>
-                <form action="/reader" method="post" enctype="multipart/form-data">
+                <form action="/inspect_establishment/{{ establishment.id }}" method="post" enctype="multipart/form-data">
                     <div class="card-body">
                         {% csrf_token %}
 
@@ -176,7 +172,7 @@
                         <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <button id="find-me" class="form-control " type="button">أضغط لتحديد المكان</button><br/>
+                                <button id="find-me" style="background-color: #8A1538; color: white" onclick="getLocation()" class="form-control " type="button">أضغط لتحديد المكان</button><br/>
                                 <p id="status"></p><br/>
                                 <div id="map" class="big-map"></div>
                                 {{ iform.latitude|add_class:"form-control"|attr:"id:latitude" }} {{ iform.longitude|add_class:"form-control"|attr:"id:longitude" }}
@@ -217,17 +213,14 @@
                 <div class="row ">
                     <div class="col-md-12 ">
                         <div class="form-group ">
-                            <input type="submit" value="حفظ" class="form-control">
+                            <input type="submit" value="حفظ" style="background-color: #8A1538; color: white"  class="form-control">
                         </div>
                     </div>
                 </div>
     </form>
     </div>
-    {% else %}
-    <h2 align="center ">لم يتم العثور على المعرف {{ code }} في قاعدة البيانات</h2>
-    {% endif %} {% else %}
-    <h2 align="center ">في انتظار قراءة المعرف</h2>
-    {% endif %}
+    </div>
+
 </body>
 
 </html>
