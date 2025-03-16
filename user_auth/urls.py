@@ -11,6 +11,7 @@ from .views import (
     user_delete,
     user_deactivate,
     user_activate,
+    get_team_members
 )
 from django.urls import path
 
@@ -27,4 +28,5 @@ urlpatterns = [
     path("team-create", team_create, name="team-create"),
     path("team-edit/<int:id>", team_edit, name="team-edit"),
     path("team-delete/<int:id>", team_delete, name="team-delete"),
+    path("get_team_members/<int:id>", get_team_members, name="get_team_members"),
 ]

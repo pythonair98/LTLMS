@@ -34,17 +34,16 @@
             <td>{{ profile.email }}</td>
             <td>{{ profile.profiles.occupation.ar_name }} / {{ profile.profiles.occupation.en_name }}</td>
             <td>
-              {% if profile.team %}
+{#              {% if profile.team %}#}
                 {{ profile.profiles.team.ar_name }} / {{ profile.profiles.team.en_name }}
-              {% else %}
-                غير منتمي لفريق
-              {% endif %}
+{#              {% else %}#}
+{#                غير منتمي لفريق#}
+{#              {% endif %}#}
             </td>
             <td>{{ profile.date_joined|date:"Y-m-d H:i" }}</td>
             <td>
               <!-- Edit Button -->
               <a href="{% url 'user_edit' profile.id %}" class="btn btn-primary btn-sm">تعديل</a>
-              <a href="{% url 'user_delete' profile.id %}" class="btn btn-danger btn-sm">حذف</a>
 
               <!-- Deactivate Button -->
               {% if profile.is_active %}

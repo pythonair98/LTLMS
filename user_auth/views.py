@@ -196,7 +196,7 @@ def view_teams(request):
     teams = Team.objects.all()
     return render(request, "users/view_teams.html", {"teams": teams})
 
-
+@login_required(login_url="login")
 def team_edit(request, id):
     team = get_object_or_404(Team, id=id)
     if request.method == "POST":
@@ -209,7 +209,7 @@ def team_edit(request, id):
         form = TeamForm(instance=team)
     return redirect("teams")
 
-
+@login_required(login_url="login")
 def team_delete(request, id):
     team = get_object_or_404(Team, id=id)
     if request.method == "POST":
@@ -218,7 +218,7 @@ def team_delete(request, id):
         return redirect("teams")  # Redirect to a list of teams after deletion
     return redirect("teams")
 
-
+@login_required(login_url="login")
 def team_create(request):
     if request.method == "POST":
         form = TeamForm(request.POST)
@@ -239,7 +239,7 @@ def team_create(request):
         form = TeamForm()
         return redirect("teams")
 
-
+@login_required(login_url="login")
 def user_edit(request, id):
     """
     Edit a user account.
@@ -268,7 +268,7 @@ def user_edit(request, id):
         {"form": form, "user": user, "occupations": occupations, "teams": teams},
     )
 
-
+@login_required(login_url="login")
 def user_deactivate(request, id):
     """
     Deactivate a user account.
@@ -286,7 +286,7 @@ def user_deactivate(request, id):
         messages.error(request, "حدث خطأ اثناء تعطيل المستخدم!")
     return redirect("profiles-list")
 
-
+@login_required(login_url="login")
 def user_activate(request, id):
     """
     Activate a user account.
@@ -304,7 +304,7 @@ def user_activate(request, id):
         messages.error(request, "حدث خطأ اثناء تفعيل المستخدم!")
     return redirect("profiles-list")
 
-
+@login_required(login_url="login")
 def user_delete(request, id):
     """
     Delete a user account.
@@ -320,3 +320,10 @@ def user_delete(request, id):
     else:
         messages.error(request, "حدث خطأ اثناء حذف المستخدم!")
     return redirect("profiles-list")
+
+@login_required(login_url="login")
+def get_team_members(request,id):
+    team = Team.objects.get(id=id)
+    members = team.profiles_set.all()
+    users = [user.user for user in members]
+    return render(request, "users/profiles_list.html", {"profiles": users})
