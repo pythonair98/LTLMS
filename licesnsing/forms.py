@@ -38,6 +38,7 @@ class EstablishmentForm(forms.ModelForm):
         """
 
         model = Establishment  # Specifies the model associated with this form
+        ordering = ["-id"]
         fields = [
             "rifd",
             "establishment_name",

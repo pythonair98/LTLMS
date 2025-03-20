@@ -1,10 +1,11 @@
-from datetime import date
+from datetime import date, datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
 from django.views.decorators.http import require_http_methods, require_POST
 from django.db.models import Count
 
@@ -93,7 +94,6 @@ def add_establishment(request):
     form = EstablishmentForm()
     if request.method == "POST":
         form = EstablishmentForm(request.POST)
-        print(form.errors)  # Debugging: Print form validation errors
         if form.is_valid():
             form.save()
             messages.success(request, "تم إضافة المنشأة بنجاح")
@@ -114,13 +114,13 @@ def view_establishment(request):
     Returns:
         HttpResponse: Renders the 'view_establishment.html' template with all establishments.
     """
-    establishments = Establishment.objects.all()
-
+    establishments = Establishment.objects.all().order_by("-id")
+    page_obj = Paginator(establishments, 5)
     return render(
         request,
         "licesnsing/view_establishment.html",
         {
-            "establishments": establishments,
+            "establishments": page_obj,
             "today": date.today(),
         },
     )
@@ -250,7 +250,7 @@ def query(request):
 
 @login_required(login_url="login")
 def reader(request):
-    establishments = Establishment.objects.all()
+    establishments = [establsihemnt.establishment for establsihemnt in InspectionAssignment.objects.filter(inspector=request.user)]
     return render(request, "licesnsing/readRFID.html", {"establishments": establishments})
 @login_required(login_url="login")
 def inspect_establishment(request,id):
@@ -356,7 +356,6 @@ def inspection_delete(request,id):
 #
 #         else:
 #             messages.warning(request, "الرجاء تصحيح الأخطاء في النموذج.")
-#             print(form.errors.as_data())
 #     else:
 #         form = InspectionForm()
 #
@@ -628,10 +627,8 @@ def assign_establishment(request):
             # Adjust the redirect URL as needed.
             return redirect("view_assignments")
         else:
-            print(form.errors)
             messages.warning(request, form.errors.as_text())
     inspectors = Profiles.objects.filter(occupation__power=6)
-    print(inspectors)
     form = InspectionAssignmentForm()
     unassigned_establishments = Establishment.objects.exclude(
         inspection_assignments__isnull=False
@@ -688,7 +685,11 @@ def view_inspections(request):
         request, "licesnsing/view_inspections.html", {"inspections": inspections}
     )
 
-
+@login_required(login_url="login")
+def view_inspection_data(request,pk):
+    inspection = Inspection.objects.get(id=pk)
+    if inspection:
+        return render(request,"licesnsing/view_inspection_data.html",{"inspection":inspection})
 @login_required(login_url="login")
 def archive_inspection(request, pk):
     """
@@ -700,6 +701,7 @@ def archive_inspection(request, pk):
     """
     inspection = get_object_or_404(Inspection, pk=pk)
     inspection.is_archived = True
+    inspection.archived_at = datetime.now()
     inspection.save()
     messages.success(request, "تم أرشفة المعاينة بنجاح!")
     return redirect("view_inspections")
@@ -738,9 +740,9 @@ def add_establishment_register(request):
 
     else:
         form = EstablishmentRegisterForm()
-
+        establishments = Establishment.objects.all()
     return render(
-        request, "licesnsing/establishment_register_form.html", {"form": form}
+        request, "licesnsing/establishment_register_form.html", {"form": form,"establishments":establishments}
     )
 
 

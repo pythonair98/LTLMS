@@ -2,12 +2,13 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-3">قائمة المعاينات</h2>
+    <h2 class="mb-3">🔍 قائمة المعاينات</h2>
 
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
                 <th>#</th>
+                <th>المنشأة</th>
                 <th>رقم السجل</th>
                 <th>المفتش</th>
                 <th>الحالة</th>
@@ -21,6 +22,7 @@
             {% for inspection in inspections %}
             <tr>
                 <td>{{ forloop.counter }}</td>
+                <td>{{ inspection.get_register.establishment.establishment_name }}</td>
                 <td>{{ inspection.register_number }}</td>
                 <td>{{ inspection.inspector.get_full_name }}</td>
                 <td>
@@ -39,7 +41,7 @@
                 </td>
                 <td>{{ inspection.created_at|date:"Y-m-d H:i" }}</td>
                 <td>
-                    <a href="#" class="btn btn-primary btn-sm">عرض</a>
+                    <a href="{% url 'view_inspection_data' inspection.id %}" class="btn btn-primary btn-sm">عرض</a>
                     <a href="{% url 'inspection_delete' inspection.id  %}" class="btn btn-danger btn-sm">حذف</a>
                     {% if not inspection.is_archived %}
                         <a href="{% url 'archive_inspection' inspection.id %}" class="btn btn-warning btn-sm">أرشفة</a>

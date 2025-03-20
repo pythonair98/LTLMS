@@ -53,7 +53,11 @@ INSTALLED_APPS = [
     "widget_tweaks",
     "reports.apps.ReportsConfig",
     "django_extensions",
+    "django_seed",
 ]
+USE_TZ = False
+
+
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None

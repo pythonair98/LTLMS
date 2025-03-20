@@ -5,26 +5,50 @@
     <h2 class="mb-3">إضافة سجل جديد</h2>
 
     <form method="POST" class="card p-4 shadow">
-        {% csrf_token %}
+        <input type="hidden" name="csrfmiddlewaretoken" value="bfV9eZHo01yh0xxzGQpBgz0bIfAvynn9pk4nkZtBrp25NfsLCEVhEIXhpCGjLVKe">
 
         <!-- Render Form Fields -->
         <div class="mb-3">
-            <label class="form-label">المؤسسة</label>
-            {{ form.establishment }}
+            <label for="malti_select"  class="form-label">المؤسسة</label>
+            <select type="text" name="establishment" class="form-control" id="malti_select" required>
+  <option value="" selected>---------</option>
+                {% for establishment in establishments %}
+                	<option value="{{ establishment.id }}" selected>{{ establishment.establishment_name }}</option>
+                {% endfor %}
+
+</select>
         </div>
 
         <div class="mb-3">
             <label class="form-label">تاريخ الإصدار</label>
-            {{ form.issuance_date }}
+            <input type="date" name="issuance_date" class="form-control" required aria-describedby="id_issuance_date_helptext" id="id_issuance_date">
         </div>
 
         <div class="mb-3">
             <label class="form-label">تاريخ الانتهاء</label>
-            {{ form.expiration_date }}
+            <input type="date" name="expiration_date" class="form-control" required aria-describedby="id_expiration_date_helptext" id="id_expiration_date">
         </div>
 
         <button type="submit" class="btn btn-lg" style="background-color:#8A1538; color:white;">إضافة السجل</button>
-        <a href="{% url 'register-list' %}" class="btn btn-secondary">إلغاء</a>
+        <a href="/registers/" class="btn btn-secondary">إلغاء</a>
     </form>
+
 </div>
+<script type="text/javascript">
+$(document).ready(function(){
+$('#malti_select').selectize({
+    plugins: ['remove_button'],
+    delimiter: ',',
+    persist: false,
+    create: function(input) {
+        return {
+            value: input,
+            text: input
+        }
+    }
+});
+});
+
+</script>
+
 {% endblock %}

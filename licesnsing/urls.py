@@ -24,7 +24,7 @@ from .views import (
     add_establishment_register,
     add_establishment_licence,
     get_inspector_assignments,
-    get_inspector_inspections, inspect_establishment, inspection_delete,
+    get_inspector_inspections, inspect_establishment, inspection_delete, view_inspection_data,
 )
 
 # URL patterns for routing different views in the Django application
@@ -68,6 +68,7 @@ urlpatterns = [
     path("archived_inspection", view_archive, name="archived_inspection"),
     path("inspections/<int:pk>/archive/", archive_inspection, name="archive_inspection"),
     path("inspections/<int:id>/delete/", inspection_delete, name="inspection_delete"),
+    path("inspections/<int:pk>/view/", view_inspection_data, name="view_inspection_data"),
     path("inspect_establishment/<int:id>", inspect_establishment, name="inspect_establishment"),
 
     # Additional Establishment Management URLs
