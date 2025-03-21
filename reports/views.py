@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
 from datetime import datetime
 
-from licesnsing.models import EstablishmentRegister, Inspection
+from licesnsing.models import EstablishmentRegister, Inspection, Establishment
 
 
 def report_index(request):
@@ -105,10 +106,11 @@ def all_establishment_report(request):
     pass
 
 
-def inspection_report(request):
-    register = EstablishmentRegister.objects.all()[0]
+def inspection_report(request,inspection_id):
+    inspection = get_object_or_404(Inspection, pk=inspection_id)
+    register = inspection.get_register()
     establishment = register.establishment
-    inspection = Inspection.objects.all()[0]
+
     current_date = datetime.now()
     context = {
         "current_date": current_date,
@@ -116,5 +118,4 @@ def inspection_report(request):
         "establishment": establishment,
         "inspection": inspection,
     }
-
     return render(request, "reports/new_report.html", context=context)

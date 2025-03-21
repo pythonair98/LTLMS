@@ -29,7 +29,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for lic in licences %}
+          {% for lic in page_obj %}
           <tr>
             <!-- Display the license primary key or another unique identifier -->
             <th scope="row">{{ lic.counter }}</th>
@@ -65,6 +65,7 @@
           {% endfor %}
         </tbody>
       </table>
+    {% include 'include/pagination.html' %}
     </div>
   </div>
 </body>

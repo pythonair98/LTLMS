@@ -115,13 +115,14 @@ def view_establishment(request):
         HttpResponse: Renders the 'view_establishment.html' template with all establishments.
     """
     establishments = Establishment.objects.all().order_by("-id")
-    page_obj = Paginator(establishments, 5)
+    paginator = Paginator(establishments, 5)
+    page_obj = paginator.get_page(request.GET.get("page"))
     return render(
         request,
         "licesnsing/view_establishment.html",
         {
-            "establishments": page_obj,
             "today": date.today(),
+            "page_obj": page_obj,
         },
     )
 
@@ -421,8 +422,11 @@ def register_list_create(request):
         form = EstablishmentRegisterForm()
 
     registers = EstablishmentRegister.objects.all()
+    paginator = Paginator(registers, 5)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
     context = {
-        "registers": registers,
+        "page_obj": page_obj,
         "today": date.today(),
         "form": form,
     }
@@ -484,8 +488,11 @@ def licence_list_create(request):
         form = EstablishmentLicenceForm()
 
     licences = EstablishmentLicence.objects.all()
+    paginator = Paginator(licences, 5)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
     context = {
-        "licences": licences,
+        "page_obj": page_obj,
         "form": form,
     }
     return render(request, "licesnsing/licence_list_create.html", context)

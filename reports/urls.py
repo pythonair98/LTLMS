@@ -9,5 +9,5 @@ urlpatterns = [
         all_establishment_report,
         name="all_establishment_report",
     ),
-    path("inspection_report/", inspection_report, name="inspection_report"),
+    path("inspection_report/<int:inspection_id>", inspection_report, name="inspection_report"),
 ]

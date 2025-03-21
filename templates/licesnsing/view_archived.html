@@ -42,6 +42,7 @@
                 <td>{{ inspection.created_at|date:"Y-m-d H:i" }}</td>
                 <td>
                     <a href="{% url 'view_inspection_data' inspection.id %}" class="btn btn-primary btn-sm">عرض</a>
+                    <a href="{% url 'inspection_report' inspection.id %}" target="_blank" class="btn btn-primary btn-sm">طباعة</a>
                     {% if not inspection.is_archived %}
                         <a href="{% url 'archive_inspection' inspection.id %}" class="btn btn-warning btn-sm">أرشفة</a>
                     {% endif %}
