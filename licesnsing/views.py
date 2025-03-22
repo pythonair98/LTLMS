@@ -251,7 +251,7 @@ def query(request):
 
 @login_required(login_url="login")
 def reader(request):
-    establishments = [establsihemnt.establishment for establsihemnt in InspectionAssignment.objects.filter(inspector=request.user)]
+    establishments = [establsihemnt.establishment for establsihemnt in InspectionAssignment.objects.filter(inspector=request.user,status="pending")]
     return render(request, "licesnsing/readRFID.html", {"establishments": establishments})
 @login_required(login_url="login")
 def inspect_establishment(request,id):
