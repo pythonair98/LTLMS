@@ -222,5 +222,69 @@
     </div>
 
 </body>
+<script>
+const MAX_WIDTH = 320;
+const MAX_HEIGHT = 180;
 
+// Select all image input fields that have the attributes you want.
+const inputs = document.querySelectorAll('input[type="file"][accept="image/*"][capture="environment"]');
+
+// Add change event listener to each input.
+inputs.forEach(input => {
+  input.onchange = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Create a blob URL for the selected file.
+    const blobURL = URL.createObjectURL(file);
+    const img = new Image();
+    img.src = blobURL;
+
+    img.onload = function () {
+      // Calculate the new dimensions while maintaining aspect ratio.
+      const [newWidth, newHeight] = calculateSize(img, MAX_WIDTH, MAX_HEIGHT);
+      const canvas = document.createElement("canvas");
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+      // Compress the image and convert it to a blob.
+      canvas.toBlob((blob) => {
+        // Create a display message showing original and compressed sizes.
+        const displayTag = document.createElement('h1');
+        displayTag.innerText = `Original Image - ${readableBytes(file.size)} :::::: Compressed Image - ${readableBytes(blob.size)}`;
+        document.getElementById('container').append(displayTag);
+
+        // Optionally: you can now upload or process 'blob' as needed.
+      }, 'image/jpeg', 0.7); // Adjust image type and quality as needed.
+    };
+  }
+});
+
+function calculateSize(img, maxWidth, maxHeight) {
+  let width = img.width;
+  let height = img.height;
+
+  // Constrain dimensions while maintaining the aspect ratio.
+  if (width > height) {
+    if (width > maxWidth) {
+      height = Math.round((height * maxWidth) / width);
+      width = maxWidth;
+    }
+  } else {
+    if (height > maxHeight) {
+      width = Math.round((width * maxHeight) / height);
+      height = maxHeight;
+    }
+  }
+  return [width, height];
+}
+
+function readableBytes(bytes) {
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+}
+</script>
 </html>
