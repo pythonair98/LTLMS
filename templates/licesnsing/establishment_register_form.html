@@ -5,8 +5,7 @@
     <h2 class="mb-3">إضافة سجل جديد</h2>
 
     <form method="POST" class="card p-4 shadow">
-        <input type="hidden" name="csrfmiddlewaretoken" value="bfV9eZHo01yh0xxzGQpBgz0bIfAvynn9pk4nkZtBrp25NfsLCEVhEIXhpCGjLVKe">
-
+        {% csrf_token %}
         <!-- Render Form Fields -->
         <div class="mb-3">
             <label for="malti_select"  class="form-label">المؤسسة</label>
