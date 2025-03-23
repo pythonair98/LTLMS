@@ -537,11 +537,11 @@ class InspectionAssignment(models.Model):
     """
 
     STATUS_CHOICES = (
-        ("pending", "Pending"),
-        ("accepted", "Accepted"),
-        ("in_progress", "In Progress"),
-        ("completed", "Completed"),
-        ("cancelled", "Cancelled"),
+        ("pending", "أنتظار"),
+        ("accepted", "مقبولة"),
+        ("in_progress", "قيد المتابعة"),
+        ("completed", "مكتملة"),
+        ("cancelled", "ملغاة"),
     )
 
     inspector = models.ForeignKey(

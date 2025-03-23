@@ -2,12 +2,13 @@ from datetime import date, datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.core.paginator import Paginator
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
-from django.db.models import Count
+from django.db.models.functions import TruncMonth
 
 from user_auth.models import Profiles
 from .forms import (
@@ -26,54 +27,9 @@ from .models import (
     Inspection,
 )
 from .utils import (
-    process_raw_data,
-    process_form_data,
     mark_inspection_as_done,
     get_establishment_obj_by_register,
 )
-
-
-@login_required(login_url="login")
-def dashboard(request):
-    """
-    Renders a dashboard with key statistics and latest records.
-
-    Statistics include:
-      - Total Establishments
-      - Total Inspection Assignments and breakdown by status
-      - Total Licenses
-      - Total Inspections
-
-    Also, recent (latest) records for each table are shown in tabbed tables.
-    """
-    total_establishments = Establishment.objects.count()
-    total_assignments = InspectionAssignment.objects.count()
-    assignments_by_status = (
-        InspectionAssignment.objects.values("status")
-        .annotate(count=Count("id"))
-        .order_by("status")
-    )
-    total_licenses = EstablishmentLicence.objects.count()
-    total_inspections = Inspection.objects.count()
-
-    # Get latest records (adjust ordering fields as needed)
-    latest_establishments = Establishment.objects.order_by("-created_at")[:5]
-    latest_assignments = InspectionAssignment.objects.order_by("-assigned_at")[:5]
-    latest_licenses = EstablishmentLicence.objects.order_by("-number")[:5]
-    latest_inspections = Inspection.objects.order_by("-created_at")[:5]
-
-    context = {
-        "total_establishments": total_establishments,
-        "total_assignments": total_assignments,
-        "assignments_by_status": assignments_by_status,
-        "total_licenses": total_licenses,
-        "total_inspections": total_inspections,
-        "latest_establishments": latest_establishments,
-        "latest_assignments": latest_assignments,
-        "latest_licenses": latest_licenses,
-        "latest_inspections": latest_inspections,
-    }
-    return render(request, "licesnsing/index.html", context)
 
 
 @login_required(login_url="login")
@@ -101,6 +57,77 @@ def add_establishment(request):
         messages.error(request, "حدث خطأ أثناء إضافة المنشأة")
 
     return render(request, "licesnsing/add_establishment.html", {"form": form})
+
+
+@login_required(login_url="login")
+def dashboard(request):
+    """
+    Renders a dashboard with key statistics and latest records.
+
+    Statistics include:
+      - Total Establishments
+      - Total Inspection Assignments and breakdown by status
+      - Total Licenses
+      - Total Inspections
+
+    Also, recent (latest) records for each table are shown in tabbed tables.
+    """
+
+    total_establishments = Establishment.objects.count()
+    total_assignments = InspectionAssignment.objects.count()
+    assignments_by_status = (
+        InspectionAssignment.objects.all().annotate(
+            count=Count("id")).order_by("status"))
+    total_licenses = EstablishmentLicence.objects.count()
+    total_inspections = Inspection.objects.count()
+
+    # Monthly inspections data
+    monthly_inspections = (
+        Inspection.objects.annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    # Inspection status distribution
+    inspection_status = (
+        Inspection.objects.values('status')
+        .annotate(count=Count('id'))
+    )
+
+    # License expiration data
+    expiring_licenses = (
+        EstablishmentLicence.objects.filter(
+            expiration_date__gte=timezone.now()
+        ).count()
+    )
+
+    # Municipality distribution
+    municipality_stats = (
+        Establishment.objects.values('municipality_name')
+        .annotate(count=Count('id'))
+        .order_by('-count')[:5]
+    )
+
+    # Get latest records (adjust ordering fields as needed)
+    latest_establishments = Establishment.objects.order_by("-created_at")[:5]
+    latest_assignments = InspectionAssignment.objects.order_by(
+        "-assigned_at")[:5]
+    latest_licenses = EstablishmentLicence.objects.order_by("-number")[:5]
+    latest_inspections = Inspection.objects.order_by("-created_at")[:5]
+
+    context = {
+        "total_establishments": total_establishments,
+        "total_assignments": total_assignments,
+        "assignments_by_status": assignments_by_status,
+        "total_licenses": total_licenses,
+        "total_inspections": total_inspections,
+        "latest_establishments": latest_establishments,
+        "latest_assignments": latest_assignments,
+        "latest_licenses": latest_licenses,
+        "latest_inspections": latest_inspections,
+    }
+    return render(request, "licesnsing/index.html", context)
 
 
 @login_required(login_url="login")
@@ -605,8 +632,6 @@ def update_assignment_status(request, pk):
         return redirect(
             "view_assignments"
         )  # Adjust to your actual URL name for assignments view
-    if new_status == "accepted" or "completed" or "cancelled":
-        assignment.delete()
     else:
         assignment.status = new_status
         assignment.save()
