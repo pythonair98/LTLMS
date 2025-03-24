@@ -3,3 +3,7 @@
 /static/inspections/*
 /licesnsing/migrations
 /user_auth/migrations
+/reports/migrations
+/licesnsing/migrations/*
+/user_auth/migrations/*
+/reports/migrations/*

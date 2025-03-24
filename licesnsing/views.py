@@ -58,7 +58,7 @@ def add_establishment(request):
 
     return render(request, "licesnsing/add_establishment.html", {"form": form})
 
-
+@login_required(login_url="login")
 def dashboard(request):
     """
     Renders a dashboard with key statistics and latest records.

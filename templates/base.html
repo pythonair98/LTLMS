@@ -170,7 +170,7 @@
                 {% endif %}
                 {% if request.user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" style="" href="{% url 'logout' %}">تسجيل الخروج</a>
+                        <a class="nav-link" style="" href="{% url 'logout' %}">تسجيل الخروج ({{ request.user.get_full_name }})</a>
                     </li>
                 {% else %}
                     <li class="nav-item">
