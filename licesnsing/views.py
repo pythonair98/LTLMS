@@ -59,55 +59,62 @@ def add_establishment(request):
     return render(request, "licesnsing/add_establishment.html", {"form": form})
 
 
-@login_required(login_url="login")
 def dashboard(request):
     """
     Renders a dashboard with key statistics and latest records.
-
-    Statistics include:
-      - Total Establishments
-      - Total Inspection Assignments and breakdown by status
-      - Total Licenses
-      - Total Inspections
-
-    Also, recent (latest) records for each table are shown in tabbed tables.
     """
+    from django.db.models.functions import TruncMonth
+    from django.utils import timezone
+    from datetime import timedelta
 
+    # Basic stats
     total_establishments = Establishment.objects.count()
     total_assignments = InspectionAssignment.objects.count()
-    assignments_by_status = (
-        InspectionAssignment.objects.all().annotate(
-            count=Count("id")).order_by("status"))
     total_licenses = EstablishmentLicence.objects.count()
     total_inspections = Inspection.objects.count()
 
-    # Monthly inspections data
+    # Assignment status distribution
+    assignments_by_status = InspectionAssignment.objects.values("status").annotate(
+        count=Count("id")).order_by("status")
+
+    # Monthly inspections (last 6 months)
+    six_months_ago = timezone.now() - timedelta(days=180)
     monthly_inspections = (
-        Inspection.objects.annotate(month=TruncMonth('created_at'))
+        Inspection.objects.filter(created_at__gte=six_months_ago)
+        .annotate(month=TruncMonth('created_at'))
         .values('month')
         .annotate(count=Count('id'))
         .order_by('month')
     )
 
     # Inspection status distribution
-    inspection_status = (
-        Inspection.objects.values('status')
-        .annotate(count=Count('id'))
-    )
+    inspection_status = [
+        {'status': True, 'count': Inspection.objects.filter(status=True).count()},
+        {'status': False, 'count': Inspection.objects.filter(status=False).count()}
+    ]
 
-    # License expiration data
-    expiring_licenses = (
-        EstablishmentLicence.objects.filter(
-            expiration_date__gte=timezone.now()
-        ).count()
-    )
-
-    # Municipality distribution
+    # Top 5 municipalities
     municipality_stats = (
         Establishment.objects.values('municipality_name')
         .annotate(count=Count('id'))
         .order_by('-count')[:5]
     )
+
+    # Activity distribution
+    activity_stats = (
+        Establishment.objects.values('activity__ar_name')
+        .annotate(count=Count('id'))
+        .order_by('-count')[:3]
+    )
+
+    # License status
+    today = timezone.now().date()
+    active_licenses = EstablishmentLicence.objects.filter(expiration_date__gt=today).count()
+    expired_licenses = EstablishmentLicence.objects.filter(expiration_date__lte=today).count()
+    license_status = [
+        {'status': 'Active', 'count': active_licenses},
+        {'status': 'Expired', 'count': expired_licenses}
+    ]
 
     # Get latest records (adjust ordering fields as needed)
     latest_establishments = Establishment.objects.order_by("-created_at")[:5]
@@ -119,14 +126,16 @@ def dashboard(request):
     context = {
         "total_establishments": total_establishments,
         "total_assignments": total_assignments,
-        "assignments_by_status": assignments_by_status,
         "total_licenses": total_licenses,
         "total_inspections": total_inspections,
-        "latest_establishments": latest_establishments,
-        "latest_assignments": latest_assignments,
-        "latest_licenses": latest_licenses,
-        "latest_inspections": latest_inspections,
+        "assignments_by_status": assignments_by_status,
+        "monthly_inspections": monthly_inspections,
+        "inspection_status": inspection_status,
+        "municipality_stats": municipality_stats,
+        "activity_stats": activity_stats,
+        "license_status": license_status,
     }
+    print(context)
     return render(request, "licesnsing/index.html", context)
 
 

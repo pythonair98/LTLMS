@@ -1,3 +1,4 @@
+
 {% extends 'base.html' %}
 {% load static %}
 
@@ -9,8 +10,8 @@
 <div class="container-fluid p-4">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-primary">موجز لوحة التحكم</h2>
-        <div class="text-muted">اخر تحديث: {% now "Y-m-d H:i" %}</div>
+        <h2 class="text-primary">Dashboard Overview</h2>
+        <div class="text-muted">Last updated: {% now "Y-m-d H:i" %}</div>
     </div>
 
     <!-- Key Statistics Cards -->
@@ -20,7 +21,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-white-50">إجمالي المنشآت</h6>
+                            <h6 class="text-white-50">Total Establishments</h6>
                             <h2 class="mb-0">{{ total_establishments }}</h2>
                         </div>
                         <div class="ms-3">
@@ -35,22 +36,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-white-50">التكليفات النشطة</h6>
-                            <h2 class="mb-0">{{ total_assignments }}</h2>
-                        </div>
-                        <div class="ms-3">
-                            <i class="fas fa-tasks fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card bg-warning text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-white-50">إجمالي التراخيص</h6>
+                            <h6 class="text-white-50">Total Licenses</h6>
                             <h2 class="mb-0">{{ total_licenses }}</h2>
                         </div>
                         <div class="ms-3">
@@ -65,7 +51,22 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-white-50">إجمالي عمليات التفتيش</h6>
+                            <h6 class="text-white-50">Total Assignments</h6>
+                            <h2 class="mb-0">{{ total_assignments }}</h2>
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-tasks fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-white-50">Total Inspections</h6>
                             <h2 class="mb-0">{{ total_inspections }}</h2>
                         </div>
                         <div class="ms-3">
@@ -77,98 +78,215 @@
         </div>
     </div>
 
-    <!-- Charts and Tables Section -->
+    <!-- Charts Section -->
     <div class="row g-3">
         <!-- Assignment Status Chart -->
         <div class="col-12 col-lg-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">توزيع حالات التكليفات</h5>
+                    <h5 class="card-title mb-0">Assignment Status Distribution</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="assignmentChart" height="300"></canvas>
+                    <canvas id="assignmentChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Activities -->
+        <!-- Monthly Inspections Chart -->
         <div class="col-12 col-lg-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">الأنشطة الأخيرة</h5>
+                    <h5 class="card-title mb-0">Monthly Inspections</h5>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>النشاط</th>
-                                    <th>الحالة</th>
-                                    <th>التاريخ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for insp in latest_inspections %}
-                                <tr>
-                                    <td>تفتيش #{{ insp.register_number }}</td>
-                                    <td>
-                                        <span class="badge {% if insp.status %}bg-success{% else %}bg-danger{% endif %}">
-                                            {{ insp.status|yesno:"Accepted,Refused" }}
-                                        </span>
-                                    </td>
-                                    <td>{{ insp.created_at|date:"Y-m-d" }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="card-body">
+                    <canvas id="monthlyInspectionsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Municipality Distribution Chart -->
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Top Municipalities</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="municipalityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- License Status Chart -->
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">License Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="licenseStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Distribution Chart -->
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Top Activities</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inspection Status Chart -->
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Inspection Results</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="inspectionStatusChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Chart.js Script -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Assignment Status Chart
-    const ctx = document.getElementById('assignmentChart').getContext('2d');
-    const statusData = [
-        {% for status in assignments_by_status %}
-            {{ status.count }},
-        {% endfor %}
-    ];
-    const statusLabels = [
-        {% for status in assignments_by_status %}
-            '{{ status.get_status_display }}',
-        {% endfor %}
-    ];
+    const chartColors = {
+        primary: '#0d6efd',
+        success: '#198754',
+        warning: '#ffc107',
+        danger: '#dc3545',
+        info: '#0dcaf0'
+    };
 
-    new Chart(ctx, {
-        type: 'doughnut',
+    // Assignment Status Chart
+    new Chart(document.getElementById('assignmentChart'), {
+        type: 'pie',
         data: {
-            labels: statusLabels,
+            labels: [{% for status in assignments_by_status %}'{{ status.status }}',{% endfor %}],
             datasets: [{
-                data: statusData,
-                backgroundColor: [
-                    '#0d6efd',
-                    '#198754',
-                    '#ffc107',
-                    '#dc3545',
-                    '#6c757d'
-                ],
-                borderWidth: 1
+                data: [{% for status in assignments_by_status %}{{ status.count }},{% endfor %}],
+                backgroundColor: [chartColors.primary, chartColors.success, chartColors.warning, chartColors.danger]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Monthly Inspections Chart
+    new Chart(document.getElementById('monthlyInspectionsChart'), {
+        type: 'line',
+        data: {
+            labels: [{% for item in monthly_inspections %}'{{ item.month|date:"F Y" }}',{% endfor %}],
+            datasets: [{
+                label: 'Number of Inspections',
+                data: [{% for item in monthly_inspections %}{{ item.count }},{% endfor %}],
+                borderColor: chartColors.primary,
+                tension: 0.1,
+                fill: false
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right'
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
                 }
             }
+        }
+    });
+
+    // Municipality Chart
+    new Chart(document.getElementById('municipalityChart'), {
+        type: 'bar',
+        data: {
+            labels: [{% for item in municipality_stats %}'{{ item.municipality_name }}',{% endfor %}],
+            datasets: [{
+                label: 'Number of Establishments',
+                data: [{% for item in municipality_stats %}{{ item.count }},{% endfor %}],
+                backgroundColor: chartColors.info
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // License Status Chart
+    new Chart(document.getElementById('licenseStatusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: [{% for item in license_status %}'{{ item.status }}',{% endfor %}],
+            datasets: [{
+                data: [{% for item in license_status %}{{ item.count }},{% endfor %}],
+                backgroundColor: [chartColors.success, chartColors.danger]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Activity Chart
+    new Chart(document.getElementById('activityChart'), {
+        type: 'bar',
+        data: {
+            labels: [{% for item in activity_stats %}'{{ item.activity__ar_name }}',{% endfor %}],
+            datasets: [{
+                label: 'Number of Establishments',
+                data: [{% for item in activity_stats %}{{ item.count }},{% endfor %}],
+                backgroundColor: chartColors.warning
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // Inspection Status Chart
+    new Chart(document.getElementById('inspectionStatusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['مستوفي الشروط', 'غير مستوفي الشروط'],
+            datasets: [{
+                data: [{% for item in inspection_status %}{{ item.count }},{% endfor %}],
+                backgroundColor: [chartColors.success, chartColors.danger]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
         }
     });
 });
