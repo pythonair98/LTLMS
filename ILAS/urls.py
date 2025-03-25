@@ -37,7 +37,7 @@ urlpatterns = [
     path("add_establishment", add_establishment, name="add_establishment"),
     path("view_establishment", view_establishment, name="view_establishment"),
     path("delete_establishment/<int:register_number>", delete_establishment, name="delete_establishment"),
-    path("edit_establishment/<int:register_number>", edit_establishment, name="edit_establishment"),
+    path("edit_establishment/<str:rifd>", edit_establishment, name="edit_establishment"),
 
     # RFID Reader-related URLs
     path("reader", reader, name="reader"),

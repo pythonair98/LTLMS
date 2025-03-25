@@ -58,6 +58,7 @@ def add_establishment(request):
 
     return render(request, "licesnsing/add_establishment.html", {"form": form})
 
+
 @login_required(login_url="login")
 def dashboard(request):
     """
@@ -74,52 +75,58 @@ def dashboard(request):
     total_inspections = Inspection.objects.count()
 
     # Assignment status distribution
-    assignments_by_status = InspectionAssignment.objects.values("status").annotate(
-        count=Count("id")).order_by("status")
+    assignments_by_status = (
+        InspectionAssignment.objects.values("status")
+        .annotate(count=Count("id"))
+        .order_by("status")
+    )
 
     # Monthly inspections (last 6 months)
     six_months_ago = timezone.now() - timedelta(days=180)
     monthly_inspections = (
         Inspection.objects.filter(created_at__gte=six_months_ago)
-        .annotate(month=TruncMonth('created_at'))
-        .values('month')
-        .annotate(count=Count('id'))
-        .order_by('month')
+        .annotate(month=TruncMonth("created_at"))
+        .values("month")
+        .annotate(count=Count("id"))
+        .order_by("month")
     )
 
     # Inspection status distribution
     inspection_status = [
-        {'status': True, 'count': Inspection.objects.filter(status=True).count()},
-        {'status': False, 'count': Inspection.objects.filter(status=False).count()}
+        {"status": True, "count": Inspection.objects.filter(status=True).count()},
+        {"status": False, "count": Inspection.objects.filter(status=False).count()},
     ]
 
     # Top 5 municipalities
     municipality_stats = (
-        Establishment.objects.values('municipality_name')
-        .annotate(count=Count('id'))
-        .order_by('-count')[:5]
+        Establishment.objects.values("municipality_name")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:5]
     )
 
     # Activity distribution
     activity_stats = (
-        Establishment.objects.values('activity__ar_name')
-        .annotate(count=Count('id'))
-        .order_by('-count')[:3]
+        Establishment.objects.values("activity__ar_name")
+        .annotate(count=Count("id"))
+        .order_by("-count")[:3]
     )
 
     # License status
     today = timezone.now().date()
-    active_licenses = EstablishmentLicence.objects.filter(expiration_date__gt=today).count()
-    expired_licenses = EstablishmentLicence.objects.filter(expiration_date__lte=today).count()
+    active_licenses = EstablishmentLicence.objects.filter(
+        expiration_date__gt=today
+    ).count()
+    expired_licenses = EstablishmentLicence.objects.filter(
+        expiration_date__lte=today
+    ).count()
     license_status = [
-        {'status': 'Active', 'count': active_licenses},
-        {'status': 'Expired', 'count': expired_licenses}
+        {"status": "Active", "count": active_licenses},
+        {"status": "Expired", "count": expired_licenses},
     ]
 
     # Get latest records (adjust ordering fields as needed)
     latest_establishments = Establishment.objects.order_by("-created_at")[:5]
-    latest_assignments = InspectionAssignment.objects.order_by(
-        "-assigned_at")[:5]
+    latest_assignments = InspectionAssignment.objects.order_by("-assigned_at")[:5]
     latest_licenses = EstablishmentLicence.objects.order_by("-number")[:5]
     latest_inspections = Inspection.objects.order_by("-created_at")[:5]
 
@@ -193,7 +200,7 @@ def delete_establishment(request, register_number):
 
 
 @login_required(login_url="login")
-def edit_establishment(request, register_number):
+def edit_establishment(request, rifd):
     """
     Edits an existing establishment's details.
 
@@ -208,9 +215,10 @@ def edit_establishment(request, register_number):
     Returns:
         HttpResponse: Renders the 'edit_establishment.html' template with the form.
     """
-    establishment = get_object_or_404(Establishment, register_number=register_number)
+    establishment = get_object_or_404(Establishment, rifd=rifd)
     form = EstablishmentForm(request.POST or None, instance=establishment)
     if form.is_valid():
+        messages.success(request, "تم تحديث المنشأة بنجاح")
         form.save()
 
     return render(request, "licesnsing/edit_establishment.html", {"form": form})
@@ -285,12 +293,22 @@ def query(request):
         }
     )
 
+
 @login_required(login_url="login")
 def reader(request):
-    establishments = [establsihemnt.establishment for establsihemnt in InspectionAssignment.objects.filter(inspector=request.user,status="pending")]
-    return render(request, "licesnsing/readRFID.html", {"establishments": establishments})
+    establishments = [
+        establsihemnt.establishment
+        for establsihemnt in InspectionAssignment.objects.filter(
+            inspector=request.user, status="pending"
+        )
+    ]
+    return render(
+        request, "licesnsing/readRFID.html", {"establishments": establishments}
+    )
+
+
 @login_required(login_url="login")
-def inspect_establishment(request,id):
+def inspect_establishment(request, id):
     establishment = Establishment.objects.get(id=id)
     if request.method == "POST":
         form = InspectionForm(request.POST, request.FILES)
@@ -325,15 +343,17 @@ def inspect_establishment(request,id):
                 }
             )
 
-@login_required(login_url='login')
-def inspection_delete(request,id):
+
+@login_required(login_url="login")
+def inspection_delete(request, id):
     inspection = Inspection.objects.get(id=id)
     if inspection:
         inspection.delete()
-        messages.success(request,"تم حذف المعاينة بنجاح")
+        messages.success(request, "تم حذف المعاينة بنجاح")
     else:
-        messages.warning(request,"حدث خطأ اثناء حذف المعاينة")
+        messages.warning(request, "حدث خطأ اثناء حذف المعاينة")
     return redirect("view_inspections")
+
 
 # @login_required(login_url="login")
 # def reader(request):
@@ -396,7 +416,7 @@ def inspection_delete(request,id):
 #     else:
 #         form = InspectionForm()
 #
-#     return render(request, "licesnsing/readRFID.html", {"form": form})
+#     return render(request, "ILAS/readRFID.html", {"form": form})
 
 
 # Main view to handle the POST request from Arduino
@@ -726,11 +746,16 @@ def view_inspections(request):
         request, "licesnsing/view_inspections.html", {"inspections": inspections}
     )
 
+
 @login_required(login_url="login")
-def view_inspection_data(request,pk):
+def view_inspection_data(request, pk):
     inspection = Inspection.objects.get(id=pk)
     if inspection:
-        return render(request,"licesnsing/view_inspection_data.html",{"inspection":inspection})
+        return render(
+            request, "licesnsing/view_inspection_data.html", {"inspection": inspection}
+        )
+
+
 @login_required(login_url="login")
 def archive_inspection(request, pk):
     """
@@ -783,7 +808,9 @@ def add_establishment_register(request):
         form = EstablishmentRegisterForm()
         establishments = Establishment.objects.all()
     return render(
-        request, "licesnsing/establishment_register_form.html", {"form": form,"establishments":establishments}
+        request,
+        "licesnsing/establishment_register_form.html",
+        {"form": form, "establishments": establishments},
     )
 
 

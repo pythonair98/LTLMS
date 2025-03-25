@@ -1,9 +1,9 @@
 /.venv/
 /static/inspections/
 /static/inspections/*
-/licesnsing/migrations
+/ILAS/migrations
 /user_auth/migrations
 /reports/migrations
-/licesnsing/migrations/*
+/ILAS/migrations/*
 /user_auth/migrations/*
 /reports/migrations/*

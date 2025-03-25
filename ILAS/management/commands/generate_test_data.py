@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import timedelta
 import random
 
-from licesnsing.models import (
+from ILAS.models import (
     Activity, MainCategory, SubCategory, Establishment,
     EstablishmentRegister, EstablishmentLicence, Inspection
 )

@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "user_auth.apps.UserAuthConfig",
-    "licesnsing.apps.LicesnsingConfig",
+    "ILAS.apps.LicesnsingConfig",
     "crispy_forms",
     "crispy_bootstrap5",
     "widget_tweaks",

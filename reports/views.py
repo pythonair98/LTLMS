@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from datetime import datetime
 
-from licesnsing.models import EstablishmentRegister, Inspection, Establishment
+from ILAS.models import EstablishmentRegister, Inspection, Establishment
 
 
 def report_index(request):

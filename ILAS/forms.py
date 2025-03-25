@@ -42,10 +42,10 @@ class EstablishmentForm(forms.ModelForm):
         fields = [
             "rifd",
             "establishment_name",
-            "register_issuance_date",
-            "register_expiration_date",
-            "license_creation_date",
-            "license_expiration_date",
+            # "register_issuance_date",
+            # "register_expiration_date",
+            # "license_creation_date",
+            # "license_expiration_date",
             "main_category",
             "sub_category",
             "owner_name",
@@ -108,30 +108,30 @@ class EstablishmentForm(forms.ModelForm):
     )
 
     # Date fields with date picker widgets
-    register_issuance_date = forms.DateField(
-        label="تاريخ إصدار السجل/Commercial Reg. Issuance Date:",
-        required=True,
-        input_formats=settings.DATE_INPUT_FORMATS,
-        widget=DateInput(attrs={"type": "date", "class": "form-control"}),
-    )
-    register_expiration_date = forms.DateField(
-        label="تاريخ انتهاء السجل/Commercial Reg. Expiration Date:",
-        required=True,
-        input_formats=settings.DATE_INPUT_FORMATS,
-        widget=DateInput(attrs={"type": "date", "class": "form-control"}),
-    )
-    license_creation_date = forms.DateField(
-        label="تاريخ إنشاء الرخصة/License Issuance Date:",
-        required=True,
-        input_formats=settings.DATE_INPUT_FORMATS,
-        widget=DateInput(attrs={"type": "date", "class": "form-control"}),
-    )
-    license_expiration_date = forms.DateField(
-        label="تاريخ انتهاء الرخصة/License Expiration Date:",
-        required=True,
-        input_formats=settings.DATE_INPUT_FORMATS,
-        widget=DateInput(attrs={"type": "date", "class": "form-control"}),
-    )
+    # register_issuance_date = forms.DateField(
+    #     label="تاريخ إصدار السجل/Commercial Reg. Issuance Date:",
+    #     required=True,
+    #     input_formats=settings.DATE_INPUT_FORMATS,
+    #     widget=DateInput(attrs={"type": "date", "class": "form-control"}),
+    # )
+    # register_expiration_date = forms.DateField(
+    #     label="تاريخ انتهاء السجل/Commercial Reg. Expiration Date:",
+    #     required=True,
+    #     input_formats=settings.DATE_INPUT_FORMATS,
+    #     widget=DateInput(attrs={"type": "date", "class": "form-control"}),
+    # )
+    # license_creation_date = forms.DateField(
+    #     label="تاريخ إنشاء الرخصة/License Issuance Date:",
+    #     required=True,
+    #     input_formats=settings.DATE_INPUT_FORMATS,
+    #     widget=DateInput(attrs={"type": "date", "class": "form-control"}),
+    # )
+    # license_expiration_date = forms.DateField(
+    #     label="تاريخ انتهاء الرخصة/License Expiration Date:",
+    #     required=True,
+    #     input_formats=settings.DATE_INPUT_FORMATS,
+    #     widget=DateInput(attrs={"type": "date", "class": "form-control"}),
+    # )
 
     # Category details
     # main_category = forms.CharField(label="التصنيف الرئيسي/Main Category:", required=True)
