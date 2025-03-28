@@ -64,20 +64,20 @@ img {
 /*    display: inline-block;*/
 /*}*/
 
-.navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-}
+/*.navbar {*/
+/*    position: fixed;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    right: 0;*/
+/*    z-index: 1000;*/
+/*}*/
 
-.container-fluid {
-    margin-top: 60px; /* Adjust based on navbar height */
-    position: relative;
-    z-index: 1;
-}
+/*.container-fluid {*/
+/*    margin-top: 60px; !* Adjust based on navbar height *!*/
+/*    position: relative;*/
+/*    z-index: 1;*/
+/*}*/
 
-.top-nav {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
+/*.top-nav {*/
+/*    border-bottom: 1px solid rgba(255, 255, 255, 0.1);*/
+/*}*/
