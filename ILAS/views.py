@@ -142,7 +142,6 @@ def dashboard(request):
         "activity_stats": activity_stats,
         "license_status": license_status,
     }
-    print(context)
     return render(request, "licesnsing/index.html", context)
 
 

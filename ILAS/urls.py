@@ -30,8 +30,7 @@ from .views import (
 # URL patterns for routing different views in the Django application
 urlpatterns = [
     # Dashboard view
-    path("", dashboard, name="dashboard"),
-    path("/", dashboard, name="dashboard"),
+    path("summary", dashboard, name="dashboard"),
 
     # Establishment-related URLs
     path("add_establishment", add_establishment, name="add_establishment"),
