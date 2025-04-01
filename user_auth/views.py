@@ -253,6 +253,9 @@ def user_edit(request, id):
     """
 
     user = get_object_or_404(User, id=id)
+    if not user.profiles:
+        messages.error(request, "هذا المستخدم غير مستكمل البيانات.")
+        return redirect("profiles-list")
     profile = get_object_or_404(Profiles, user=user)
     if request.method == "POST":
         form = UserEditForm(request.POST, instance=user)
