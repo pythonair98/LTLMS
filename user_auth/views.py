@@ -46,9 +46,6 @@ def edit_user_profile(request, pk):
     """
 
     user = User.objects.get(pk=pk)
-    if not user.profiles:
-        messages.error(request, "هذا المستخدم غير مستكمل البيانات.")
-        return redirect("profiles-list")
     profile = user.profiles
     contact = profile.contact
     user_form = CustomUserCreationForm(request.POST or None, instance=user)
@@ -253,7 +250,7 @@ def user_edit(request, id):
     """
 
     user = get_object_or_404(User, id=id)
-    if not user.profiles:
+    if user.profiles == None:
         messages.error(request, "هذا المستخدم غير مستكمل البيانات.")
         return redirect("profiles-list")
     profile = get_object_or_404(Profiles, user=user)
