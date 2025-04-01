@@ -867,3 +867,7 @@ def get_inspector_inspections(request):
     return render(
         request, "licesnsing/inspector_inspections.html", {"inspections": inspections}
     )
+
+
+def not_found404(request, exception):
+    return render(request, 'errors/404.html', status=404)

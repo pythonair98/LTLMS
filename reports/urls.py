@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import all_establishment_report, report_index, inspection_report
 
+from .views import all_establishment_report, report_index, inspection_report
 
 urlpatterns = [
     path("report", report_index, name="report_index"),

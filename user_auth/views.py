@@ -1,8 +1,9 @@
+from django.contrib import messages
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db import transaction
-from django.contrib import messages
 
 from ILAS.utils import inspector_assignments
 from .forms import (
@@ -13,9 +14,6 @@ from .forms import (
     TeamForm,
     UserEditForm,
 )
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login, logout
-
 from .models import Team, Occupation, Profiles
 
 
