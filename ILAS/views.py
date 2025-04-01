@@ -741,8 +741,10 @@ def view_inspections(request):
     :return:
     """
     inspections = Inspection.objects.filter(is_archived=False)
+    paginator = Paginator(inspections, 5)
+    page_obj = paginator.get_page(request.GET.get("page"))
     return render(
-        request, "licesnsing/view_inspections.html", {"inspections": inspections}
+        request, "licesnsing/view_inspections.html", {"page_obj": page_obj}
     )
 
 
