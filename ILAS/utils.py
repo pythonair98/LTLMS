@@ -144,7 +144,7 @@ class PPTtoPDFConverter:
 
 def create_license_report(licence_:EstablishmentLicence, establishment:Establishment, register):
     presentation_path = os.path.join(settings.BASE_DIR,"static/files/reports_temp", "license_report.pptx")
-    updated_presentation_path = str(uuid.uuid4()) + ".pptx"
+    updated_presentation_path =os.path.join(settings.BASE_DIR,"static/files/reports_temp", str(uuid.uuid4()) + ".pptx")
 
     cell_values = {
         "Owner_name": establishment.owner_name,
