@@ -135,7 +135,6 @@ class PPTtoPDFConverter:
             os.path.dirname(output_file),
             input_file,
         ]
-        print(command)
         subprocess.run(command, check=True)
 
         # Return the absolute path of the generated PDF file
@@ -168,6 +167,7 @@ def create_license_report(licence_:EstablishmentLicence, establishment:Establish
 
     # Convert the updated presentation to a PDF and get the absolute path of the generated PDF file
     pdf_path = PPTtoPDFConverter.convert(os.path.abspath(updated_presentation_path))
+    print(pdf_path)
     return pdf_path
 
 
