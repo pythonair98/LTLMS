@@ -1,6 +1,10 @@
 /.venv/
 /static/inspections/
 /static/inspections/*
+/static/files/profile_images
+/static/files/profile_images/*
+/static/files/reports_temp
+/static/files/reports_temp/*
 /ILAS/migrations
 /user_auth/migrations
 /reports/migrations
