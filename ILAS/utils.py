@@ -1,11 +1,15 @@
 import subprocess
 import os
 import uuid
+
+from django.conf import settings
 from pptx import Presentation
 from pptx.util import Pt
 from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_ANCHOR
+
+from ILAS.models import EstablishmentLicence, Establishment
 
 
 class PowerPointUpdater:
@@ -63,7 +67,7 @@ class PPTtoPDFConverter:
 
         # Generate a random file name for the PDF
 
-        output_file = os.path.join(os.path.dirname(input_file), input_file)
+        output_file = os.path.join(settings.BASE_DIR,"static/files/reports_temp", input_file)
         print("OutFile:", output_file)
         command = [
             libreoffice_path,
@@ -81,23 +85,23 @@ class PPTtoPDFConverter:
         return os.path.abspath(output_file)
 
 
-def create_license_report(data: dict = {}):
-    presentation_path = "lic.pptx"
+def create_license_report(licence_:EstablishmentLicence, establishment:Establishment, register):
+    presentation_path = os.path.join(settings.BASE_DIR,"static/files/reports_temp", "license_report.pptx")
     updated_presentation_path = str(uuid.uuid4()) + ".pptx"
 
     cell_values = {
-        "Owner_name": "John Doe",
-        "Register_number": "123456789",
-        "Establishment_name": "ABC Corp",
-        "Id_number": "987654321",
-        "License_category": "Driver's License",
-        "Issue_date": "2025-01-01",
-        "Expired_date": "2030-01-01",
-        "Activity": "Driving",
-        "Address": "123 Main St, Anytown, USA",
-        "License_number": "D1234567",
-        "Phone_number": "555-123-4567",
-        "Email": "example@example.com",
+        "Owner_name": establishment.owner_name,
+        "Register_number": register.id,
+        "Establishment_name": establishment.establishment_name,
+        "Id_number": establishment.owner_number,
+        "License_category": licence_.main_category_id,
+        "Issue_date": licence_.creation_date,
+        "Expired_date": licence_.expiration_date,
+        "Activity": licence_.activity.ar_name,
+        "Address": establishment.get_address(),
+        "License_number": licence_.number,
+        "Phone_number": establishment.phone_number,
+        "Email": establishment.email,
     }
 
     # Create an instance of PowerPointUpdater, update the table cells, and save the updated presentation

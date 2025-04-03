@@ -2,8 +2,8 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from datetime import datetime
 
-from ILAS.models import EstablishmentRegister, Inspection, Establishment
-
+from ILAS.models import EstablishmentRegister, Inspection, Establishment, EstablishmentLicence
+from ILAS.utils import create_license_report
 
 def report_index(request):
     reports = [
@@ -119,3 +119,15 @@ def inspection_report(request,inspection_id):
         "inspection": inspection,
     }
     return render(request, "reports/new_report.html", context=context)
+
+
+def license_report(request, licence_id):
+    licence_ = get_object_or_404(EstablishmentLicence, number=licence_id)
+    register_data = licence_.register
+    establishment = licence_.establishment
+    report_path = create_license_report(licence_=licence_, establishment=establishment, register=register_data)
+    with open(report_path, 'rb') as report_file:
+        response = HttpResponse(report_file.read(), content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="license_report_{licence_id}.pdf"'
+
+    return response
