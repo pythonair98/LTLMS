@@ -148,17 +148,17 @@ def create_license_report(licence_:EstablishmentLicence, establishment:Establish
 
     cell_values = {
         "Owner_name": establishment.owner_name,
-        "Register_number": register.id,
-        "Establishment_name": establishment.establishment_name,
-        "Id_number": establishment.owner_number,
-        "License_category": licence_.main_category_id,
-        "Issue_date": licence_.creation_date,
-        "Expired_date": licence_.expiration_date,
-        "Activity": licence_.activity.ar_name,
-        "Address": establishment.get_address(),
-        "License_number": licence_.number,
-        "Phone_number": establishment.phone_number,
-        "Email": establishment.email,
+        "Register_number": str(register.id),
+        "Establishment_name": str(establishment.establishment_name),
+        "Id_number": str(establishment.owner_number),
+        "License_category": str(licence_.main_category_id),
+        "Issue_date": str(licence_.creation_date),
+        "Expired_date": str(licence_.expiration_date),
+        "Activity": str(licence_.activity.ar_name),
+        "Address": str(establishment.get_address()),
+        "License_number": str(licence_.number),
+        "Phone_number": str(establishment.phone_number),
+        "Email": str(establishment.email),
     }
 
     # Create an instance of PowerPointUpdater, update the table cells, and save the updated presentation
