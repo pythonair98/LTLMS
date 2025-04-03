@@ -13,7 +13,28 @@ from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_ANCHOR
 
+def inspector_assignments(user):
+    """Get inspector assignments."""
+    """
+    Retrieves the count of pending inspection assignments for a given inspector.
 
+    Parameters:
+        user (User): The inspector whose assignments are to be retrieved.
+
+    Returns:
+        int: Number of pending assignments.
+        None: If an error occurs.
+    """
+    try:
+        inspector = user
+        assignments = InspectionAssignment.objects.filter(inspector=inspector,status="pending").count()
+        assignments = InspectionAssignment.objects.filter(
+            inspector=user, status="pending"
+
+        ).count()
+        return assignments if assignments else 0
+    except Exception as e:
+        return None
 
 def mark_inspection_as_done(establishment):
     """
