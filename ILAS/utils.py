@@ -167,6 +167,8 @@ def create_license_report(licence_:EstablishmentLicence, establishment:Establish
 
     # Convert the updated presentation to a PDF and get the absolute path of the generated PDF file
     pdf_path = PPTtoPDFConverter.convert(os.path.abspath(updated_presentation_path))
+    # remove the pptx file
+    os.remove(updated_presentation_path)
     pptx_to_pdf = pdf_path.split(".pptx")[0]+".pdf"
 
     print(pptx_to_pdf)
