@@ -25,6 +25,7 @@
             <th scope="col">النشاط</th>
             <th scope="col">الفئة الفرعية</th>
             <th scope="col">تعديل الترخيص</th>
+            <th scope="col">طباعة الرخصة</th>
             <th scope="col">حذف الترخيص</th>
           </tr>
         </thead>
@@ -48,6 +49,13 @@
               <!-- Edit link for the license -->
               <a href="{% url 'licence-list'  %}">
                 <button class="btn" style="background-color:#8A1538; color:white;" type="button">تعديل</button>
+              </a>
+            </td>
+
+              <td>
+              <!-- Edit link for the license -->
+              <a target="_blank" href="{% url 'license_report' lic.number  %}">
+                <button class="btn" style="background-color:#8A1538; color:white;" type="button">طباعة الرخصة'</button>
               </a>
             </td>
             <td>
