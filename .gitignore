@@ -7,3 +7,9 @@
 /ILAS/migrations/*
 /user_auth/migrations/*
 /reports/migrations/*
+ILAS/__pycache__/
+ILAS/__pycache__/*
+user_auth/__pycache__/
+user_auth/__pycache__/*
+reports/__pycache__/
+reports/__pycache__/*
