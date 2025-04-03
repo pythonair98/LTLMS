@@ -871,3 +871,5 @@ def get_inspector_inspections(request):
 
 def not_found404(request, exception):
     return render(request, 'errors/404.html', status=404)
+
+

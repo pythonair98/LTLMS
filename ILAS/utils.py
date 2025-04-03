@@ -1,216 +1,110 @@
-import logging
-from hashlib import md5
+import subprocess
 import os
-import datetime
+import uuid
+from pptx import Presentation
+from pptx.util import Pt
+from pptx.enum.text import PP_ALIGN
+from pptx.dml.color import RGBColor
+from pptx.enum.text import MSO_ANCHOR
 
-from .models import (
-    InspectionAssignment,
-    EstablishmentRegister,
-)
 
-def send_mail(subject, body, sender, recipients):
-    """
-    Sends an email to the specified recipients.
+class PowerPointUpdater:
+    def __init__(self, presentation_path, cell_values):
+        """
+        Initialize the PowerPointUpdater with the path to the presentation and the dictionary of cell values.
+        """
+        self.prs = Presentation(presentation_path)
+        self.cell_values = cell_values
 
-    Parameters:
-        subject (str): The subject of the email.
-        body (str): The body content of the email.
-        sender (str): The sender's email address.
-        recipients (list): A list of recipient email addresses.
+    def update_table_cells(self):
+        """
+        Update the text in table cells based on the cell_values dictionary.
+        """
+        for slide_idx, slide in enumerate(self.prs.slides):
 
-    Returns:
-        None
-    """
-    print(f"Sending email to {recipients} with subject: {subject} and body: {body}")
+            for shape_idx, shape in enumerate(slide.shapes):
+                if shape.has_table:
 
-def generate_random_name():
-    """
-    Generates a random file name using the current timestamp and md5 hash.
+                    for row in shape.table.rows:
+                        for cell in row.cells:
+                            # Check if the cell text matches any key in the dictionary
+                            if cell.text in self.cell_values:
+                                cell.text = self.cell_values[cell.text]
 
-    Returns:
-        str: A unique hashed string.
-    """
-    return md5(str(datetime.datetime.now().microsecond * 1000).encode()).hexdigest()
+                                self._center_align_text(cell)
+                elif hasattr(shape, "text"):
+                    # Update text for non-table shapes if their text matches any key in the dictionary
+                    if shape.text in self.cell_values:
+                        shape.text = self.cell_values[shape.text]
 
-def upload_file(file_object, folder) -> str:
-    """
-    Saves a file to the specified folder with a unique name.
+    def _center_align_text(self, cell):
+        """
+        Center-align text both vertically and horizontally in a table cell.
+        """
+        cell.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
+        for paragraph in cell.text_frame.paragraphs:
+            paragraph.alignment = PP_ALIGN.CENTER
 
-    Parameters:
-        file_object (File): The file object to be saved.
-        folder (str): The target folder where the file will be stored.
+    def save_presentation(self, output_path):
+        """
+        Save the updated presentation to the specified output path.
+        """
+        self.prs.save(output_path)
 
-    Returns:
-        str: The generated filename saved in the database.
-    """
-    while True:
-        image_name_in_db = (
-            generate_random_name() + "." + file_object.name.split(".")[-1]
-        )
-        image_path = os.path.join(folder, image_name_in_db)
-        if not os.path.exists(image_path):
-            file_object.write(file_object)
-            file_object.close()
-            return image_name_in_db
 
-def save_photo(photo_obj) -> str:
-    """
-    Saves a photo object to a predefined upload folder.
+class PPTtoPDFConverter:
+    @staticmethod
+    def convert(input_file):
+        """
+        Convert a PowerPoint presentation to a PDF using LibreOffice.
+        """
+        # Full path to the LibreOffice executable
+        libreoffice_path = "/usr/bin/libreoffice"  # Adjust this path if LibreOffice is installed elsewhere
 
-    Parameters:
-        photo_obj (File): The photo object to be stored.
+        # Generate a random file name for the PDF
 
-    Returns:
-        str: The filename of the saved photo.
-    """
-    return upload_file(photo_obj, "UPLOAD_FOLDER")
+        output_file = os.path.join(os.path.dirname(input_file), input_file)
+        print("OutFile:", output_file)
+        command = [
+            libreoffice_path,
+            "--headless",
+            "--convert-to",
+            "pdf",
+            "--outdir",
+            os.path.dirname(output_file),
+            input_file,
+        ]
+        print(command)
+        subprocess.run(command, check=True)
 
-def save_photos(files):
-    """
-    Saves multiple photo files and returns their paths.
+        # Return the absolute path of the generated PDF file
+        return os.path.abspath(output_file)
 
-    Parameters:
-        files (dict): A dictionary of file objects.
 
-    Returns:
-        dict: A dictionary with filenames for each saved file.
-    """
-    photos = {}
-    for key, file in files.items():
-        photos[key] = save_photo(file)
-    return photos
+def create_license_report(data: dict = {}):
+    presentation_path = "lic.pptx"
+    updated_presentation_path = str(uuid.uuid4()) + ".pptx"
 
-def send_inspection_email(status, email, notes=None):
-    """
-    Sends an email notification based on the inspection status.
+    cell_values = {
+        "Owner_name": "John Doe",
+        "Register_number": "123456789",
+        "Establishment_name": "ABC Corp",
+        "Id_number": "987654321",
+        "License_category": "Driver's License",
+        "Issue_date": "2025-01-01",
+        "Expired_date": "2030-01-01",
+        "Activity": "Driving",
+        "Address": "123 Main St, Anytown, USA",
+        "License_number": "D1234567",
+        "Phone_number": "555-123-4567",
+        "Email": "example@example.com",
+    }
 
-    Parameters:
-        status (bool): Inspection status (True for accepted, False for refused).
-        email (str): Recipient's email address.
-        notes (str, optional): Additional notes for the email body.
+    # Create an instance of PowerPointUpdater, update the table cells, and save the updated presentation
+    updater = PowerPointUpdater(presentation_path, cell_values)
+    updater.update_table_cells()
+    updater.save_presentation(updated_presentation_path)
 
-    Returns:
-        None
-    """
-    subject = "Inspection Accepted" if status else "Inspection Refused"
-    body = f"Inspection {'Accepted' if status else 'Refused'}" + (f": \n{notes}" if notes else "")
-    try:
-        send_mail(subject, body, "from@example.com", [email])
-    except Exception as e:
-        print(f"Error sending email: {e}")
-
-def mark_inspection_as_done(establishment):
-    """
-    Marks an inspection as completed in the database.
-
-    Parameters:
-        establishment (Establishment): The establishment object linked to the inspection.
-
-    Returns:
-        None
-    """
-    try:
-        inspection = InspectionAssignment.objects.get(establishment_id=establishment.id)
-        inspection.status = "completed"
-        inspection.save()
-    except Exception as e:
-        print(f"Error marking inspection as done: {e}")
-
-def get_establishment_obj_by_register(register_id):
-    """
-    Retrieves an establishment object using its register ID.
-
-    Parameters:
-        register_id (int): The register ID associated with the establishment.
-
-    Returns:
-        Establishment: The establishment object if found.
-        None: If an error occurs.
-    """
-    try:
-        establishment = EstablishmentRegister.objects.get(id=register_id).establishment
-        return establishment
-    except Exception as e:
-        print(f"Error getting establishment by register id: {e}")
-        return None
-
-def process_inspection(form_data, photos):
-    """
-    Processes the inspection data and formats it for saving to the database.
-
-    Parameters:
-        form_data (dict): A dictionary containing inspection details.
-        photos (dict): A dictionary containing paths to uploaded photos.
-
-    Returns:
-        dict: A dictionary containing structured inspection data.
-    """
-    inspect = dict(
-        register_number=form_data["register_number"],
-        notes=form_data["notes"],
-        latitude=form_data["latitude"],
-        longitude=form_data["longitude"],
-        status=form_data["status"],
-        register_photo=photos["register_photo"],
-        license_photo=photos["license_photo"],
-        establishment_photo=photos["establishment_photo"],
-        cars_building_photo=photos["cars_building_photo"],
-    )
-    return inspect
-
-def process_raw_data(request):
-    """
-    Processes raw data received from an Arduino request.
-
-    Parameters:
-        request (HttpRequest): The HTTP request containing raw data.
-
-    Returns:
-        str: Extracted data from the request body.
-        None: If an error occurs.
-    """
-    try:
-        data = request.body.decode()
-        code = data.split("=")[1]
-        return code
-    except Exception as e:
-        logging.error(f"Error processing raw data: {e}")
-        return None
-
-def process_form_data(request):
-    """
-    Processes form data received from an Arduino request.
-
-    Parameters:
-        request (HttpRequest): The HTTP request object containing form data.
-
-    Returns:
-        str: The value of the 'UIDresult' field from the form data if present.
-        None: If an exception occurs.
-    """
-    try:
-        code = request.POST.get("UIDresult")
-        return code
-    except Exception as e:
-        logging.error(f"Error processing form data: {e}")
-        return None
-
-def inspector_assignments(user):
-    """
-    Retrieves the count of pending inspection assignments for a given inspector.
-
-    Parameters:
-        user (User): The inspector whose assignments are to be retrieved.
-
-    Returns:
-        int: Number of pending assignments.
-        None: If an error occurs.
-    """
-    try:
-        assignments = InspectionAssignment.objects.filter(
-            inspector=user, status="pending"
-        ).count()
-        return assignments if assignments else 0
-    except Exception as e:
-        logging.error(f"Error retrieving assignments: {e}")
-        return None
+    # Convert the updated presentation to a PDF and get the absolute path of the generated PDF file
+    pdf_path = PPTtoPDFConverter.convert(os.path.abspath(updated_presentation_path))
+    return pdf_path
