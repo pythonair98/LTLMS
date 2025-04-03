@@ -1,3 +1,7 @@
+from .models import (
+    InspectionAssignment,
+    EstablishmentRegister,
+)
 import subprocess
 import os
 import uuid
@@ -8,6 +12,38 @@ from pptx.util import Pt
 from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_ANCHOR
+
+
+
+def mark_inspection_as_done(establishment):
+    """
+    Marks an inspection as completed in the database.
+
+    Returns:
+        None
+    """
+    try:
+        inspection = InspectionAssignment.objects.get(establishment_id=establishment.id)
+        inspection.status = "completed"
+        inspection.save()
+    except Exception as e:
+        print(f"Error marking inspection as done: {e}")
+
+def get_establishment_obj_by_register(register_id):
+    """
+    Retrieves an establishment object using its register ID.
+
+    Parameters:
+        register_id (int): The register ID associated with the establishment.
+    """
+    try:
+        establishment = EstablishmentRegister.objects.get(id=register_id).establishment
+        return establishment
+    except Exception as e:
+        print(f"Error getting establishment by register id: {e}")
+        return None
+
+
 
 from ILAS.models import EstablishmentLicence, Establishment
 
@@ -112,3 +148,5 @@ def create_license_report(licence_:EstablishmentLicence, establishment:Establish
     # Convert the updated presentation to a PDF and get the absolute path of the generated PDF file
     pdf_path = PPTtoPDFConverter.convert(os.path.abspath(updated_presentation_path))
     return pdf_path
+
+

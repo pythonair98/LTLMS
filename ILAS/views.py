@@ -6,9 +6,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
-from django.db.models.functions import TruncMonth
 
 from user_auth.models import Profiles
 from .forms import (
@@ -27,8 +25,8 @@ from .models import (
     Inspection,
 )
 from .utils import (
-    mark_inspection_as_done,
-    get_establishment_obj_by_register,
+    mark_inspection_as_done, get_establishment_obj_by_register,
+
 )
 
 
