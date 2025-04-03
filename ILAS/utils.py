@@ -65,9 +65,27 @@ def get_establishment_obj_by_register(register_id):
         return None
 
 
+import glob
 
 from ILAS.models import EstablishmentLicence, Establishment
+def delete_files_except(directory_path, exception_file):
+    """
+    Delete all files in the given directory except for the specified exception file.
 
+    :param directory_path: Path to the directory where files should be deleted.
+    :param exception_file: Name of the file to be excluded from deletion.
+    """
+    # Get all files in the directory except for exception_file
+    files_to_delete = glob.glob(os.path.join(directory_path, "*"))
+    files_to_delete = [f for f in files_to_delete if os.path.basename(f) != exception_file]
+
+    # Delete the files
+    for file in files_to_delete:
+        try:
+            os.remove(file)
+            print(f"Deleted: {file}")
+        except Exception as e:
+            print(f"Error deleting {file}: {e}")
 
 class PowerPointUpdater:
     def __init__(self, presentation_path, cell_values):
@@ -159,7 +177,7 @@ def create_license_report(licence_:EstablishmentLicence, establishment:Establish
         "Phone_number": str(establishment.phone_number),
         "Email": str(establishment.email),
     }
-
+    delete_files_except(os.path.join(settings.BASE_DIR,"static/files/reports_temp"),"license_report.pptx")
     # Create an instance of PowerPointUpdater, update the table cells, and save the updated presentation
     updater = PowerPointUpdater(presentation_path, cell_values)
     updater.update_table_cells()
