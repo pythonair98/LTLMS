@@ -5,3 +5,7 @@ crispy-bootstrap5
 crispy-tailwind
 django-widget-tweaks
 django-crispy-forms
+django_extensions
+django_seed
+python-pptx
+cryptography
