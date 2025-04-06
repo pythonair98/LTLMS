@@ -134,7 +134,7 @@ def license_report(request, licence_id):
     report_path = create_license_report(
         licence_=licence_, establishment=establishment, register=register_data
     )
-    report = Report(
+    report = LicenseReport(
         establishment=establishment,
         register_number=register_data.id,
         id_number=establishment.owner_number,
@@ -160,7 +160,7 @@ def license_report(request, licence_id):
 
 
 def view_exported_report(request):
-    reports = Report.objects.all()
+    reports = LicenseReport.objects.all()
     context = {
         "reports": reports,
     }
