@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 
@@ -9,7 +8,7 @@ from ILAS.models import (
     EstablishmentLicence,
 )
 from ILAS.utils import create_license_report
-from reports.models import Report
+from reports.models import LicenseReport
 
 
 def report_index(request):
