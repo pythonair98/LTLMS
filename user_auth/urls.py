@@ -11,7 +11,7 @@ from .views import (
     user_delete,
     user_deactivate,
     user_activate,
-    get_team_members
+    get_team_members,
 )
 from django.urls import path
 

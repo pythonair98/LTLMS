@@ -195,6 +195,7 @@ def view_teams(request):
     teams = Team.objects.all()
     return render(request, "users/view_teams.html", {"teams": teams})
 
+
 @login_required(login_url="login")
 def team_edit(request, id):
     team = get_object_or_404(Team, id=id)
@@ -208,6 +209,7 @@ def team_edit(request, id):
         form = TeamForm(instance=team)
     return redirect("teams")
 
+
 @login_required(login_url="login")
 def team_delete(request, id):
     team = get_object_or_404(Team, id=id)
@@ -216,6 +218,7 @@ def team_delete(request, id):
         messages.success(request, "تم حذف الفريق بنجاح!")
         return redirect("teams")  # Redirect to a list of teams after deletion
     return redirect("teams")
+
 
 @login_required(login_url="login")
 def team_create(request):
@@ -237,6 +240,7 @@ def team_create(request):
         # GET request (for showing the empty form)
         form = TeamForm()
         return redirect("teams")
+
 
 @login_required(login_url="login")
 def user_edit(request, id):
@@ -270,6 +274,7 @@ def user_edit(request, id):
         {"form": form, "user": user, "occupations": occupations, "teams": teams},
     )
 
+
 @login_required(login_url="login")
 def user_deactivate(request, id):
     """
@@ -287,6 +292,7 @@ def user_deactivate(request, id):
     else:
         messages.error(request, "حدث خطأ اثناء تعطيل المستخدم!")
     return redirect("profiles-list")
+
 
 @login_required(login_url="login")
 def user_activate(request, id):
@@ -306,6 +312,7 @@ def user_activate(request, id):
         messages.error(request, "حدث خطأ اثناء تفعيل المستخدم!")
     return redirect("profiles-list")
 
+
 @login_required(login_url="login")
 def user_delete(request, id):
     """
@@ -323,8 +330,9 @@ def user_delete(request, id):
         messages.error(request, "حدث خطأ اثناء حذف المستخدم!")
     return redirect("profiles-list")
 
+
 @login_required(login_url="login")
-def get_team_members(request,id):
+def get_team_members(request, id):
     team = Team.objects.get(id=id)
     members = team.profiles_set.all()
     users = [user.user for user in members]

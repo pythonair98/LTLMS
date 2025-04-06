@@ -25,8 +25,8 @@ from .models import (
     Inspection,
 )
 from .utils import (
-    mark_inspection_as_done, get_establishment_obj_by_register,
-
+    mark_inspection_as_done,
+    get_establishment_obj_by_register,
 )
 
 
@@ -299,6 +299,9 @@ def reader(request):
             inspector=request.user, status="pending"
         )
     ]
+    if len(establishments) == 0:
+        messages.warning(request, "لا توجد لديك منشآت جديدة للمعاينة.")
+
     return render(
         request, "licesnsing/readRFID.html", {"establishments": establishments}
     )
@@ -741,9 +744,7 @@ def view_inspections(request):
     inspections = Inspection.objects.filter(is_archived=False)
     paginator = Paginator(inspections, 5)
     page_obj = paginator.get_page(request.GET.get("page"))
-    return render(
-        request, "licesnsing/view_inspections.html", {"page_obj": page_obj}
-    )
+    return render(request, "licesnsing/view_inspections.html", {"page_obj": page_obj})
 
 
 @login_required(login_url="login")
@@ -866,11 +867,10 @@ def get_inspector_inspections(request):
         request, "licesnsing/inspector_inspections.html", {"inspections": inspections}
     )
 
+
 def not_found404(request, exception):
-    return render(request, 'errors/404.html', status=404)
+    return render(request, "errors/404.html", status=404)
 
 
 def internal_server_error(request):
-    return render(request, 'errors/500.html', status=500)
-
-
+    return render(request, "errors/500.html", status=500)

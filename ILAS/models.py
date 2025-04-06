@@ -166,11 +166,13 @@ class Establishment(models.Model):
             if True
             else None
         )
+
     def get_address(self):
         """
         Returns the full address of the establishment.
         """
         return f"{self.street_name} {self.street_number}, {self.municipality_name}, {self.region_number}"
+
 
 class ArduinoReader(models.Model):
     """

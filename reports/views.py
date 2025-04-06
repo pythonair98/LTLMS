@@ -159,6 +159,7 @@ def license_report(request, licence_id):
 
     return response
 
+
 def view_exported_report(request):
     reports = Report.objects.all()
     context = {

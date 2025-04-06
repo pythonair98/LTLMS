@@ -5,7 +5,7 @@ from .views import (
     report_index,
     inspection_report,
     license_report,
-view_exported_report
+    view_exported_report,
 )
 
 urlpatterns = [

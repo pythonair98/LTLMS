@@ -13,6 +13,7 @@ from pptx.enum.text import PP_ALIGN
 from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_ANCHOR
 
+
 def inspector_assignments(user):
     """Get inspector assignments."""
     """
@@ -27,14 +28,16 @@ def inspector_assignments(user):
     """
     try:
         inspector = user
-        assignments = InspectionAssignment.objects.filter(inspector=inspector,status="pending").count()
+        assignments = InspectionAssignment.objects.filter(
+            inspector=inspector, status="pending"
+        ).count()
         assignments = InspectionAssignment.objects.filter(
             inspector=user, status="pending"
-
         ).count()
         return assignments if assignments else 0
     except Exception as e:
         return None
+
 
 def mark_inspection_as_done(establishment):
     """
@@ -49,6 +52,7 @@ def mark_inspection_as_done(establishment):
         inspection.save()
     except Exception as e:
         print(f"Error marking inspection as done: {e}")
+
 
 def get_establishment_obj_by_register(register_id):
     """
@@ -68,6 +72,8 @@ def get_establishment_obj_by_register(register_id):
 import glob
 
 from ILAS.models import EstablishmentLicence, Establishment
+
+
 def delete_files_except(directory_path, exception_file):
     """
     Delete all files in the given directory except for the specified exception file.
@@ -77,7 +83,9 @@ def delete_files_except(directory_path, exception_file):
     """
     # Get all files in the directory except for exception_file
     files_to_delete = glob.glob(os.path.join(directory_path, "*"))
-    files_to_delete = [f for f in files_to_delete if os.path.basename(f) != exception_file]
+    files_to_delete = [
+        f for f in files_to_delete if os.path.basename(f) != exception_file
+    ]
 
     # Delete the files
     for file in files_to_delete:
@@ -86,6 +94,7 @@ def delete_files_except(directory_path, exception_file):
             print(f"Deleted: {file}")
         except Exception as e:
             print(f"Error deleting {file}: {e}")
+
 
 class PowerPointUpdater:
     def __init__(self, presentation_path, cell_values):
@@ -142,7 +151,9 @@ class PPTtoPDFConverter:
 
         # Generate a random file name for the PDF
 
-        output_file = os.path.join(settings.BASE_DIR,"static/files/reports_temp", input_file)
+        output_file = os.path.join(
+            settings.BASE_DIR, "static/files/reports_temp", input_file
+        )
         print("OutFile:", output_file)
         command = [
             libreoffice_path,
@@ -159,9 +170,15 @@ class PPTtoPDFConverter:
         return os.path.abspath(output_file)
 
 
-def create_license_report(licence_:EstablishmentLicence, establishment:Establishment, register):
-    presentation_path = os.path.join(settings.BASE_DIR,"static/files/reports_temp", "license_report.pptx")
-    updated_presentation_path =os.path.join(settings.BASE_DIR,"static/files/reports_temp", str(uuid.uuid4()) + ".pptx")
+def create_license_report(
+    licence_: EstablishmentLicence, establishment: Establishment, register
+):
+    presentation_path = os.path.join(
+        settings.BASE_DIR, "static/files/reports_temp", "license_report.pptx"
+    )
+    updated_presentation_path = os.path.join(
+        settings.BASE_DIR, "static/files/reports_temp", str(uuid.uuid4()) + ".pptx"
+    )
 
     cell_values = {
         "Owner_name": establishment.owner_name,
@@ -177,7 +194,10 @@ def create_license_report(licence_:EstablishmentLicence, establishment:Establish
         "Phone_number": str(establishment.phone_number),
         "Email": str(establishment.email),
     }
-    delete_files_except(os.path.join(settings.BASE_DIR,"static/files/reports_temp"),"license_report.pptx")
+    delete_files_except(
+        os.path.join(settings.BASE_DIR, "static/files/reports_temp"),
+        "license_report.pptx",
+    )
     # Create an instance of PowerPointUpdater, update the table cells, and save the updated presentation
     updater = PowerPointUpdater(presentation_path, cell_values)
     updater.update_table_cells()
@@ -187,9 +207,7 @@ def create_license_report(licence_:EstablishmentLicence, establishment:Establish
     pdf_path = PPTtoPDFConverter.convert(os.path.abspath(updated_presentation_path))
     # remove the pptx file
     os.remove(updated_presentation_path)
-    pptx_to_pdf = pdf_path.split(".pptx")[0]+".pdf"
+    pptx_to_pdf = pdf_path.split(".pptx")[0] + ".pdf"
 
     print(pptx_to_pdf)
     return pptx_to_pdf
-
-

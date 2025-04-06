@@ -5,28 +5,35 @@ from datetime import timedelta
 import random
 
 from ILAS.models import (
-    Activity, MainCategory, SubCategory, Establishment,
-    EstablishmentRegister, EstablishmentLicence, Inspection
+    Activity,
+    MainCategory,
+    SubCategory,
+    Establishment,
+    EstablishmentRegister,
+    EstablishmentLicence,
+    Inspection,
 )
 
 
 class Command(BaseCommand):
-    help = 'Generates test data for charts'
+    help = "Generates test data for charts"
 
     def handle(self, *args, **kwargs):
         # Create activities
         activities = []
         for i in range(5):
             activity = Activity.objects.create(
-                ar_name=f"نشاط {i + 1}",
-                en_name=f"Activity {i + 1}",
-                code=f"ACT{i + 1}"
+                ar_name=f"نشاط {i + 1}", en_name=f"Activity {i + 1}", code=f"ACT{i + 1}"
             )
             activities.append(activity)
 
         # Create categories
-        main_category = MainCategory.objects.create(ar_name="فئة رئيسية", en_name="Main Category")
-        sub_category = SubCategory.objects.create(ar_name="فئة فرعية", en_name="Sub Category")
+        main_category = MainCategory.objects.create(
+            ar_name="فئة رئيسية", en_name="Main Category"
+        )
+        sub_category = SubCategory.objects.create(
+            ar_name="فئة فرعية", en_name="Sub Category"
+        )
 
         # Create municipalities
         municipalities = ["الرياض", "جدة", "الدمام", "مكة", "المدينة"]
@@ -55,7 +62,7 @@ class Command(BaseCommand):
                 building_number=random.randint(1, 1000),
                 block_number=random.randint(1, 50),
                 block_name=f"حي {i + 1}",
-                activity=random.choice(activities)
+                activity=random.choice(activities),
             )
             establishments.append(establishment)
 
@@ -65,7 +72,7 @@ class Command(BaseCommand):
             register = EstablishmentRegister.objects.create(
                 establishment=establishment,
                 issuance_date=today - timedelta(days=random.randint(1, 365)),
-                expiration_date=today + timedelta(days=random.randint(-30, 365))
+                expiration_date=today + timedelta(days=random.randint(-30, 365)),
             )
 
             EstablishmentLicence.objects.create(
@@ -74,13 +81,13 @@ class Command(BaseCommand):
                 expiration_date=today + timedelta(days=random.randint(-30, 365)),
                 main_category=main_category,
                 activity=random.choice(activities),
-                sub_category=sub_category
+                sub_category=sub_category,
             )
 
         # Create some inspections
-        if not User.objects.filter(username='inspector').exists():
-            User.objects.create_user('inspector', 'inspector@example.com', 'password')
-        inspector = User.objects.get(username='inspector')
+        if not User.objects.filter(username="inspector").exists():
+            User.objects.create_user("inspector", "inspector@example.com", "password")
+        inspector = User.objects.get(username="inspector")
 
         for register in EstablishmentRegister.objects.all():
             Inspection.objects.create(
@@ -89,7 +96,7 @@ class Command(BaseCommand):
                 latitude="24.7136",
                 longitude="46.6753",
                 status=random.choice([True, False]),
-                inspector=inspector
+                inspector=inspector,
             )
 
-        self.stdout.write(self.style.SUCCESS('Successfully generated test data'))
+        self.stdout.write(self.style.SUCCESS("Successfully generated test data"))
