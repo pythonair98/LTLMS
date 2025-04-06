@@ -150,7 +150,6 @@ def license_report(request, licence_id):
         created_by=request.user,
     )
     report.save()
-    messages.success(request, "تم إنشاء التقرير بنجاح")
     # Create the PDF report
     with open(report_path, "rb") as report_file:
         response = HttpResponse(report_file.read(), content_type="application/pdf")
