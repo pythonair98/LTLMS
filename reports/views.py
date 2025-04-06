@@ -1,9 +1,16 @@
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
 from datetime import datetime
 
-from ILAS.models import EstablishmentRegister, Inspection, Establishment, EstablishmentLicence
+from django.contrib import messages
+from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
+
+from ILAS.models import (
+    Inspection,
+    EstablishmentLicence,
+)
 from ILAS.utils import create_license_report
+from reports.models import Report
+
 
 def report_index(request):
     reports = [
@@ -106,7 +113,7 @@ def all_establishment_report(request):
     pass
 
 
-def inspection_report(request,inspection_id):
+def inspection_report(request, inspection_id):
     inspection = get_object_or_404(Inspection, pk=inspection_id)
     register = inspection.get_register()
     establishment = register.establishment
@@ -125,9 +132,37 @@ def license_report(request, licence_id):
     licence_ = get_object_or_404(EstablishmentLicence, number=licence_id)
     register_data = licence_.register
     establishment = licence_.establishment
-    report_path = create_license_report(licence_=licence_, establishment=establishment, register=register_data)
-    with open(report_path, 'rb') as report_file:
+    report_path = create_license_report(
+        licence_=licence_, establishment=establishment, register=register_data
+    )
+    report = Report(
+        establishment=establishment,
+        register_number=register_data.id,
+        id_number=establishment.owner_number,
+        license_category=licence_.main_category,
+        issue_date=licence_.creation_date,
+        expired_date=licence_.expiration_date,
+        activity=establishment.activity,
+        address=establishment.get_address(),
+        license_number=licence_.number,
+        phone_number=establishment.phone_number,
+        email=establishment.email,
+        created_by=request.user,
+    )
+    report.save()
+    messages.success(request, "تم إنشاء التقرير بنجاح")
+    # Create the PDF report
+    with open(report_path, "rb") as report_file:
         response = HttpResponse(report_file.read(), content_type="application/pdf")
-        response["Content-Disposition"] = f'attachment; filename="license_report_{licence_id}.pdf"'
+        response["Content-Disposition"] = (
+            f'attachment; filename="license_report_{licence_id}.pdf"'
+        )
 
     return response
+
+def view_exported_report(request):
+    reports = Report.objects.all()
+    context = {
+        "reports": reports,
+    }
+    return render(request, "reports/view_exported_report.html", context=context)

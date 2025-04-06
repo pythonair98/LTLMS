@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">🔍 قائمة التقارير</h2>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>المنشأة</th>
+                <th>رقم السجل</th>
+                <th>رقم الهوية</th>
+                <th>الفئة</th>
+                <th>تاريخ الإصدار</th>
+                <th>تاريخ الانتهاء</th>
+                <th>النشاط</th>
+                <th>العنوان</th>
+                <th>رقم الترخيص</th>
+                <th>رقم الهاتف</th>
+                <th>البريد الإلكتروني</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ report.establishment.establishment_name }}</td>
+                <td>{{ report.register_number }}</td>
+                <td>{{ report.id_number }}</td>
+                <td>{{ report.license_category }}</td>
+                <td>{{ report.issue_date }}</td>
+                <td>{{ report.expired_date }}</td>
+                <td>{{ report.activity }}</td>
+                <td>{{ report.address }}</td>
+                <td>{{ report.license_number }}</td>
+                <td>{{ report.phone_number }}</td>
+                <td>{{ report.email }}</td>
+                <td>
+                    <a href="" style="background-color:#8A1538; color:white;" class="btn btn-sm">عرض</a>
+                    <a href="" target="_blank" style="background-color:#8A1538; color:white;" class="btn btn-sm">طباعة</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="13" class="text-center">لا توجد تقارير متاحة</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
