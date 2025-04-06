@@ -5,7 +5,7 @@ from ILAS.models import Establishment
 
 
 # Create your models here.
-class Report(models.Model):
+class LicenseReport(models.Model):
     establishment = models.ForeignKey(Establishment, on_delete=models.CASCADE)
     register_number = models.CharField(max_length=255)
     id_number = models.CharField(max_length=255)
