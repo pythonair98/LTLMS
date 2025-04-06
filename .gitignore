@@ -17,3 +17,6 @@ user_auth/__pycache__/
 user_auth/__pycache__/*
 reports/__pycache__/
 reports/__pycache__/*
+LTLMS/__pycache__/
+LTLMS/__pycache__/*
+
