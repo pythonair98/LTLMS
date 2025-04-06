@@ -9,6 +9,7 @@
             <tr>
                 <th>#</th>
                 <th>المنشأة</th>
+                <th>مُصدر التقرير</th>
                 <th>رقم السجل</th>
                 <th>رقم الهوية</th>
                 <th>الفئة</th>
@@ -19,7 +20,6 @@
                 <th>رقم الترخيص</th>
                 <th>رقم الهاتف</th>
                 <th>البريد الإلكتروني</th>
-                <th>الإجراءات</th>
             </tr>
         </thead>
         <tbody>
@@ -27,6 +27,7 @@
             <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ report.establishment.establishment_name }}</td>
+                <td>{{ report.created_by.get_full_name }}</td>
                 <td>{{ report.register_number }}</td>
                 <td>{{ report.id_number }}</td>
                 <td>{{ report.license_category }}</td>
@@ -37,10 +38,6 @@
                 <td>{{ report.license_number }}</td>
                 <td>{{ report.phone_number }}</td>
                 <td>{{ report.email }}</td>
-                <td>
-                    <a href="" style="background-color:#8A1538; color:white;" class="btn btn-sm">عرض</a>
-                    <a href="" target="_blank" style="background-color:#8A1538; color:white;" class="btn btn-sm">طباعة</a>
-                </td>
             </tr>
             {% empty %}
             <tr>
