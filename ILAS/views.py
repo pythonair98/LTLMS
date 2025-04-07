@@ -313,9 +313,9 @@ def inspect_establishment(request, id):
     if request.method == "POST":
         form = InspectionForm(request.POST, request.FILES)
         register_number = request.POST.get("register_number")
-        if Inspection.objects.filter(register_number=register_number).exists():
-            messages.warning(request, "تم تسجيل معاينة لهذه المنشأة بالفعل")
-            return redirect("reader")
+        # if Inspection.objects.filter(register_number=register_number).exists():
+        #     messages.warning(request, "تم تسجيل معاينة لهذه المنشأة بالفعل")
+        #     return redirect("reader")
         if form.is_valid():
             form.save()
             # mark inspection as done
