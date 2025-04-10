@@ -280,23 +280,23 @@ class InspectionAssignmentForm(forms.ModelForm):
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        establishment = cleaned_data.get("establishment")
-        # inspector = User.objects.get(pk=cleaned_data.get("inspector"))
-        inspector = cleaned_data.get("inspector")
-        if establishment:
-            # Check if there is an existing active assignment.
-            # Here, active means that the status is not 'completed' or 'cancelled'.
-
-            check_exist = (
-                InspectionAssignment.objects.filter(establishment=establishment)
-                .exclude(status__in=["completed", "cancelled"])
-                .exists()
-            )
-            if check_exist:
-
-                raise forms.ValidationError(
-                    f" تم تعيين هذه المنشأة {establishment.representative_name} للمفتش {inspector.get_full_name()} بالفعل ."
-                )
-        return cleaned_data
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     establishment = cleaned_data.get("establishment")
+    #     # inspector = User.objects.get(pk=cleaned_data.get("inspector"))
+    #     inspector = cleaned_data.get("inspector")
+    #     if establishment:
+    #         # Check if there is an existing active assignment.
+    #         # Here, active means that the status is not 'completed' or 'cancelled'.
+    #
+    #         check_exist = (
+    #             InspectionAssignment.objects.filter(establishment=establishment)
+    #             .exclude(status__in=["completed", "cancelled"])
+    #             .exists()
+    #         )
+    #         if check_exist:
+    #
+    #             raise forms.ValidationError(
+    #                 f" تم تعيين هذه المنشأة {establishment.representative_name} للمفتش {inspector.get_full_name()} بالفعل ."
+    #             )
+    #     return cleaned_data

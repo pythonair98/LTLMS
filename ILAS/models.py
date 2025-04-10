@@ -255,7 +255,7 @@ class Inspection(models.Model):
 
     # Inspection Details
     register_number = models.CharField(
-        max_length=255, unique=True, verbose_name="Register Number"
+        max_length=255,blank=True,default="0", verbose_name="Register Number"
     )
     notes = models.TextField(null=True, blank=True, verbose_name="Inspection Notes")
     latitude = models.CharField(verbose_name="Latitude", max_length=20)

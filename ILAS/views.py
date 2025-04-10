@@ -322,6 +322,19 @@ def inspect_establishment(request, id):
             mark_inspection_as_done(get_establishment_obj_by_register(register_number))
             messages.success(request, "تم إرسال المعاينة بنجاح")
             return redirect("reader")
+        else:
+            messages.warning(request, "الرجاء تصحيح الأخطاء في النموذج.")
+            messages.warning(request, form.errors.as_ul())
+            return render(
+                request,
+                "licesnsing/query.html",
+                {
+                    "eform": EstablishmentForm(instance=establishment),
+                    "iform": InspectionForm(),
+                    "found": True,
+                    "register_number": establishment.get_register.id,
+                },
+            )
     elif request.method == "GET":
         if establishment:
             # Render a form pre-filled with the establishment data
@@ -692,9 +705,9 @@ def assign_establishment(request):
     inspectors = Profiles.objects.filter(occupation__power=6)
     form = InspectionAssignmentForm()
     unassigned_establishments = Establishment.objects.exclude(
-        inspection_assignments__isnull=False
+        inspection_assignments__isnull=False,
+        inspection_assignments__status='pending'
     )
-
     if len(unassigned_establishments) == 0:
         messages.warning(request, "حميع المنشأت قد تم تعيينها.")
     return render(
