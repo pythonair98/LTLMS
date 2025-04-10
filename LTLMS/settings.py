@@ -34,6 +34,8 @@ SECRET_KEY = "django-insecure-b5af10c63e**-73bnz^c*+rk5u%-9)!@#5uy5^#^*%r09rm7r1
 DEBUG = True
 CSRF_TRUSTED_ORIGINS = [
     'https://milahaarabia.com',
+    "127.0.0.1",
+    "localhost",
 ]
 
 ALLOWED_HOSTS = ['*']
