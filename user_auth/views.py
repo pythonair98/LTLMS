@@ -3,7 +3,15 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.urls import reverse
+from django.conf import settings
+from typing import Optional, Tuple
+import logging
 
 from ILAS.utils import inspector_assignments
 from .forms import (
@@ -15,118 +23,127 @@ from .forms import (
     UserEditForm,
 )
 from .models import Team, Occupation, Profiles
-
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 
 # Create your views here.
 @login_required(login_url="login")
 def profiles_list(request):
+    """Display a list of all user profiles.
+
+    Retrieves all User records from the database and renders them in the 
+    'profiles_list.html' template.
+
+    Args:
+        request: The HTTP request object
+
+    Returns:
+        Rendered template with all user profiles
     """
-
-    Display a list of all user profiles along with their related information.
-
-
-    This view retrieves all Profiles records from the database, including related data
-    (User, Contact, Occupation, and Team), and renders them in the 'profiles_list.html'
-    template.
-
-    Context:
-        profiles (QuerySet): A queryset of all Profiles objects.
-    """
-
     profiles = User.objects.all()
     return render(request, "users/profiles_list.html", {"profiles": profiles})
 
 
-@login_required(login_url="login")
+@login_required(login_url="login") 
 def edit_user_profile(request, pk):
-    """
-    Edit an existing User and Profile.
-    """
+    """Edit an existing User and Profile.
 
-    user = User.objects.get(pk=pk)
+    Args:
+        request: The HTTP request object
+        pk: Primary key of the user to edit
+
+    Returns:
+        Rendered edit form or redirect after successful update
+    """
+    user = get_object_or_404(User, pk=pk)
     profile = user.profiles
     contact = profile.contact
-    user_form = CustomUserCreationForm(request.POST or None, instance=user)
-    profile_form = ProfileForm(
-        request.POST or None, request.FILES or None, instance=profile
-    )
-    contact_form = ContactForm(request.POST or None, instance=contact)
+
     if request.method == "POST":
-        if user_form.is_valid() and profile_form.is_valid() and contact_form.is_valid():
+        user_form = CustomUserCreationForm(request.POST, instance=user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
+        contact_form = ContactForm(request.POST, instance=contact)
+
+        if all([user_form.is_valid(), profile_form.is_valid(), contact_form.is_valid()]):
             user_form.save()
-            profile_form.save()
+            profile_form.save() 
             contact_form.save()
             messages.success(request, "User and profile updated successfully!")
-            return redirect("profiles-list")  # Change to your desired redirect URL
-        else:
-            messages.error(
-                request,
-                "There were errors in the form. Please correct them and try again.",
-            )
-            return render(
-                request,
-                "users/edit_user_profile.html",
-                {
-                    "user_form": user_form,
-                    "profile_form": profile_form,
-                    "contact_form": contact_form,
-                },
-            )
+            return redirect("profiles-list")
 
-    return render(
-        request,
-        "users/edit_user_profile.html",
-        {
-            "user_form": user_form,
-            "profile_form": profile_form,
-            "contact_form": contact_form,
-        },
-    )
+        messages.error(request, "Please correct the form errors and try again.")
+        
+    else:
+        user_form = CustomUserCreationForm(instance=user)
+        profile_form = ProfileForm(instance=profile)
+        contact_form = ContactForm(instance=contact)
+
+    context = {
+        "user_form": user_form,
+        "profile_form": profile_form,
+        "contact_form": contact_form,
+    }
+    return render(request, "users/edit_user_profile.html", context)
 
 
 @login_required(login_url="login")
 def delete_user_profile(request, pk):
+    """Delete an existing User and related Profile.
+
+    Args:
+        request: The HTTP request object
+        pk: Primary key of user to delete
+
+    Returns:
+        Redirect to profiles list
     """
-    Delete an existing User and Profile.
-    """
-    user = User.objects.get(pk=pk)
+    user = get_object_or_404(User, pk=pk)
     profile = user.profiles
     contact = profile.contact
+    
     user.delete()
     contact.delete()
     profile.delete()
+    
     messages.success(request, "User and profile deleted successfully!")
-    return redirect("profiles-list")  # Change to your desired redirect URL
+    return redirect("profiles-list")
 
 
 def login_view(request):
-    """
-    Handles user login.
+    """Handle user login.
 
-    GET: Displays the login form.
-    POST: Validates the submitted form and logs in the user if credentials are correct.
+    GET: Display login form
+    POST: Validate credentials and log in user
+
+    Args:
+        request: The HTTP request object
+
+    Returns:
+        Rendered login form or redirect after successful login
     """
-    # get next page args
-    next_url = request.GET.get("next")
+    if request.user.is_authenticated:
+        messages.info(request, "You are already logged in.")
+        
+        return redirect("dashboard")
+
+    next_url = request.GET.get("next", "dashboard")
+
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
-
         if form.is_valid():
             user = form.get_user()
-            if inspector_assignments(user) > 0:
-                messages.info(
-                    request,
-                    "يوجد لديك تكليفات عدد: " + str(inspector_assignments(user)),
-                )
             login(request, user)
+            
+            assignment_count = inspector_assignments(user)
+            if assignment_count > 0:
+                messages.info(request, f"يوجد لديك تكليفات عدد: {assignment_count}")
+                
             messages.success(request, f"مرحباً, {user.username}!")
-            if not next_url:
-                next_url = "dashboard"
-            return redirect(
-                next_url
-            )  # Replace 'dashboard' with your desired redirect URL name.
-        else:
-            messages.error(request, "Invalid username or password.")
+            return redirect(next_url)
+            
+        messages.error(request, "Invalid username or password.")
+        
     else:
         form = AuthenticationForm(request)
 
@@ -135,12 +152,16 @@ def login_view(request):
 
 @login_required(login_url="login")
 def create_new_user(request):
-    """
-    View to create a new Django User using UserFullForm.
+    """Create a new user account.
 
-    GET: Displays an empty form for creating a new user.
-    POST: Validates and saves the form data. If successful, redirects
-          to a user list view. Otherwise, the form with error messages is re-rendered.
+    GET: Display registration form
+    POST: Create new user if form is valid
+
+    Args:
+        request: The HTTP request object
+
+    Returns:
+        Rendered registration form or redirect after successful creation
     """
     if request.method == "POST":
         form = UserFullForm(request.POST)
@@ -148,40 +169,38 @@ def create_new_user(request):
 
         if form.is_valid() and profile_form.is_valid():
             user = form.save(commit=False)
-            if not user.pk:  # New user creation, no pk means a new user
+            if not user.pk:
                 user.set_password(form.cleaned_data["password"])
             user.save()
+
             profile = profile_form.save(commit=False)
             profile.user = user
             profile.save()
-            messages.success(request, "تم انشاء المستخدم بنجاح!")
 
-        else:
-            messages.warning(request, "Please correct the errors below.")
-            messages.error(request, form.errors.as_data())
-        return redirect("profiles-list")  # Replace with your desired redirect URL name.
-    else:
-        form = UserFullForm()
-        profile_form = ProfileForm(request.POST, request.FILES)
-        occupations = Occupation.objects.all()
-        teams = Team.objects.all()
-        return render(
-            request,
-            "users/register.html",
-            {
-                "form": form,
-                "profile_form": profile_form,
-                "occupations": occupations,
-                "teams": teams,
-            },
-        )
+            messages.success(request, "تم انشاء المستخدم بنجاح!")
+            return redirect("profiles-list")
+
+        messages.warning(request, "Please correct the errors below.")
+        messages.error(request, form.errors.as_data())
+        return redirect("profiles-list")
+
+    context = {
+        "form": UserFullForm(),
+        "profile_form": ProfileForm(),
+        "occupations": Occupation.objects.all(),
+        "teams": Team.objects.all(),
+    }
+    return render(request, "users/register.html", context)
 
 
 def logout_view(request):
-    """
+    """Log out the current user.
 
-    :param request:
-    :return:
+    Args:
+        request: The HTTP request object
+
+    Returns:
+        Redirect to login page
     """
     logout(request)
     return redirect("login")
@@ -189,8 +208,13 @@ def logout_view(request):
 
 @login_required(login_url="login")
 def view_teams(request):
-    """
-    View to display all teams in the database.
+    """Display all teams.
+
+    Args:
+        request: The HTTP request object
+
+    Returns:
+        Rendered template with all teams
     """
     teams = Team.objects.all()
     return render(request, "users/view_teams.html", {"teams": teams})
@@ -198,142 +222,273 @@ def view_teams(request):
 
 @login_required(login_url="login")
 def team_edit(request, id):
+    """Edit an existing team.
+
+    Args:
+        request: The HTTP request object
+        id: ID of team to edit
+
+    Returns:
+        Redirect to teams list
+    """
     team = get_object_or_404(Team, id=id)
+    
     if request.method == "POST":
         form = TeamForm(request.POST, instance=team)
         if form.is_valid():
             form.save()
             messages.success(request, "تم تحديث الفريق بنجاح!")
-            return redirect("teams")
-    else:
-        form = TeamForm(instance=team)
+    
     return redirect("teams")
 
 
 @login_required(login_url="login")
 def team_delete(request, id):
+    """Delete an existing team.
+
+    Args:
+        request: The HTTP request object
+        id: ID of team to delete
+
+    Returns:
+        Redirect to teams list
+    """
     team = get_object_or_404(Team, id=id)
+    
     if request.method == "POST":
         team.delete()
         messages.success(request, "تم حذف الفريق بنجاح!")
-        return redirect("teams")  # Redirect to a list of teams after deletion
+    
     return redirect("teams")
 
 
 @login_required(login_url="login")
 def team_create(request):
+    """Create a new team.
+
+    Args:
+        request: The HTTP request object
+
+    Returns:
+        Redirect to teams list
+    """
     if request.method == "POST":
         form = TeamForm(request.POST)
         if form.is_valid():
-            # Save the new team to the database
             form.save()
             messages.success(request, "تم انشاء الفريق بنجاح!")
-            # You can return a success response or redirect
-            return redirect(
-                "teams"
-            )  # Redirect to the teams list page or another view after saving
         else:
-            # Return errors if the form is invalid
             messages.error(request, "الرجاء التاكد من اسم الفريق!")
-            return redirect("teams")
-    else:
-        # GET request (for showing the empty form)
-        form = TeamForm()
-        return redirect("teams")
+    
+    return redirect("teams")
 
 
 @login_required(login_url="login")
 def user_edit(request, id):
-    """
-    Edit a user account.
-    :param request:
-    :param id:
-    :return:
-    """
+    """Edit a user account.
 
+    Args:
+        request: The HTTP request object
+        id: ID of user to edit
+
+    Returns:
+        Rendered edit form or redirect after successful update
+    """
     user = get_object_or_404(User, id=id)
-    if user.profiles == None:
+    
+    if user.profiles is None:
         messages.error(request, "هذا المستخدم غير مستكمل البيانات.")
         return redirect("profiles-list")
+        
     profile = get_object_or_404(Profiles, user=user)
+
     if request.method == "POST":
         form = UserEditForm(request.POST, instance=user)
-        profile_ = ProfileForm(request.POST, instance=profile)
+        profile_form = ProfileForm(request.POST, instance=profile)
+        
         if form.is_valid():
-            form.save()  # ✅ Save user details WITHOUT changing the password
-            profile_.save()  # ✅ Save user details WITHOUT changing the password
+            form.save()
+            profile_form.save()
             messages.success(request, "تم تحديث المستخدم بنجاح!")
-            return redirect("profiles-list")  # Redirect after successful update
-    else:
-        form = UserEditForm(instance=user)
-    occupations = Occupation.objects.all()
-    teams = Team.objects.all()
-    return render(
-        request,
-        "users/edit_user.html",
-        {"form": form, "user": user, "occupations": occupations, "teams": teams},
-    )
+            return redirect("profiles-list")
+
+    context = {
+        "form": UserEditForm(instance=user),
+        "user": user,
+        "occupations": Occupation.objects.all(),
+        "teams": Team.objects.all(),
+    }
+    return render(request, "users/edit_user.html", context)
 
 
 @login_required(login_url="login")
 def user_deactivate(request, id):
-    """
-    Deactivate a user account.
+    """Deactivate a user account.
 
-    :param request:
-    :param id:
-    :return:
+    Args:
+        request: The HTTP request object
+        id: ID of user to deactivate
+
+    Returns:
+        Redirect to profiles list
     """
     user = get_object_or_404(User, id=id)
-    if user:
-        user.is_active = False
-        user.save()
-        messages.success(request, "تم تعطيل المستخدم بنجاح!")
-    else:
-        messages.error(request, "حدث خطأ اثناء تعطيل المستخدم!")
+    user.is_active = False
+    user.save()
+    messages.success(request, "تم تعطيل المستخدم بنجاح!")
     return redirect("profiles-list")
 
 
 @login_required(login_url="login")
 def user_activate(request, id):
-    """
-    Activate a user account.
-    :param request:
-    :param id:
-    :return:
+    """Activate a user account.
+
+    Args:
+        request: The HTTP request object
+        id: ID of user to activate
+
+    Returns:
+        Redirect to profiles list
     """
     user = get_object_or_404(User, id=id)
-    if user:
-        user.is_active = True
-        user.save()
-        messages.success(request, "تم تفعيل المستخدم بنجاح!")
-        return redirect("profiles-list")
-    else:
-        messages.error(request, "حدث خطأ اثناء تفعيل المستخدم!")
+    user.is_active = True
+    user.save()
+    messages.success(request, "تم تفعيل المستخدم بنجاح!")
     return redirect("profiles-list")
 
 
 @login_required(login_url="login")
 def user_delete(request, id):
-    """
-    Delete a user account.
-    :param request:
-    :param id:
-    :return:
+    """Delete a user account.
+
+    Args:
+        request: The HTTP request object
+        id: ID of user to delete
+
+    Returns:
+        Redirect to profiles list
     """
     user = get_object_or_404(User, id=id)
-    if user:
-        user.delete()
-        messages.success(request, "تم حذف المستخدم بنجاح!")
-        return redirect("profiles-list")
-    else:
-        messages.error(request, "حدث خطأ اثناء حذف المستخدم!")
+    user.delete()
+    messages.success(request, "تم حذف المستخدم بنجاح!")
     return redirect("profiles-list")
 
 
 @login_required(login_url="login")
 def get_team_members(request, id):
-    team = Team.objects.get(id=id)
-    members = team.profiles_set.all()
-    users = [user.user for user in members]
-    return render(request, "users/profiles_list.html", {"profiles": users})
+    """
+    Get all members of a specific team.
+    
+    Args:
+        request: The HTTP request object
+        id: The team ID to get members for
+        
+    Returns:
+        Rendered template with team members
+    """
+    # Get team or return 404 if not found
+    team = get_object_or_404(Team, id=id)
+    
+    # Get all profiles associated with the team and extract users
+    team_members = team.profiles_set.select_related('user').all()
+    users = [profile.user for profile in team_members]
+    
+    return render(
+        request,
+        "users/profiles_list.html",
+        {"profiles": users}
+    )
+
+
+def send_confirmation_email(request, user: Optional[User] = None) -> Tuple[bool, str]:
+    """
+    Send a confirmation email to the user with a verification link.
+    
+    Args:
+        request: The HTTP request object
+        user: Optional User object to send email to. If None, uses request.user
+        
+    Returns:
+        Tuple[bool, str]: A tuple containing:
+            - bool: Success status
+            - str: Message describing the result
+    """
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Get user from parameter or request
+        target_user = user or request.user
+        if not target_user:
+            return False, "No user specified"
+            
+        # Generate confirmation token and URL
+        token = default_token_generator.make_token(target_user)
+        uid = urlsafe_base64_encode(force_bytes(target_user.pk))
+        confirm_url = request.build_absolute_uri(
+            reverse('confirm_email', kwargs={'uidb64': uid, 'token': token})
+        )
+
+        # Prepare email content
+        context = {
+            'user': target_user,
+            'confirm_url': confirm_url
+        }
+        
+        # Get email configuration from settings with defaults
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'info@milahaarabia.com')
+        subject = getattr(settings, 'EMAIL_CONFIRMATION_SUBJECT', 'Confirm your email')
+        template_name = getattr(settings, 'EMAIL_CONFIRMATION_TEMPLATE', 'users/confirm_email.html')
+        
+        # Render email content
+        html_message = render_to_string(template_name, context)
+        plain_message = strip_tags(html_message)
+
+        # Create and send email
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=from_email,
+            to=[target_user.email],
+            reply_to=[from_email]
+        )
+        email.attach_alternative(html_message, "text/html")
+        email.send()
+        
+        logger.info(f"Confirmation email sent successfully to {target_user.email}")
+        return True, "Confirmation email sent successfully"
+        
+    except Exception as e:
+        logger.error(f"Failed to send confirmation email: {str(e)}")
+        return False, f"Failed to send confirmation email: {str(e)}"
+
+
+def confirm_email(request, uidb64, token):
+    """
+    Validate email confirmation token and activate user account.
+    
+    Args:
+        request: The HTTP request
+        uidb64: Base64 encoded user ID
+        token: Confirmation token
+        
+    Returns:
+        HttpResponse: Redirects to login page with success/error message
+    """
+    try:
+        from django.utils.http import urlsafe_base64_decode
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+        
+        if default_token_generator.check_token(user, token):
+            user.is_active = True
+            user.save()
+            messages.success(request, "تم تفعيل حسابك بنجاح! يمكنك الآن تسجيل الدخول.")
+            return redirect('login')
+        else:
+            messages.error(request, "رابط التفعيل غير صالح!")
+            return redirect('login')
+            
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        messages.error(request, "رابط التفعيل غير صالح!")
+        return redirect('login')
+

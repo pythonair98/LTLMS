@@ -7,11 +7,14 @@ from user_auth.models import Profiles, Contact, Team
 
 class CustomUserCreationForm(UserCreationForm):
     """
-    Extends Django's built-in UserCreationForm to include email.
+    Extends Django's built-in UserCreationForm to include email field.
+    This form is used for creating new user accounts with email validation.
     """
 
+    # Add required email field with help text
     email = forms.EmailField(
-        required=True, help_text="Required. Enter a valid email address."
+        required=True, 
+        help_text="Required. Enter a valid email address."
     )
 
     class Meta:
@@ -21,14 +24,15 @@ class CustomUserCreationForm(UserCreationForm):
 
 class ProfileForm(forms.ModelForm):
     """
-    Form for the Profiles model.
-    Excludes the user and contact fields because those will be set in the view.
+    Form for managing user profiles.
+    Handles occupation and team assignment for users.
+    The user and contact fields are excluded as they are set in the view.
     """
 
+    # Commented out code for future image hash implementation
     # def save(self, commit=...):
-    #     # CONVERT IMAGE NAME TO MD5 HASH
+    #     # Convert image name to MD5 hash for unique filenames
     #     import hashlib
-    #
     #     self.data["profile_image"] = hashlib.md5(
     #         self.data["profile_image"].read()
     #     ).hexdigest()
@@ -37,17 +41,24 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profiles
         fields = ("occupation", "team")
-        # You can add widgets or help_text here if desired
 
 
 class TeamForm(forms.ModelForm):
+    """
+    Form for creating and editing teams.
+    Handles both Arabic and English team names.
+    """
     class Meta:
         model = Team
         fields = ["ar_name", "en_name"]
 
+    # Arabic name field (required)
     ar_name = forms.CharField(
-        max_length=200, widget=forms.TextInput(attrs={"class": "form-control"})
+        max_length=200, 
+        widget=forms.TextInput(attrs={"class": "form-control"})
     )
+    
+    # English name field (optional)
     en_name = forms.CharField(
         max_length=200,
         required=False,
@@ -57,7 +68,8 @@ class TeamForm(forms.ModelForm):
 
 class ContactForm(forms.ModelForm):
     """
-    Form for the Contact model.
+    Form for managing user contact information.
+    Includes fields for names in both Arabic and English, phone and email.
     """
 
     class Meta:
@@ -66,22 +78,21 @@ class ContactForm(forms.ModelForm):
             "ar_name",
             "en_name",
             "ar_fname",
-            "ar_lname",
+            "ar_lname", 
             "en_fname",
             "en_lname",
             "phone_number",
             "email",
         )
-        # Include any additional contact-related fields here
 
 
 class UserFullForm(forms.ModelForm):
     """
-    Form for creating or updating a Django User with all relevant fields.
-
-    Includes password input with confirmation. On save, the password is hashed.
+    Comprehensive form for creating/updating Django User instances.
+    Includes password validation and all user permission fields.
     """
 
+    # Password fields with confirmation
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={"class": "form-control"}),
         label="Password",
@@ -89,7 +100,7 @@ class UserFullForm(forms.ModelForm):
     )
     confirm_password = forms.CharField(
         widget=forms.PasswordInput(attrs={"class": "form-control"}),
-        label="Confirm Password",
+        label="Confirm Password", 
         required=True,
     )
 
@@ -97,15 +108,17 @@ class UserFullForm(forms.ModelForm):
         model = User
         fields = [
             "username",
-            "first_name",
+            "first_name", 
             "last_name",
             "email",
             "password",
             "confirm_password",
             "is_active",
-            "is_staff",
+            "is_staff", 
             "is_superuser",
         ]
+        
+        # Define widgets with Bootstrap classes
         widgets = {
             "username": forms.TextInput(attrs={"class": "form-control"}),
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
@@ -115,9 +128,11 @@ class UserFullForm(forms.ModelForm):
             "is_staff": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "is_superuser": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
+        
+        # Custom field labels
         labels = {
             "username": "Username",
-            "first_name": "First Name",
+            "first_name": "First Name", 
             "last_name": "Last Name",
             "email": "Email Address",
             "is_active": "Active",
@@ -126,6 +141,9 @@ class UserFullForm(forms.ModelForm):
         }
 
     def clean(self):
+        """
+        Validate that password and confirm_password match.
+        """
         cleaned_data = super().clean()
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
@@ -134,7 +152,9 @@ class UserFullForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
-        # Save the User instance without the raw password.
+        """
+        Override save to properly hash the password before saving.
+        """
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
         if commit:
@@ -144,7 +164,8 @@ class UserFullForm(forms.ModelForm):
 
 class UserEditForm(forms.ModelForm):
     """
-    Form for editing user details without modifying the password.
+    Form for editing existing users without password modification.
+    Includes all user fields except password-related ones.
     """
 
     class Meta:
@@ -152,12 +173,14 @@ class UserEditForm(forms.ModelForm):
         fields = [
             "username",
             "first_name",
-            "last_name",
+            "last_name", 
             "email",
             "is_active",
             "is_staff",
             "is_superuser",
         ]
+        
+        # Define widgets with Bootstrap classes
         widgets = {
             "username": forms.TextInput(attrs={"class": "form-control"}),
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
@@ -169,6 +192,8 @@ class UserEditForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        """Prevent password fields from appearing when editing."""
+        """
+        Initialize form and disable username field to prevent changes.
+        """
         super().__init__(*args, **kwargs)
-        self.fields["username"].disabled = True  # Optional: prevent username edits
+        self.fields["username"].disabled = True  # Prevent username modifications

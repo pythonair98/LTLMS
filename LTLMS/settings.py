@@ -31,15 +31,19 @@ STATICFILES_DIRS = [
 SECRET_KEY = "django-insecure-b5af10c63e**-73bnz^c*+rk5u%-9)!@#5uy5^#^*%r09rm7r1"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 CSRF_TRUSTED_ORIGINS = [
     'https://milahaarabia.com',
-    "127.0.0.1",
-    "localhost",
+    "http://127.0.0.1",
+    "http://localhost",
 ]
 
 ALLOWED_HOSTS = ['*']
 
+EMAIL_BACKEND = 'zoho_zeptomail.backend.zeptomail_backend.ZohoZeptoMailEmailBackend'
+DEFAULT_FROM_EMAIL = 'info@milahaarabia.com'
+ZOHO_ZEPTOMAIL_API_KEY_TOKEN = 'Zoho-enczapikey wSsVR60n+R/1XfgryWapJ+s/nV5QVF70RBwvjlP043L0HvDFp8c6kkefUAD0FfNMFDZgQTYarOggzRgG1WINitQpygoADCiF9mqRe1U4J3x17qnvhDzJXmlemxOMKo4BxQlonGJiEcEk+g=='
+ZOHO_ZEPTOMAIL_HOSTED_REGION = 'zeptomail.zoho.com'
 
 # Application definition
 DATE_INPUT_FORMATS = ["%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%d-%b-%Y"]

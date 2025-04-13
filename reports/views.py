@@ -12,6 +12,10 @@ from reports.models import LicenseReport
 
 
 def report_index(request):
+    """
+    Display a list of available reports with their descriptions.
+    Each report is represented by a dictionary containing name, description and URL slug.
+    """
     reports = [
         {
             "name": "تقرير نظرة عامة على الأنشطة",
@@ -19,7 +23,7 @@ def report_index(request):
             "slug": "activity-overview-report",
         },
         {
-            "name": "تقرير رموز الأنشطة",
+            "name": "تقرير رموز الأنشطة", 
             "description": "تفصيل دقيق لرموز الأنشطة وإحصاءات استخدامها.",
             "slug": "activity-code-report",
         },
@@ -108,18 +112,30 @@ def report_index(request):
 
 
 def all_establishment_report(request):
-    # Query the data from the model
+    """
+    Generate a report for all establishments.
+    TODO: Implement report generation logic
+    """
     pass
 
 
 def inspection_report(request, inspection_id):
+    """
+    Generate an inspection report for a specific inspection.
+    
+    Args:
+        request: HTTP request object
+        inspection_id: ID of the inspection to generate report for
+        
+    Returns:
+        Rendered inspection report template with inspection details
+    """
     inspection = get_object_or_404(Inspection, pk=inspection_id)
     register = inspection.get_register()
     establishment = register.establishment
 
-    current_date = datetime.now()
     context = {
-        "current_date": current_date,
+        "current_date": datetime.now(),
         "register": register,
         "establishment": establishment,
         "inspection": inspection,
@@ -128,40 +144,55 @@ def inspection_report(request, inspection_id):
 
 
 def license_report(request, licence_id):
-    licence_ = get_object_or_404(EstablishmentLicence, number=licence_id)
-    register_data = licence_.register
-    establishment = licence_.establishment
+    """
+    Generate and download a PDF license report.
+    
+    Args:
+        request: HTTP request object
+        licence_id: ID of the license to generate report for
+        
+    Returns:
+        PDF file response containing the license report
+    """
+    # Get required data
+    licence = get_object_or_404(EstablishmentLicence, number=licence_id)
+    register = licence.register
+    establishment = licence.establishment
+    
+    # Generate PDF report
     report_path = create_license_report(
-        licence_=licence_, establishment=establishment, register=register_data
+        licence_=licence,
+        establishment=establishment,
+        register=register
     )
+
+    # Save report record
     report = LicenseReport(
         establishment=establishment,
-        register_number=register_data.id,
+        register_number=register.id,
         id_number=establishment.owner_number,
-        license_category=licence_.main_category,
-        issue_date=licence_.creation_date,
-        expired_date=licence_.expiration_date,
+        license_category=licence.main_category,
+        issue_date=licence.creation_date,
+        expired_date=licence.expiration_date,
         activity=establishment.activity,
         address=establishment.get_address(),
-        license_number=licence_.number,
+        license_number=licence.number,
         phone_number=establishment.phone_number,
         email=establishment.email,
         created_by=request.user,
     )
     report.save()
-    # Create the PDF report
+
+    # Return PDF file
     with open(report_path, "rb") as report_file:
         response = HttpResponse(report_file.read(), content_type="application/pdf")
-        response["Content-Disposition"] = (
-            f'attachment; filename="license_report_{licence_id}.pdf"'
-        )
-
-    return response
+        response["Content-Disposition"] = f'attachment; filename="license_report_{licence_id}.pdf"'
+        return response
 
 
 def view_exported_report(request):
+    """
+    Display a list of all exported license reports.
+    """
     reports = LicenseReport.objects.all()
-    context = {
-        "reports": reports,
-    }
-    return render(request, "reports/view_exported_report.html", context=context)
+    return render(request, "reports/view_exported_report.html", {"reports": reports})

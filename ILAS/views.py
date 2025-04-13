@@ -35,17 +35,12 @@ def add_establishment(request):
     """
     Handles the creation of a new establishment.
 
-    - If the request method is GET, it renders an empty form.
-    - If the request method is POST, it validates and saves the form data.
-    - Prints form errors for debugging if the form is invalid.
-
     Args:
         request (HttpRequest): The HTTP request object.
 
     Returns:
-        HttpResponse: Renders the 'add_establishment.html' template with the form.
+        HttpResponse: Renders the form template with appropriate context.
     """
-    form = EstablishmentForm()
     if request.method == "POST":
         form = EstablishmentForm(request.POST)
         if form.is_valid():
@@ -53,6 +48,8 @@ def add_establishment(request):
             messages.success(request, "تم إضافة المنشأة بنجاح")
             return redirect("view_establishment")
         messages.error(request, "حدث خطأ أثناء إضافة المنشأة")
+    else:
+        form = EstablishmentForm()
 
     return render(request, "licesnsing/add_establishment.html", {"form": form})
 
@@ -61,12 +58,23 @@ def add_establishment(request):
 def dashboard(request):
     """
     Renders a dashboard with key statistics and latest records.
+    
+    Displays metrics including:
+    - Total counts for establishments, assignments, licenses, and inspections
+    - Assignment status distribution
+    - Monthly inspection trends
+    - Inspection status breakdown
+    - Municipality and activity statistics
+    - License status overview
+    
+    Returns:
+        HttpResponse: Renders the dashboard template with statistics context.
     """
     from django.db.models.functions import TruncMonth
     from django.utils import timezone
     from datetime import timedelta
 
-    # Basic stats
+    # Basic statistics
     total_establishments = Establishment.objects.count()
     total_assignments = InspectionAssignment.objects.count()
     total_licenses = EstablishmentLicence.objects.count()
@@ -102,14 +110,14 @@ def dashboard(request):
         .order_by("-count")[:5]
     )
 
-    # Activity distribution
+    # Activity distribution (top 3)
     activity_stats = (
         Establishment.objects.values("activity__ar_name")
         .annotate(count=Count("id"))
         .order_by("-count")[:3]
     )
 
-    # License status
+    # License status (active vs expired)
     today = timezone.now().date()
     active_licenses = EstablishmentLicence.objects.filter(
         expiration_date__gt=today
@@ -121,12 +129,6 @@ def dashboard(request):
         {"status": "Active", "count": active_licenses},
         {"status": "Expired", "count": expired_licenses},
     ]
-
-    # Get latest records (adjust ordering fields as needed)
-    latest_establishments = Establishment.objects.order_by("-created_at")[:5]
-    latest_assignments = InspectionAssignment.objects.order_by("-assigned_at")[:5]
-    latest_licenses = EstablishmentLicence.objects.order_by("-number")[:5]
-    latest_inspections = Inspection.objects.order_by("-created_at")[:5]
 
     context = {
         "total_establishments": total_establishments,
@@ -146,17 +148,18 @@ def dashboard(request):
 @login_required(login_url="login")
 def view_establishment(request):
     """
-    Displays a list of all registered establishments.
+    Displays a paginated list of all registered establishments.
 
     Args:
         request (HttpRequest): The HTTP request object.
 
     Returns:
-        HttpResponse: Renders the 'view_establishment.html' template with all establishments.
+        HttpResponse: Renders the template with paginated establishments.
     """
     establishments = Establishment.objects.all().order_by("-id")
     paginator = Paginator(establishments, 5)
     page_obj = paginator.get_page(request.GET.get("page"))
+    
     return render(
         request,
         "licesnsing/view_establishment.html",
@@ -172,28 +175,21 @@ def delete_establishment(request, register_number):
     """
     Deletes an establishment based on the provided register number.
 
-    - If the establishment exists, it is deleted.
-    - If it does not exist, the function handles the exception silently.
-    - After deletion, the updated list of establishments is displayed.
-
     Args:
         request (HttpRequest): The HTTP request object.
         register_number (str): The unique register number of the establishment.
 
     Returns:
-        HttpResponse: Renders the 'view_establishment.html' template with the updated list.
+        HttpResponse: Redirects to the establishment list view.
     """
     try:
         establishment = Establishment.objects.get(register_number=register_number)
         establishment.delete()
+        messages.success(request, "تم حذف المنشأة بنجاح")
     except Establishment.DoesNotExist:
-        pass  # Silently handle the case where the establishment does not exist
+        messages.error(request, "المنشأة غير موجودة")
 
-    return render(
-        request,
-        "licesnsing/view_establishment.html",
-        {"establishments": Establishment.objects.all()},
-    )
+    return redirect("view_establishment")
 
 
 @login_required(login_url="login")
@@ -201,37 +197,35 @@ def edit_establishment(request, rifd):
     """
     Edits an existing establishment's details.
 
-    - Retrieves the establishment using the register number.
-    - If the request method is POST, updates the establishment with new data.
-    - If the form is valid, saves the changes.
-
     Args:
         request (HttpRequest): The HTTP request object.
-        register_number (str): The unique register number of the establishment.
+        rifd (str): The RFID of the establishment.
 
     Returns:
-        HttpResponse: Renders the 'edit_establishment.html' template with the form.
+        HttpResponse: Renders the edit form with the establishment data.
     """
     establishment = get_object_or_404(Establishment, rifd=rifd)
     form = EstablishmentForm(request.POST or None, instance=establishment)
-    if form.is_valid():
-        messages.success(request, "تم تحديث المنشأة بنجاح")
+    
+    if request.method == "POST" and form.is_valid():
         form.save()
+        messages.success(request, "تم تحديث المنشأة بنجاح")
+        return redirect("view_establishment")
 
     return render(request, "licesnsing/edit_establishment.html", {"form": form})
 
 
-@login_required(
-    login_url="login"
-)  # Ensures only authenticated users can access this endpoint
-@require_http_methods(["GET", "POST"])  # Allows only GET and POST requests
+@login_required(login_url="login")
+@require_http_methods(["GET", "POST"])
 def query(request):
     """
-    Django view to check for new unread entries from the Arduino device.
+    Checks for new unread entries from the Arduino device.
+    
+    Fetches the latest unread record from ArduinoReader and attempts to match
+    it with an establishment. Returns appropriate JSON response based on the result.
 
-    - Fetches the latest unread record from the ArduinoReader model.
-    - If an establishment is found that matches the RFID code, a form with the data is rendered.
-    - Returns a JSON response containing the rendered template.
+    Returns:
+        JsonResponse: Contains establishment data or not found message.
     """
     # Fetch the latest unread ArduinoReader entry
     code = (
@@ -240,33 +234,8 @@ def query(request):
         .first()
     )
 
-    if code:
-        # Look for an establishment with the corresponding RFID code
-        establishment = Establishment.objects.filter(rifd=code.code).first()
-
-        if establishment:
-            # Render a form pre-filled with the establishment data
-            code.status = "processed"
-            code.save()
-            return JsonResponse(
-                {
-                    "found": True,
-                    "code": code.code,
-                    "template": render(
-                        request,
-                        "licesnsing/query.html",
-                        {
-                            "eform": EstablishmentForm(instance=establishment),
-                            "datafound": True,
-                            "iform": InspectionForm(),
-                            "found": True,
-                            "register_number": establishment.get_register.id,
-                        },
-                    ).content.decode("utf-8"),
-                }
-            )
-
-        # If no matching establishment is found, return a 'not found' response
+    if not code:
+        # No new unread record found
         return JsonResponse(
             {
                 "found": False,
@@ -278,7 +247,34 @@ def query(request):
             }
         )
 
-    # Default response when no new unread record is found
+    # Look for an establishment with the corresponding RFID code
+    establishment = Establishment.objects.filter(rifd=code.code).first()
+
+    if establishment:
+        # Mark the code as processed
+        code.status = "processed"
+        code.save()
+        
+        # Return the establishment data
+        return JsonResponse(
+            {
+                "found": True,
+                "code": code.code,
+                "template": render(
+                    request,
+                    "licesnsing/query.html",
+                    {
+                        "eform": EstablishmentForm(instance=establishment),
+                        "datafound": True,
+                        "iform": InspectionForm(),
+                        "found": True,
+                        "register_number": establishment.get_register.id,
+                    },
+                ).content.decode("utf-8"),
+            }
+        )
+
+    # No matching establishment found
     return JsonResponse(
         {
             "found": False,
@@ -293,13 +289,20 @@ def query(request):
 
 @login_required(login_url="login")
 def reader(request):
+    """
+    Displays establishments assigned to the current user for inspection.
+    
+    Returns:
+        HttpResponse: Renders the RFID reader template with assigned establishments.
+    """
     establishments = [
-        establsihemnt.establishment
-        for establsihemnt in InspectionAssignment.objects.filter(
+        assignment.establishment
+        for assignment in InspectionAssignment.objects.filter(
             inspector=request.user, status="pending"
         )
     ]
-    if len(establishments) == 0:
+    
+    if not establishments:
         messages.warning(request, "لا توجد لديك منشآت جديدة للمعاينة.")
 
     return render(
@@ -309,16 +312,25 @@ def reader(request):
 
 @login_required(login_url="login")
 def inspect_establishment(request, id):
-    establishment = Establishment.objects.get(id=id)
+    """
+    Handles the inspection of an establishment.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        id (int): The ID of the establishment to inspect.
+        
+    Returns:
+        HttpResponse: Renders the inspection form or redirects after submission.
+    """
+    establishment = get_object_or_404(Establishment, id=id)
+    
     if request.method == "POST":
         form = InspectionForm(request.POST, request.FILES)
         register_number = request.POST.get("register_number")
-        # if Inspection.objects.filter(register_number=register_number).exists():
-        #     messages.warning(request, "تم تسجيل معاينة لهذه المنشأة بالفعل")
-        #     return redirect("reader")
+        
         if form.is_valid():
-            form.save()
-            # mark inspection as done
+            inspection = form.save()
+            # Mark inspection as done
             mark_inspection_as_done(get_establishment_obj_by_register(register_number))
             messages.success(request, "تم إرسال المعاينة بنجاح")
             return redirect("reader")
@@ -330,163 +342,72 @@ def inspect_establishment(request, id):
                 "licesnsing/query.html",
                 {
                     "eform": EstablishmentForm(instance=establishment),
-                    "iform": InspectionForm(),
+                    "iform": form,  # Return the form with errors
                     "found": True,
                     "register_number": establishment.get_register.id,
                 },
             )
-    elif request.method == "GET":
-        if establishment:
-            # Render a form pre-filled with the establishment data
-            return JsonResponse(
+    
+    # GET request - show the inspection form
+    return JsonResponse(
+        {
+            "found": True,
+            "template": render(
+                request,
+                "licesnsing/query.html",
                 {
+                    "eform": EstablishmentForm(instance=establishment),
+                    "establishment": establishment,
+                    "datafound": True,
+                    "iform": InspectionForm(),
                     "found": True,
-                    "template": render(
-                        request,
-                        "licesnsing/query.html",
-                        {
-                            "eform": EstablishmentForm(instance=establishment),
-                            "establishment": establishment,
-                            "datafound": True,
-                            "iform": InspectionForm(),
-                            "found": True,
-                            "register_number": establishment.get_register.id,
-                        },
-                    ).content.decode("utf-8"),
-                }
-            )
+                    "register_number": establishment.get_register.id,
+                },
+            ).content.decode("utf-8"),
+        }
+    )
 
 
 @login_required(login_url="login")
 def inspection_delete(request, id):
-    inspection = Inspection.objects.get(id=id)
-    if inspection:
+    """
+    Deletes an inspection record.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        id (int): The ID of the inspection to delete.
+        
+    Returns:
+        HttpResponse: Redirects to the inspection list view.
+    """
+    try:
+        inspection = get_object_or_404(Inspection, id=id)
         inspection.delete()
         messages.success(request, "تم حذف المعاينة بنجاح")
-    else:
-        messages.warning(request, "حدث خطأ اثناء حذف المعاينة")
+    except Exception as e:
+        messages.warning(request, f"حدث خطأ اثناء حذف المعاينة: {str(e)}")
+    
     return redirect("view_inspections")
-
-
-# @login_required(login_url="login")
-# def reader(request):
-#     """
-#     Main view to handle inspection (reader) requests.
-#
-#     Process:
-#       1. On POST:
-#          - Instantiate InspectionForm with POST and FILES.
-#          - Validate the form.
-#          - Check if an inspection with the given register_number already exists.
-#          - If not, save the inspection.
-#          - Retrieve the RFID (assumed to be in the 'rifd' field of the form).
-#          - Query the ArduinoReader for a matching record (code == rifd, queried is False, status is "processed").
-#          - If found, mark it as queried, clean up all queried records, and show a success message.
-#          - If not, clean up and show a warning message.
-#       2. On GET:
-#          - Display an empty InspectionForm.
-#     """
-#     if request.method == "POST":
-#         form = InspectionForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             register_number = form.cleaned_data.get("register_number")
-#
-#             # Check if inspection for this establishment already exists.
-#             if Inspection.objects.filter(register_number=register_number).exists():
-#                 messages.error(request, "تم تسجيل معاينة لهذه المنشأة بالفعل")
-#                 return redirect("reader")
-#
-#             # Save the inspection record.
-#             form.save()
-#             # mark inspection as done
-#             mark_inspection_as_done(get_establishment_obj_by_register(register_number))
-#             messages.success(request, "تم إرسال المعاينة بنجاح")
-#             # Retrieve the RFID from the form data.
-#             rifd = form.cleaned_data.get("rifd")
-#
-#             # Query ArduinoReader for a matching record.
-#             arduino_record = (
-#                 ArduinoReader.objects.filter(
-#                     code=rifd, queried=False, status="processed"
-#                 )
-#                 .order_by("-id")
-#                 .first()
-#             )
-#
-#             if arduino_record:
-#                 # Mark the ArduinoReader record as queried.
-#                 arduino_record.queried = True
-#                 arduino_record.save()
-#
-#                 # Clean up all ArduinoReader records that have been queried.
-#                 ArduinoReader.objects.filter(queried=True).delete()
-#
-#                 messages.success(request, "تم إرسال المعاينة")
-#                 return redirect("reader")
-#
-#         else:
-#             messages.warning(request, "الرجاء تصحيح الأخطاء في النموذج.")
-#     else:
-#         form = InspectionForm()
-#
-#     return render(request, "ILAS/readRFID.html", {"form": form})
-
-
-# Main view to handle the POST request from Arduino
-# @csrf_exempt
-# def api_arduino(request):
-#     """
-#     This view handles communication with the Arduino and saves the received code.
-#     """
-#     if request.method == "POST":
-#         # Check if there's raw data in the request body
-#         if request.body:
-#             code = process_raw_data(request)
-#             if code:
-#                 # Save the code to the database
-#                 ArduinoReader.objects.create(code=code)
-#                 return JsonResponse(
-#                     {"message": "Code received successfully"}, status=200
-#                 )
-#
-#         # Check if there's form data in the request
-#         elif "UIDresult" in request.POST:
-#             code = process_form_data(request)
-#             if code:
-#                 # Save the code to the database
-#                 ArduinoReader.objects.create(code=code)
-#                 return JsonResponse(
-#                     {"message": "Code received successfully"}, status=200
-#                 )
-#
-#         # If no valid data found, return an error
-#         return JsonResponse({"error": "Invalid request"}, status=400)
-#
-#     return JsonResponse({"error": "Forbidden method"}, status=403)
 
 
 @login_required(login_url="login")
 def register_list_create(request):
     """
-    View to display a list of all EstablishmentRegister records and provide a form
+    Displays a list of all EstablishmentRegister records and provides a form
     for adding a new record.
-
-    - GET: Retrieve and display all records along with an empty creation form.
-    - POST: Process the form data to create a new EstablishmentRegister record.
-
-    Template:
-      'register_list_create.html'
-
-    Context:
-      registers - QuerySet of all EstablishmentRegister records.
-      form      - The EstablishmentRegisterForm instance.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the register list template with context.
     """
     if request.method == "POST":
         form = EstablishmentRegisterForm(request.POST)
         if form.is_valid():
             form.save()
-            # After saving, redirect to the same view to display the updated list.
-            return redirect("register-list")  # Ensure your URL name matches this.
+            messages.success(request, "تم إضافة السجل بنجاح")
+            return redirect("register-list")
     else:
         form = EstablishmentRegisterForm()
 
@@ -505,54 +426,43 @@ def register_list_create(request):
 @login_required(login_url="login")
 def register_delete(request, pk):
     """
-    View to delete a specific EstablishmentRegister record.
-
-    The view retrieves the record by its primary key (pk). For GET requests,
-    it displays a confirmation page. For POST requests, it deletes the record
-    and redirects back to the register list view.
-
-    Template:
-      'register_confirm_delete.html'
-
-    Context:
-      register - The EstablishmentRegister record to be deleted.
+    Deletes a specific EstablishmentRegister record.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        pk (int): The primary key of the register to delete.
+        
+    Returns:
+        HttpResponse: Redirects to the register list view.
     """
-    register = get_object_or_404(EstablishmentRegister, pk=pk)
-    if register:
+    try:
+        register = get_object_or_404(EstablishmentRegister, pk=pk)
         register.delete()
-        return redirect("register-list")  # Ensure your URL name matches this.
-
-    context = {"register": register}
-    return render(request, "licesnsing/register_confirm_delete.html", context)
-
-
-# -------------------------------------------------------------------
-# Views for EstablishmentLicence (Licence)
-# -------------------------------------------------------------------
+        messages.success(request, "تم حذف السجل بنجاح")
+    except Exception as e:
+        messages.error(request, f"حدث خطأ أثناء حذف السجل: {str(e)}")
+    
+    return redirect("register-list")
 
 
 @login_required(login_url="login")
 def licence_list_create(request):
     """
-    View to display a list of all EstablishmentLicence records and provide a form
+    Displays a list of all EstablishmentLicence records and provides a form
     for adding a new record.
-
-    - GET: Retrieve and display all licence records along with an empty creation form.
-    - POST: Process the form data to create a new EstablishmentLicence record.
-
-    Template:
-      'licence_list_create.html'
-
-    Context:
-      licences - QuerySet of all EstablishmentLicence records.
-      form     - The EstablishmentLicenceForm instance.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the licence list template with context.
     """
     if request.method == "POST":
         form = EstablishmentLicenceForm(request.POST)
         if form.is_valid():
             form.save()
-            # After saving, redirect to the same view to display the updated list.
-            return redirect("licence-list")  # Ensure your URL name matches this.
+            messages.success(request, "تم إضافة الرخصة بنجاح")
+            return redirect("licence-list")
     else:
         form = EstablishmentLicenceForm()
 
@@ -570,30 +480,35 @@ def licence_list_create(request):
 @login_required(login_url="login")
 def licence_delete(request, pk):
     """
-    View to delete a specific EstablishmentLicence record.
-
-    The view retrieves the record by its primary key (pk). For GET requests,
-    it displays a confirmation page. For POST requests, it deletes the record
-    and redirects back to the licence list view.
-
-    Template:
-      'licence_confirm_delete.html'
-
-    Context:
-      licence - The EstablishmentLicence record to be deleted.
+    Deletes a specific EstablishmentLicence record.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        pk (int): The primary key of the licence to delete.
+        
+    Returns:
+        HttpResponse: Redirects to the licence list view.
     """
     licence = get_object_or_404(EstablishmentLicence, pk=pk)
-
+    
     if request.method == "POST":
         licence.delete()
-        return redirect("licence-list")  # Ensure your URL name matches this.
-
-    context = {"licence": licence}
-    return render(request, "licesnsing/licence_confirm_delete.html", context)
+        messages.success(request, "تم حذف الرخصة بنجاح")
+    
+    return redirect("licence-list")
 
 
 @login_required(login_url="login")
 def view_inspection_assignments(request):
+    """
+    Displays all inspection assignments.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the assignments template with context.
+    """
     assignments = InspectionAssignment.objects.all()
     return render(
         request, "licesnsing/inspectors_assignments.html", {"assignments": assignments}
@@ -603,54 +518,39 @@ def view_inspection_assignments(request):
 @login_required(login_url="login")
 def edit_assignment(request, pk):
     """
-    Edits an existing InspectionAssignment.
-
-    - Retrieves the assignment using the primary key.
-    - If the request method is POST, updates the assignment with new data.
-    - If the form is valid, saves the changes.
-
+    Placeholder for editing an InspectionAssignment.
+    
     Args:
         request (HttpRequest): The HTTP request object.
-        pk (int): The primary key of the InspectionAssignment.
-
+        pk (int): The primary key of the assignment.
+        
     Returns:
-        HttpResponse: Renders the 'edit_assignment.html' template with the form.
+        HttpResponse: Renders the edit assignment template.
     """
-    # assignment = get_object_or_404(InspectionAssignment, pk=pk)
-    # form = InspectionAssignmentForm(request.POST or None, instance=assignment)
-    # if form.is_valid():
-    #     form.save()
-
+    # TODO: Implement assignment editing functionality
     return render(request, "licesnsing/edit_assignment.html", {})
 
 
 @login_required(login_url="login")
 def delete_assignment(request, pk):
     """
-    Deletes an InspectionAssignment based on the provided primary key.
-
-    - If the assignment exists, it is deleted.
-    - If it does not exist, the function handles the exception silently.
-    - After deletion, the updated list of assignments is displayed.
-
+    Deletes an InspectionAssignment.
+    
     Args:
         request (HttpRequest): The HTTP request object.
-        pk (int): The primary key of the InspectionAssignment.
-
+        pk (int): The primary key of the assignment to delete.
+        
     Returns:
-        HttpResponse: Renders the 'inspectors_assignments.html' template with the updated list.
+        HttpResponse: Redirects to the assignments list view.
     """
     try:
-        assignment = InspectionAssignment.objects.get(pk=pk)
+        assignment = get_object_or_404(InspectionAssignment, pk=pk)
         assignment.delete()
-    except InspectionAssignment.DoesNotExist:
-        pass  # Silently handle the case where the assignment does not exist
+        messages.success(request, "تم حذف التكليف بنجاح")
+    except Exception as e:
+        messages.error(request, f"حدث خطأ أثناء حذف التكليف: {str(e)}")
 
-    return render(
-        request,
-        "licesnsing/inspectors_assignments.html",
-        {"assignments": InspectionAssignment.objects.all()},
-    )
+    return redirect("view_assignments")
 
 
 @login_required
@@ -658,12 +558,13 @@ def delete_assignment(request, pk):
 def update_assignment_status(request, pk):
     """
     Updates the status of an InspectionAssignment.
-
-    Expects a POST request with a 'status' parameter representing the new status.
-    Valid statuses are: 'pending', 'accepted', 'in_progress', 'completed', and 'cancelled'.
-
-    On success, updates the assignment and redirects to the assignments list view.
-    On failure, displays an error message and redirects back.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        pk (int): The primary key of the assignment.
+        
+    Returns:
+        HttpResponse: Redirects to the assignments list view.
     """
     new_status = request.POST.get("status")
     assignment = get_object_or_404(InspectionAssignment, id=pk)
@@ -671,13 +572,11 @@ def update_assignment_status(request, pk):
     valid_statuses = ["pending", "accepted", "in_progress", "completed", "cancelled"]
     if new_status not in valid_statuses:
         messages.error(request, "الحالة التي قمت بإدخالها خطأ.")
-        return redirect(
-            "view_assignments"
-        )  # Adjust to your actual URL name for assignments view
     else:
         assignment.status = new_status
         assignment.save()
-    messages.success(request, "تم تحديث حالة التكليف بنجاح.")
+        messages.success(request, "تم تحديث حالة التكليف بنجاح.")
+    
     return redirect("view_assignments")
 
 
@@ -685,31 +584,35 @@ def update_assignment_status(request, pk):
 def assign_establishment(request):
     """
     Handles assigning an establishment for inspection.
-
-    GET:
-      - Displays an empty form for creating a new inspection assignment.
-
-    POST:
-      - Validates the form and, if valid, creates a new InspectionAssignment.
-      - Redirects to a view (e.g., the assignments list) upon success.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the assignment form or redirects after submission.
     """
     if request.method == "POST":
         form = InspectionAssignmentForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, "تم توجيه التكليف بنجاح")
-            # Adjust the redirect URL as needed.
             return redirect("view_assignments")
         else:
             messages.warning(request, form.errors.as_text())
+    
+    # Get inspectors with appropriate permissions
     inspectors = Profiles.objects.filter(occupation__power=6)
-    form = InspectionAssignmentForm()
+    
+    # Get establishments that aren't currently assigned for inspection
     unassigned_establishments = Establishment.objects.exclude(
         inspection_assignments__isnull=False,
         inspection_assignments__status='pending'
     )
-    if len(unassigned_establishments) == 0:
-        messages.warning(request, "حميع المنشأت قد تم تعيينها.")
+    
+    if not unassigned_establishments:
+        messages.warning(request, "جميع المنشآت قد تم تعيينها.")
+    
+    form = InspectionAssignmentForm()
     return render(
         request,
         "licesnsing/assign_establishment.html",
@@ -724,35 +627,47 @@ def assign_establishment(request):
 @login_required(login_url="login")
 def create_inspection(request):
     """
-    View to create a new Inspection record.
-    :param request:
-    :return:
+    Creates a new Inspection record.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the inspection form or redirects after submission.
     """
     if request.method == "POST":
         form = InspectionForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, "Inspection created successfully!")
-            return redirect("reader")  # Change to your desired URL name.
+            messages.success(request, "تم إنشاء المعاينة بنجاح!")
+            return redirect("reader")
         else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = InspectionForm()
-        registers = EstablishmentRegister.objects.all()
-        return render(
-            request,
-            "licesnsing/create_inspection.html",
-            {"form": form, "registers": registers},
-        )
+            messages.error(request, "الرجاء تصحيح الأخطاء أدناه.")
+            return render(
+                request,
+                "licesnsing/create_inspection.html",
+                {"form": form}
+            )
+    
+    form = InspectionForm()
+    registers = EstablishmentRegister.objects.all()
+    return render(
+        request,
+        "licesnsing/create_inspection.html",
+        {"form": form, "registers": registers},
+    )
 
 
 @login_required(login_url="login")
 def view_inspections(request):
     """
-    View to display a list of all Inspection records.
-
-    :param request:
-    :return:
+    Displays a paginated list of all non-archived Inspection records.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the inspections list template with context.
     """
     inspections = Inspection.objects.filter(is_archived=False)
     paginator = Paginator(inspections, 5)
@@ -762,21 +677,33 @@ def view_inspections(request):
 
 @login_required(login_url="login")
 def view_inspection_data(request, pk):
-    inspection = Inspection.objects.get(id=pk)
-    if inspection:
-        return render(
-            request, "licesnsing/view_inspection_data.html", {"inspection": inspection}
-        )
+    """
+    Displays detailed data for a specific inspection.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        pk (int): The primary key of the inspection.
+        
+    Returns:
+        HttpResponse: Renders the inspection detail template.
+    """
+    inspection = get_object_or_404(Inspection, id=pk)
+    return render(
+        request, "licesnsing/view_inspection_data.html", {"inspection": inspection}
+    )
 
 
 @login_required(login_url="login")
 def archive_inspection(request, pk):
     """
-    Archive an inspection. Archived inspections are not displayed in the main list.
-
-    :param request:
-    :param pk:
-    :return:
+    Archives an inspection.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        pk (int): The primary key of the inspection to archive.
+        
+    Returns:
+        HttpResponse: Redirects to the inspections list view.
     """
     inspection = get_object_or_404(Inspection, pk=pk)
     inspection.is_archived = True
@@ -789,10 +716,13 @@ def archive_inspection(request, pk):
 @login_required(login_url="login")
 def view_archive(request):
     """
-    View to display a list of all archived Inspection records.
-
-    :param request:
-    :return:
+    Displays a list of all archived Inspection records.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the archived inspections template.
     """
     inspections = Inspection.objects.filter(is_archived=True)
     return render(
@@ -802,6 +732,16 @@ def view_archive(request):
 
 @login_required
 def add_establishment_register(request):
+    """
+    Adds a new EstablishmentRegister record.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the register form or redirects after submission.
+    """
+    establishments = Establishment.objects.all()
     if request.method == "POST":
         form = EstablishmentRegisterForm(request.POST)
         if form.is_valid():
@@ -815,11 +755,13 @@ def add_establishment_register(request):
             else:
                 form.save()
                 messages.success(request, "تمت إضافة السجل بنجاح!")
-                return redirect("register-list")  # Redirect to the register list view
-
+                return redirect("register-list")
+        else:
+            messages.error(request, "الرجاء تصحيح الأخطاء في النموذج.")
     else:
         form = EstablishmentRegisterForm()
-        establishments = Establishment.objects.all()
+
+    
     return render(
         request,
         "licesnsing/establishment_register_form.html",
@@ -830,9 +772,13 @@ def add_establishment_register(request):
 @login_required
 def add_establishment_licence(request):
     """
-    View to add a new EstablishmentLicence record.
-    :param request:
-    :return:
+    Adds a new EstablishmentLicence record.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the licence form or redirects after submission.
     """
     if request.method == "POST":
         form = EstablishmentLicenceForm(request.POST)
@@ -845,7 +791,9 @@ def add_establishment_licence(request):
             else:
                 form.save()
                 messages.success(request, "تمت إضافة الرخصة بنجاح!")
-                return redirect("licence-list")  # Redirect to the license list view
+                return redirect("licence-list")
+        else:
+            messages.error(request, "الرجاء تصحيح الأخطاء في النموذج.")
 
     else:
         form = EstablishmentLicenceForm()
@@ -856,9 +804,13 @@ def add_establishment_licence(request):
 @login_required(login_url="login")
 def get_inspector_assignments(request):
     """
-    View to display all inspection assignments for the currently logged-in inspector.
-    :param request:
-    :return:
+    Displays all inspection assignments for the currently logged-in inspector.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the inspector assignments template.
     """
     inspector = request.user
     assignments = InspectionAssignment.objects.filter(inspector=inspector)
@@ -870,9 +822,13 @@ def get_inspector_assignments(request):
 @login_required(login_url="login")
 def get_inspector_inspections(request):
     """
-    View to display all inspections for the currently logged-in inspector.
-    :param request:
-    :return:
+    Displays all inspections for the currently logged-in inspector.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the inspector inspections template.
     """
     inspector = request.user
     inspections = Inspection.objects.filter(inspector=inspector)
@@ -882,8 +838,27 @@ def get_inspector_inspections(request):
 
 
 def not_found404(request, exception):
+    """
+    Handles 404 Not Found errors.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        exception: The exception that was raised.
+        
+    Returns:
+        HttpResponse: Renders the 404 error template.
+    """
     return render(request, "errors/404.html", status=404)
 
 
 def internal_server_error(request):
+    """
+    Handles 500 Internal Server Error errors.
+    
+    Args:
+        request (HttpRequest): The HTTP request object.
+        
+    Returns:
+        HttpResponse: Renders the 500 error template.
+    """
     return render(request, "errors/500.html", status=500)

@@ -1,26 +1,28 @@
 from django.utils.html import format_html
-
-from .models import (
-    Establishment,
-    Activity,
-    MainCategory,
-    EstablishmentRole,
-    SubCategory,
-    EstablishmentLicence,
-    EstablishmentRegister,
-    InspectionAssignment,
-    Inspection,
-)
-
 from django.utils.translation import gettext_lazy as _
 from django.contrib import admin
 
+from .models import (
+    Activity,
+    Establishment,
+    EstablishmentLicence,
+    EstablishmentRegister,
+    EstablishmentRole,
+    Inspection,
+    InspectionAssignment,
+    MainCategory,
+    SubCategory,
+)
 
-# Custom admin action to mark selected establishments as 'published'
+
 def make_published(modeladmin, request, queryset):
     """
-    Admin action to update the 'sub_category' field of selected records to 'published'.
-    Displays a success message with the number of records updated.
+    Admin action to mark selected records as 'published'.
+    
+    Args:
+        modeladmin: The ModelAdmin instance
+        request: The current request
+        queryset: The QuerySet containing the selected objects
     """
     updated_count = queryset.update(sub_category="published")
     modeladmin.message_user(
@@ -28,21 +30,16 @@ def make_published(modeladmin, request, queryset):
     )
 
 
-make_published.short_description = (
-    "Mark selected items as published"  # Description displayed in the admin panel
-)
+make_published.short_description = "Mark selected items as published"
 
 
 class EstablishmentAdmin(admin.ModelAdmin):
     """
     Admin configuration for the Establishment model.
-    Defines the displayed fields, filtering options, search functionality, and available actions.
+    Customizes display, filtering, search, and form layout.
     """
-
-    # Register custom admin actions
     actions = [make_published]
-
-    # Fields displayed in the list view of the admin panel
+    
     list_display = (
         "rifd",
         "establishment_name",
@@ -50,23 +47,20 @@ class EstablishmentAdmin(admin.ModelAdmin):
         "sub_category",
         "created_at",
     )
-
-    # Fields that can be searched in the admin panel
+    
     search_fields = (
         "rifd",
         "establishment_name",
         "email",
         "owner_name",
     )
-
-    # Filters for easy navigation in the admin panel
+    
     list_filter = (
         "main_category",
         "activity",
         "created_at",
     )
-
-    # Fields displayed in the detailed form view (edit page)
+    
     fields = (
         (
             "rifd",
@@ -80,8 +74,7 @@ class EstablishmentAdmin(admin.ModelAdmin):
         ("building_number", "block_number", "block_name"),
         "created_at",
     )
-
-    # Fields displayed when adding a new establishment
+    
     add_fieldsets = (
         (
             None,
@@ -89,12 +82,6 @@ class EstablishmentAdmin(admin.ModelAdmin):
                 "fields": (
                     "rifd",
                     "establishment_name",
-                    # "register_number",
-                    # "register_issuance_date",
-                    # "register_expiration_date",
-                    # "license_number",
-                    # "license_creation_date",
-                    # "license_expiration_date",
                     "main_category",
                     "sub_category",
                     "owner_name",
@@ -118,47 +105,42 @@ class EstablishmentAdmin(admin.ModelAdmin):
             },
         ),
     )
-
-    # Ordering the list view by 'created_at' in descending order
+    
     ordering = ("-created_at",)
-
-    # Custom display method for activity_name with a descriptive label
-    def activity_name_display(self, obj):
-        """Custom display for the 'activity_name' field with a proper label."""
-        return obj.activity.label
-
-    activity_name_display.short_description = _("Activity Type")
-
-    # Allow clicking on 'rifd' and 'establishment_name' to open the detailed view
-    list_display_links = (
-        "rifd",
-        "establishment_name",
-    )
-
-    # Make 'created_at' a read-only field
+    list_display_links = ("rifd", "establishment_name")
     readonly_fields = ("created_at",)
+    
+    def activity_name_display(self, obj):
+        """Custom display for the activity field with proper label."""
+        return obj.activity.label
+    
+    activity_name_display.short_description = _("Activity Type")
 
 
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
+    """Admin configuration for the Activity model."""
     list_display = ("id", "ar_name", "en_name")
     search_fields = ("ar_name", "en_name")
 
 
 @admin.register(MainCategory)
 class MainCategoryAdmin(admin.ModelAdmin):
+    """Admin configuration for the MainCategory model."""
     list_display = ("id", "ar_name", "en_name")
     search_fields = ("ar_name", "en_name")
 
 
 @admin.register(EstablishmentRole)
 class EstablishmentRoleAdmin(admin.ModelAdmin):
+    """Admin configuration for the EstablishmentRole model."""
     list_display = ("id", "ar_name", "en_name")
     search_fields = ("ar_name", "en_name")
 
 
 @admin.register(SubCategory)
 class SubCategoryAdmin(admin.ModelAdmin):
+    """Admin configuration for the SubCategory model."""
     list_display = ("id", "ar_name", "en_name")
     search_fields = ("ar_name", "en_name")
 
@@ -167,17 +149,8 @@ class SubCategoryAdmin(admin.ModelAdmin):
 class EstablishmentRegisterAdmin(admin.ModelAdmin):
     """
     Admin configuration for the EstablishmentRegister model.
-
-    Customizations include:
-      - **list_display**: Columns displayed in the admin list view.
-      - **list_filter**: Fields to filter the list view.
-      - **search_fields**: Fields available for quick search.
-      - **ordering**: Default ordering for the list view.
-      - **fieldsets**: Logical grouping of form fields in the detail view.
-      - **readonly_fields**: Fields that are read-only in the admin form.
+    Organizes fields into logical groups and customizes the display.
     """
-
-    # Columns to display in the list view
     list_display = (
         "establishment_id",
         "establishment",
@@ -186,17 +159,11 @@ class EstablishmentRegisterAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
-
-    # Allow filtering by these date fields
+    
     list_filter = ("issuance_date", "expiration_date", "created_at")
-
-    # Enable search by RFID and the name of the related establishment
     search_fields = ("establishment__rifd", "establishment__owner_name")
-
-    # Order the records by issuance date (most recent first)
     ordering = ("-issuance_date",)
-
-    # Grouping of fields on the change form for better readability
+    
     fieldsets = (
         (None, {"fields": ("establishment",)}),
         ("Dates", {"fields": ("issuance_date", "expiration_date")}),
@@ -204,12 +171,11 @@ class EstablishmentRegisterAdmin(admin.ModelAdmin):
             "Timestamps",
             {
                 "fields": ("created_at", "updated_at"),
-                "classes": ("collapse",),  # Collapses this section by default
+                "classes": ("collapse",),
             },
         ),
     )
-
-    # Make the timestamp fields read-only to prevent manual editing
+    
     readonly_fields = ("created_at", "updated_at")
 
 
@@ -217,18 +183,8 @@ class EstablishmentRegisterAdmin(admin.ModelAdmin):
 class EstablishmentLicenceAdmin(admin.ModelAdmin):
     """
     Admin configuration for the EstablishmentLicence model.
-
-    Customizations include:
-      - **list_display**: Columns displayed in the admin list view, including a custom
-        property for the establishment (via the registration).
-      - **list_filter**: Fields to filter the list view.
-      - **search_fields**: Fields available for quick search, including related model fields.
-      - **ordering**: Default ordering for the list view.
-      - **fieldsets**: Logical grouping of form fields in the detail view.
-      - **readonly_fields**: Fields that are read-only in the admin form.
+    Includes custom method to display related establishment.
     """
-
-    # Display columns for licence number, registration, associated establishment, dates, categories, and timestamps
     list_display = (
         "number",
         "register",
@@ -241,8 +197,7 @@ class EstablishmentLicenceAdmin(admin.ModelAdmin):
         "created_at",
         "updated_at",
     )
-
-    # Allow filtering by dates, categories, and creation timestamp
+    
     list_filter = (
         "creation_date",
         "expiration_date",
@@ -251,8 +206,7 @@ class EstablishmentLicenceAdmin(admin.ModelAdmin):
         "sub_category",
         "created_at",
     )
-
-    # Enable search by fields of the related registration and category models
+    
     search_fields = (
         "register__establishment__rifd",
         "register__establishment__owner_name",
@@ -260,11 +214,9 @@ class EstablishmentLicenceAdmin(admin.ModelAdmin):
         "activity__ar_name",
         "sub_category__ar_name",
     )
-
-    # Order the records by creation date (most recent first)
+    
     ordering = ("-creation_date",)
-
-    # Group the fields into logical sections on the change form
+    
     fieldsets = (
         (None, {"fields": ("register",)}),
         ("Licence Dates", {"fields": ("creation_date", "expiration_date")}),
@@ -277,22 +229,13 @@ class EstablishmentLicenceAdmin(admin.ModelAdmin):
             {"fields": ("created_at", "updated_at"), "classes": ("collapse",)},
         ),
     )
-
-    # Make the timestamp fields read-only to prevent manual editing
+    
     readonly_fields = ("created_at", "updated_at")
-
+    
     def establishment(self, obj):
-        """
-        Custom method to display the Establishment related to this licence.
-
-        This method retrieves the establishment via the associated registration record.
-
-        Returns:
-            Establishment: The establishment associated with the licence.
-        """
+        """Get the establishment associated with this licence via registration."""
         return obj.register.establishment
-
-    # Set the short description for the custom column in the list display.
+    
     establishment.short_description = "Establishment"
 
 
@@ -304,15 +247,8 @@ admin.site.register(Establishment, EstablishmentAdmin)
 class InspectionAssignmentAdmin(admin.ModelAdmin):
     """
     Admin configuration for the InspectionAssignment model.
-
-    Customizations include:
-      - list_display: Columns to display in the admin list view.
-      - list_filter: Sidebar filters for quick filtering.
-      - search_fields: Fields to search in the admin list view.
-      - ordering: Default ordering for the list view.
-      - fieldsets: Grouping of fields on the detail page.
+    Organizes fields into logical groups for better usability.
     """
-
     list_display = (
         "establishment",
         "inspector",
@@ -320,23 +256,23 @@ class InspectionAssignmentAdmin(admin.ModelAdmin):
         "assigned_at",
         "due_date",
     )
-
+    
     list_filter = (
         "status",
         "assigned_at",
         "due_date",
         "inspector",
     )
-
+    
     search_fields = (
-        "establishment__representative_name",  # Assumes the Establishment model has a 'name' field.
+        "establishment__representative_name",
         "inspector__username",
         "inspector__first_name",
         "inspector__last_name",
     )
-
+    
     ordering = ("-assigned_at",)
-
+    
     fieldsets = (
         (None, {"fields": ("establishment", "inspector", "status")}),
         (
@@ -353,12 +289,16 @@ class InspectionAssignmentAdmin(admin.ModelAdmin):
             },
         ),
     )
-
+    
     readonly_fields = ("assigned_at", "updated_at")
 
 
 @admin.register(Inspection)
 class InspectionAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the Inspection model.
+    Includes custom methods for image previews and archiving functionality.
+    """
     list_display = (
         "register_number",
         "inspector",
@@ -371,12 +311,13 @@ class InspectionAdmin(admin.ModelAdmin):
         "preview_establishment_photo",
         "preview_cars_building_photo",
     )
+    
     list_filter = ("status", "inspector", "created_at", "is_archived")
     search_fields = ("register_number", "notes")
     ordering = ("-created_at",)
     actions = ["archive_selected"]
     readonly_fields = ("created_at", "archived_at")
-
+    
     fieldsets = (
         (
             "Inspection Details",
@@ -408,34 +349,40 @@ class InspectionAdmin(admin.ModelAdmin):
             },
         ),
     )
-
-    def preview_register_photo(self, obj):
-        return self._image_preview(obj.register_photo.url)
-
-    def preview_license_photo(self, obj):
-        return self._image_preview(obj.license_photo.url)
-
-    def preview_establishment_photo(self, obj):
-        return self._image_preview(obj.establishment_photo.url)
-
-    def preview_cars_building_photo(self, obj):
-        return self._image_preview(obj.cars_building_photo.url)
-
-    def _image_preview(self, image_field):
-        if image_field:
+    
+    def _image_preview(self, image_url):
+        """Helper method to generate HTML for image previews."""
+        if image_url:
             return format_html(
                 '<img src="/static{}" width="80" style="border-radius: 5px;" />',
-                image_field,
+                image_url,
             )
         return "No Image"
-
+    
+    def preview_register_photo(self, obj):
+        """Generate preview for register photo."""
+        return self._image_preview(obj.register_photo.url)
+    
+    def preview_license_photo(self, obj):
+        """Generate preview for license photo."""
+        return self._image_preview(obj.license_photo.url)
+    
+    def preview_establishment_photo(self, obj):
+        """Generate preview for establishment photo."""
+        return self._image_preview(obj.establishment_photo.url)
+    
+    def preview_cars_building_photo(self, obj):
+        """Generate preview for cars building photo."""
+        return self._image_preview(obj.cars_building_photo.url)
+    
     preview_register_photo.short_description = "Register Photo"
     preview_license_photo.short_description = "License Photo"
     preview_establishment_photo.short_description = "Establishment Photo"
     preview_cars_building_photo.short_description = "Cars Building Photo"
-
+    
     def archive_selected(self, request, queryset):
+        """Admin action to archive selected inspections."""
         queryset.update(is_archived=True)
         self.message_user(request, "Selected inspections have been archived.")
-
+    
     archive_selected.short_description = "Archive selected inspections"

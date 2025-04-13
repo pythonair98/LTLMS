@@ -1,36 +1,33 @@
-from .models import (
-    InspectionAssignment,
-    EstablishmentRegister,
-)
-import subprocess
-import os
-import uuid
-
 from django.conf import settings
 from pptx import Presentation
 from pptx.util import Pt
-from pptx.enum.text import PP_ALIGN
+from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.dml.color import RGBColor
-from pptx.enum.text import MSO_ANCHOR
+import subprocess
+import os
+import uuid
+import glob
+
+from .models import (
+    InspectionAssignment,
+    EstablishmentRegister,
+    EstablishmentLicence,
+    Establishment,
+)
 
 
 def inspector_assignments(user):
-    """Get inspector assignments."""
     """
     Retrieves the count of pending inspection assignments for a given inspector.
 
-    Parameters:
+    Args:
         user (User): The inspector whose assignments are to be retrieved.
 
     Returns:
-        int: Number of pending assignments.
-        None: If an error occurs.
+        int: Number of pending assignments (0 if none found)
+        None: If an error occurs
     """
     try:
-        inspector = user
-        assignments = InspectionAssignment.objects.filter(
-            inspector=inspector, status="pending"
-        ).count()
         assignments = InspectionAssignment.objects.filter(
             inspector=user, status="pending"
         ).count()
@@ -42,6 +39,9 @@ def inspector_assignments(user):
 def mark_inspection_as_done(establishment):
     """
     Marks an inspection as completed in the database.
+
+    Args:
+        establishment: The establishment whose inspection is being marked complete
 
     Returns:
         None
@@ -58,8 +58,12 @@ def get_establishment_obj_by_register(register_id):
     """
     Retrieves an establishment object using its register ID.
 
-    Parameters:
+    Args:
         register_id (int): The register ID associated with the establishment.
+
+    Returns:
+        Establishment: The establishment object if found
+        None: If not found or error occurs
     """
     try:
         establishment = EstablishmentRegister.objects.get(id=register_id).establishment
@@ -69,25 +73,19 @@ def get_establishment_obj_by_register(register_id):
         return None
 
 
-import glob
-
-from ILAS.models import EstablishmentLicence, Establishment
-
-
 def delete_files_except(directory_path, exception_file):
     """
     Delete all files in the given directory except for the specified exception file.
 
-    :param directory_path: Path to the directory where files should be deleted.
-    :param exception_file: Name of the file to be excluded from deletion.
+    Args:
+        directory_path (str): Path to the directory where files should be deleted
+        exception_file (str): Name of the file to be excluded from deletion
     """
-    # Get all files in the directory except for exception_file
     files_to_delete = glob.glob(os.path.join(directory_path, "*"))
     files_to_delete = [
         f for f in files_to_delete if os.path.basename(f) != exception_file
     ]
 
-    # Delete the files
     for file in files_to_delete:
         try:
             os.remove(file)
@@ -97,89 +95,99 @@ def delete_files_except(directory_path, exception_file):
 
 
 class PowerPointUpdater:
+    """Handles updating and formatting PowerPoint presentations"""
+
     def __init__(self, presentation_path, cell_values):
         """
-        Initialize the PowerPointUpdater with the path to the presentation and the dictionary of cell values.
+        Initialize the PowerPointUpdater.
+
+        Args:
+            presentation_path (str): Path to the PowerPoint template
+            cell_values (dict): Dictionary mapping placeholder text to actual values
         """
         self.prs = Presentation(presentation_path)
         self.cell_values = cell_values
 
     def update_table_cells(self):
-        """
-        Update the text in table cells based on the cell_values dictionary.
-        """
-        for slide_idx, slide in enumerate(self.prs.slides):
-
-            for shape_idx, shape in enumerate(slide.shapes):
+        """Update the text in table cells and shapes based on the cell_values dictionary"""
+        for slide in self.prs.slides:
+            for shape in slide.shapes:
                 if shape.has_table:
-
-                    for row in shape.table.rows:
-                        for cell in row.cells:
-                            # Check if the cell text matches any key in the dictionary
-                            if cell.text in self.cell_values:
-                                cell.text = self.cell_values[cell.text]
-
-                                self._center_align_text(cell)
+                    self._update_table(shape.table)
                 elif hasattr(shape, "text"):
-                    # Update text for non-table shapes if their text matches any key in the dictionary
-                    if shape.text in self.cell_values:
-                        shape.text = self.cell_values[shape.text]
+                    self._update_shape_text(shape)
+
+    def _update_table(self, table):
+        """Update text in table cells and apply formatting"""
+        for row in table.rows:
+            for cell in row.cells:
+                if cell.text in self.cell_values:
+                    cell.text = self.cell_values[cell.text]
+                    self._center_align_text(cell)
+
+    def _update_shape_text(self, shape):
+        """Update text in non-table shapes"""
+        if shape.text in self.cell_values:
+            shape.text = self.cell_values[shape.text]
 
     def _center_align_text(self, cell):
-        """
-        Center-align text both vertically and horizontally in a table cell.
-        """
+        """Center-align text both vertically and horizontally in a table cell"""
         cell.text_frame.vertical_anchor = MSO_ANCHOR.MIDDLE
         for paragraph in cell.text_frame.paragraphs:
             paragraph.alignment = PP_ALIGN.CENTER
 
     def save_presentation(self, output_path):
-        """
-        Save the updated presentation to the specified output path.
-        """
+        """Save the updated presentation"""
         self.prs.save(output_path)
 
 
 class PPTtoPDFConverter:
+    """Handles conversion of PowerPoint files to PDF format"""
+
+    LIBREOFFICE_PATH = "/usr/bin/libreoffice"
+
     @staticmethod
     def convert(input_file):
         """
-        Convert a PowerPoint presentation to a PDF using LibreOffice.
+        Convert a PowerPoint presentation to PDF using LibreOffice.
+
+        Args:
+            input_file (str): Path to the PowerPoint file
+
+        Returns:
+            str: Absolute path to the generated PDF file
         """
-        # Full path to the LibreOffice executable
-        libreoffice_path = "/usr/bin/libreoffice"  # Adjust this path if LibreOffice is installed elsewhere
-
-        # Generate a random file name for the PDF
-
-        output_file = os.path.join(
-            settings.BASE_DIR, "static/files/reports_temp", input_file
-        )
-        print("OutFile:", output_file)
+        output_dir = os.path.dirname(input_file)
         command = [
-            libreoffice_path,
+            PPTtoPDFConverter.LIBREOFFICE_PATH,
             "--headless",
             "--convert-to",
             "pdf",
             "--outdir",
-            os.path.dirname(output_file),
+            output_dir,
             input_file,
         ]
         subprocess.run(command, check=True)
-
-        # Return the absolute path of the generated PDF file
-        return os.path.abspath(output_file)
+        return os.path.abspath(input_file)
 
 
-def create_license_report(
-    licence_: EstablishmentLicence, establishment: Establishment, register
-):
-    presentation_path = os.path.join(
-        settings.BASE_DIR, "static/files/reports_temp", "license_report.pptx"
-    )
-    updated_presentation_path = os.path.join(
-        settings.BASE_DIR, "static/files/reports_temp", str(uuid.uuid4()) + ".pptx"
-    )
+def create_license_report(licence_: EstablishmentLicence, establishment: Establishment, register):
+    """
+    Create a license report by generating a PDF from a PowerPoint template.
 
+    Args:
+        licence_: License details
+        establishment: Establishment details
+        register: Registration details
+
+    Returns:
+        str: Path to the generated PDF file
+    """
+    reports_temp_dir = os.path.join(settings.BASE_DIR, "static/files/reports_temp")
+    template_path = os.path.join(reports_temp_dir, "license_report.pptx")
+    output_pptx = os.path.join(reports_temp_dir, f"{uuid.uuid4()}.pptx")
+
+    # Prepare data for the report
     cell_values = {
         "Owner_name": establishment.owner_name,
         "Register_number": str(register.id),
@@ -194,20 +202,16 @@ def create_license_report(
         "Phone_number": str(establishment.phone_number),
         "Email": str(establishment.email),
     }
-    delete_files_except(
-        os.path.join(settings.BASE_DIR, "static/files/reports_temp"),
-        "license_report.pptx",
-    )
-    # Create an instance of PowerPointUpdater, update the table cells, and save the updated presentation
-    updater = PowerPointUpdater(presentation_path, cell_values)
+
+    # Clean up old files
+    delete_files_except(reports_temp_dir, "license_report.pptx")
+
+    # Generate and convert the report
+    updater = PowerPointUpdater(template_path, cell_values)
     updater.update_table_cells()
-    updater.save_presentation(updated_presentation_path)
+    updater.save_presentation(output_pptx)
 
-    # Convert the updated presentation to a PDF and get the absolute path of the generated PDF file
-    pdf_path = PPTtoPDFConverter.convert(os.path.abspath(updated_presentation_path))
-    # remove the pptx file
-    os.remove(updated_presentation_path)
-    pptx_to_pdf = pdf_path.split(".pptx")[0] + ".pdf"
+    pdf_path = PPTtoPDFConverter.convert(os.path.abspath(output_pptx))
+    os.remove(output_pptx)
 
-    print(pptx_to_pdf)
-    return pptx_to_pdf
+    return pdf_path.split(".pptx")[0] + ".pdf"

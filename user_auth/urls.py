@@ -1,32 +1,50 @@
+from django.urls import path
 from .views import (
+    # User profile views
     profiles_list,
     create_new_user,
-    login_view,
-    logout_view,
-    view_teams,
-    team_edit,
-    team_delete,
-    team_create,
     user_edit,
     user_delete,
-    user_deactivate,
+    user_deactivate, 
     user_activate,
+    
+    # Authentication views
+    login_view,
+    logout_view,
+    
+    # Team management views
+    view_teams,
+    team_create,
+    team_edit,
+    team_delete,
     get_team_members,
+    
+    # Email confirmation views
+    send_confirmation_email,
+    confirm_email
 )
-from django.urls import path
 
 urlpatterns = [
-    path("profiles", profiles_list, name="profiles-list"),
-    path("new_user", create_new_user, name="register"),
-    path("user_edit/<int:id>", user_edit, name="user_edit"),
-    path("user_delete/<int:id>", user_delete, name="user_delete"),
-    path("user_deactivate/<int:id>", user_deactivate, name="user_deactivate"),
-    path("user_activate/<int:id>", user_activate, name="user_activate"),
-    path("login", login_view, name="login"),
-    path("logout", logout_view, name="logout"),
-    path("teams", view_teams, name="teams"),
-    path("team-create", team_create, name="team-create"),
-    path("team-edit/<int:id>", team_edit, name="team-edit"),
-    path("team-delete/<int:id>", team_delete, name="team-delete"),
-    path("get_team_members/<int:id>", get_team_members, name="get_team_members"),
+    # User profile URLs
+    path('profiles/', profiles_list, name='profiles-list'),
+    path('profiles/new/', create_new_user, name='register'),
+    path('profiles/<int:id>/edit/', user_edit, name='user_edit'),
+    path('profiles/<int:id>/delete/', user_delete, name='user_delete'),
+    path('profiles/<int:id>/deactivate/', user_deactivate, name='user_deactivate'),
+    path('profiles/<int:id>/activate/', user_activate, name='user_activate'),
+
+    # Authentication URLs  
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
+
+    # Team management URLs
+    path('teams/', view_teams, name='teams'),
+    path('teams/new/', team_create, name='team-create'),
+    path('teams/<int:id>/edit/', team_edit, name='team-edit'),
+    path('teams/<int:id>/delete/', team_delete, name='team-delete'),
+    path('teams/<int:id>/members/', get_team_members, name='get_team_members'),
+
+    # Email confirmation URLs
+    path('email/send-confirmation/', send_confirmation_email, name='send_confirmation_email'),
+    path('email/confirm/<str:uidb64>/<str:token>/', confirm_email, name='confirm_email'),
 ]

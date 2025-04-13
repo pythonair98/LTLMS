@@ -1,11 +1,9 @@
 """
 Forms for adding, editing, and viewing establishments and inspections.
 
-This module contains forms for adding, editing,
-and viewing establishments and inspections.
-The forms are used to collect and validate
-data from users before saving it to the database.
-
+This module contains forms for managing establishments, inspections, licenses, 
+and related data. Each form handles validation and provides appropriate 
+widgets for data entry.
 """
 
 from django import forms
@@ -13,6 +11,7 @@ from django.contrib.admin.widgets import AutocompleteSelect
 from django.core.exceptions import ValidationError
 from django.forms.widgets import DateInput
 from django.contrib import admin
+
 from .models import (
     Establishment,
     Inspection,
@@ -20,32 +19,24 @@ from .models import (
     EstablishmentRegister,
     EstablishmentLicence,
     InspectionAssignment,
-)  # Importing the models used in the form
-import LTLMS.settings as settings  # Importing settings to use custom date formats
+)
+import LTLMS.settings as settings
 
 
 class EstablishmentForm(forms.ModelForm):
     """
-    Form for adding, editing, and viewing an establishment.
-    It includes fields for establishment details, contact information,
-    location details, and activity type.
+    Form for managing establishment details.
+    
+    Handles establishment information including contact details,
+    location information, and activity classification.
     """
 
     class Meta:
-        """
-        Metaclass to specify the model and fields for the form.
-
-        """
-
-        model = Establishment  # Specifies the model associated with this form
+        model = Establishment
         ordering = ["-id"]
         fields = [
             "rifd",
             "establishment_name",
-            # "register_issuance_date",
-            # "register_expiration_date",
-            # "license_creation_date",
-            # "license_expiration_date",
             "main_category",
             "sub_category",
             "owner_name",
@@ -67,75 +58,11 @@ class EstablishmentForm(forms.ModelForm):
             "activity",
         ]
 
-    def clean_rifd(self):
-        """
-        Validates the 'rifd' field to ensure uniqueness.
-        """
-        rifd = self.cleaned_data.get("rifd")
-        if (
-            Establishment.objects.exclude(rifd=self.instance.rifd)
-            .filter(rifd=rifd)
-            .exists()
-        ):
-            raise ValidationError("Establishment with this Rifd already exists.")
-        return rifd
-
-    def clean_email(self):
-        """
-        Validates the 'email' field to ensure uniqueness.
-        """
-        email = self.cleaned_data.get("email")
-        if (
-            Establishment.objects.exclude(rifd=self.instance.rifd)
-            .filter(email=email)
-            .exists()
-        ):
-            raise ValidationError("Establishment with this Email already exists.")
-        return email
-
-    def get_register_number_for_form(self):
-        """
-        Returns the register number for the form.
-        """
-        return (
-            EstablishmentRegister.objects.filter(establishment=self.instance).first().id
-        )
-
     # Establishment details
     rifd = forms.CharField(label="رقم RFID:", required=True)
     establishment_name = forms.CharField(
         label="اسم المنشأة/Commercial Name:", required=True
     )
-
-    # Date fields with date picker widgets
-    # register_issuance_date = forms.DateField(
-    #     label="تاريخ إصدار السجل/Commercial Reg. Issuance Date:",
-    #     required=True,
-    #     input_formats=settings.DATE_INPUT_FORMATS,
-    #     widget=DateInput(attrs={"type": "date", "class": "form-control"}),
-    # )
-    # register_expiration_date = forms.DateField(
-    #     label="تاريخ انتهاء السجل/Commercial Reg. Expiration Date:",
-    #     required=True,
-    #     input_formats=settings.DATE_INPUT_FORMATS,
-    #     widget=DateInput(attrs={"type": "date", "class": "form-control"}),
-    # )
-    # license_creation_date = forms.DateField(
-    #     label="تاريخ إنشاء الرخصة/License Issuance Date:",
-    #     required=True,
-    #     input_formats=settings.DATE_INPUT_FORMATS,
-    #     widget=DateInput(attrs={"type": "date", "class": "form-control"}),
-    # )
-    # license_expiration_date = forms.DateField(
-    #     label="تاريخ انتهاء الرخصة/License Expiration Date:",
-    #     required=True,
-    #     input_formats=settings.DATE_INPUT_FORMATS,
-    #     widget=DateInput(attrs={"type": "date", "class": "form-control"}),
-    # )
-
-    # Category details
-    # main_category = forms.CharField(label="التصنيف الرئيسي/Main Category:", required=True)
-    # sub_category = forms.CharField(label="التصنيف الفرعي/Sub Category:", required=True)
 
     # Contact details
     owner_name = forms.CharField(label="مالك المنشأة/Owner:", required=True)
@@ -163,21 +90,49 @@ class EstablishmentForm(forms.ModelForm):
     block_name = forms.CharField(label="اسم الحي/Block Name:", required=True)
     building_number = forms.IntegerField(label="رقم المبنى/Bldg. No:", required=True)
 
-    # Activity details
-    # activity = forms.IntegerField(label="رمز النشاط/Activity Code:", required=True)
+    # Form widgets
     widgets = {
         "activity": AutocompleteSelect(
             Activity._meta.get_field("id").remote_field, admin.site
-        ),  # Dropdown for ForeignKey
+        ),
         "main_category": forms.Select(attrs={"class": "form-control"}),
-        "role": forms.Select(attrs={"class": "form-control"}),
         "sub_category": forms.Select(attrs={"class": "form-control"}),
     }
+
+    def clean_rifd(self):
+        """Validates RFID uniqueness."""
+        rifd = self.cleaned_data.get("rifd")
+        if (
+            Establishment.objects.exclude(rifd=self.instance.rifd)
+            .filter(rifd=rifd)
+            .exists()
+        ):
+            raise ValidationError("Establishment with this RFID already exists.")
+        return rifd
+
+    def clean_email(self):
+        """Validates email uniqueness."""
+        email = self.cleaned_data.get("email")
+        if (
+            Establishment.objects.exclude(rifd=self.instance.rifd)
+            .filter(email=email)
+            .exists()
+        ):
+            raise ValidationError("Establishment with this Email already exists.")
+        return email
+
+    def get_register_number_for_form(self):
+        """Returns the register number associated with this establishment."""
+        return (
+            EstablishmentRegister.objects.filter(establishment=self.instance).first().id
+        )
 
 
 class InspectionForm(forms.ModelForm):
     """
-    ModelForm for creating or updating an Inspection record along with its photos.
+    Form for creating or updating inspection records.
+    
+    Includes fields for inspection details and photo uploads.
     """
 
     class Meta:
@@ -217,6 +172,10 @@ class InspectionForm(forms.ModelForm):
 
 
 class EstablishmentRegisterForm(forms.ModelForm):
+    """
+    Form for managing establishment registration details.
+    """
+    
     class Meta:
         model = EstablishmentRegister
         fields = ["establishment", "issuance_date", "expiration_date"]
@@ -231,11 +190,11 @@ class EstablishmentRegisterForm(forms.ModelForm):
         }
 
 
-from django import forms
-from .models import EstablishmentLicence
-
-
 class EstablishmentLicenceForm(forms.ModelForm):
+    """
+    Form for managing establishment license information.
+    """
+    
     class Meta:
         model = EstablishmentLicence
         fields = [
@@ -262,41 +221,15 @@ class EstablishmentLicenceForm(forms.ModelForm):
 
 class InspectionAssignmentForm(forms.ModelForm):
     """
-    Form for assigning an establishment to inspect.
-
-    Fields:
-      - inspector: The inspector (user) who will perform the inspection.
-      - establishment: The establishment to be inspected.
-      - due_date: The deadline for completing the inspection.
-      - notes: Additional information or instructions.
+    Form for assigning inspections to inspectors.
+    
+    Allows selection of inspector, establishment, due date, and notes.
     """
-
+    
     class Meta:
         model = InspectionAssignment
         fields = ["inspector", "establishment", "due_date", "notes"]
         widgets = {
-            # Use a datetime-local widget for due_date if you want a nicer date/time picker.
             "due_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
-
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     establishment = cleaned_data.get("establishment")
-    #     # inspector = User.objects.get(pk=cleaned_data.get("inspector"))
-    #     inspector = cleaned_data.get("inspector")
-    #     if establishment:
-    #         # Check if there is an existing active assignment.
-    #         # Here, active means that the status is not 'completed' or 'cancelled'.
-    #
-    #         check_exist = (
-    #             InspectionAssignment.objects.filter(establishment=establishment)
-    #             .exclude(status__in=["completed", "cancelled"])
-    #             .exists()
-    #         )
-    #         if check_exist:
-    #
-    #             raise forms.ValidationError(
-    #                 f" تم تعيين هذه المنشأة {establishment.representative_name} للمفتش {inspector.get_full_name()} بالفعل ."
-    #             )
-    #     return cleaned_data
