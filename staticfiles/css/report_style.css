@@ -1,0 +1,121 @@
+/* global style */
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+:root {
+  --main-color: rgb(254, 90, 53);
+  --secondary-color: #b5a6a6;
+  --black: #000;
+}
+body {
+  font-family: "Cairo", sans-serif;
+}
+.logo img {
+  height: 100px;
+}
+@media only screen and (max-width: 900px) {
+  .logo {
+    margin-left: 15%;
+  }
+  .logo img {
+    height: 80px;
+  }
+  
+
+}
+@media only screen and (max-width: 600px) {
+  .logo {
+    margin-left: 10%;
+  }
+  .logo img {
+    height: 70px;
+  }
+  .header{
+    flex-direction: column;
+  flex-wrap: wrap;
+  text-align: center;
+  }
+}
+
+.header-content > p {
+  color: var(--main-color);
+  font-weight: bold;
+  font-size: 13px;
+}
+.heading,
+h6 {
+  color: var(--main-color);
+}
+.header-content input {
+  background-color: rgb(255 230 3 / 47%) !important;
+  border: 1px solid #000 !important;
+}
+.header-content p:last-child {
+  margin-top: -22px;
+}
+h6::after {
+  content: "";
+  height: 1px;
+  background-color: var(--main-color);
+  display: block;
+}
+input[type="checkbox"] + label {
+  margin-left: 26px;
+}
+input {
+  border-radius: 0 !important ;
+  -webkit-border-radius: 0 !important ;
+  -moz-border-radius: 0 !important ;
+  -ms-border-radius: 0 !important ;
+  -o-border-radius: 0 !important ;
+  text-align: center;
+}
+label,
+p {
+  font-size: 13px !important;
+}
+textarea {
+  resize: none;
+}
+
+.border-line::after {
+  content: "";
+  background-color: var(--secondary-color);
+  display: block;
+  height: 1px;
+  width: 99%;
+}
+
+input,
+textarea {
+  border: none !important;
+  outline: none !important;
+
+}
+textarea:hover,
+input:hover,
+textarea:active,
+input:active,
+textarea:focus,
+input:focus,
+label:focus,
+.btn:active,
+.btn.active {
+  outline: 0px !important;
+    background-color: transparent !important;
+  border: none;
+  box-shadow: none !important;
+}
+input[name="lastSign"],
+input[name="lastDate"],
+input[name="inputSign"],
+input[name="inputDate"],
+input[name="observerSign"] {
+  background-color: transparent !important;
+}
+.establish_data {
+  margin-top: 10px;
+}
+  
