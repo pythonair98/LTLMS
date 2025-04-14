@@ -30,4 +30,4 @@ urlpatterns = [
     path("", include("ILAS.urls")),
     path("", include("user_auth.urls")),
     path("", include("reports.urls")),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
