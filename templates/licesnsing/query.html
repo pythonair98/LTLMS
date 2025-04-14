@@ -250,8 +250,9 @@
         })
             .then((response) => {
                 if (response.ok) {
+                    window.location.href = "{% url 'reader' %}";
                 } else {
-                    window.location = response.url;
+
                 }
             })
             .catch((error) => {
