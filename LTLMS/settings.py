@@ -162,3 +162,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']  # Folder within your project directory for static files
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # Folder for the collected static files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
