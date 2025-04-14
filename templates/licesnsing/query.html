@@ -1,11 +1,13 @@
-{% load widget_tweaks %}
-{% load crispy_forms_filters %}
-{% load crispy_forms_tags %}
-{% load  static %}
-<html lang="ar">
+{% extends 'base.html' %}
+{% load crispy_forms_filters widget_tweaks %}
+{% load static %}
 
-<body dir="rtl">
-    <div class="container">
+{% block title %}
+    <title>اختر المنشأة</title>
+{% endblock %}
+
+{% block content %}
+    <div id="container" class="container">
         <form class="form-horizontal" action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="card">
@@ -148,7 +150,7 @@
                     <h3>بيانات المعاينة</h3>
                 </div>
                 <br><br>
-                <form action="/inspect_establishment/{{ establishment.id }}" method="post" enctype="multipart/form-data">
+                <form id="inspectForm" action="/inspect_establishment/{{ establishment.id }}" method="post" enctype="multipart/form-data">
                     <div class="card-body">
                         {% csrf_token %}
 
@@ -220,71 +222,70 @@
     </form>
     </div>
     </div>
+<!DOCTYPE html>
 
-</body>
-<script>
-const MAX_WIDTH = 320;
-const MAX_HEIGHT = 180;
+  <script>
+    document.getElementById('inspectForm').addEventListener('submit', async function (event) {
+        event.preventDefault(); // Prevent form submission
 
-// Select all image input fields that have the attributes you want.
-const inputs = document.querySelectorAll('input[type="file"][accept="image/*"][capture="environment"]');
+        const form = event.target;
+        const formData = new FormData(form);
 
-// Add change event listener to each input.
-inputs.forEach(input => {
-  input.onchange = function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+        // List of image fields to compress
+        const imageFields = ['register_photo', 'license_photo', 'establishment_photo', 'cars_building_photo'];
 
-    // Create a blob URL for the selected file.
-    const blobURL = URL.createObjectURL(file);
-    const img = new Image();
-    img.src = blobURL;
+        for (const fieldName of imageFields) {
+            const fileInput = document.getElementById(fieldName);
+            const file = fileInput.files[0];
+            if (file) {
+                const compressedBlob = await compressImageQualityOnly(file);
+                formData.set(fieldName, compressedBlob, file.name); // Replace original file with compressed blob
+            }
+        }
 
-    img.onload = function () {
-      // Calculate the new dimensions while maintaining aspect ratio.
-      const [newWidth, newHeight] = calculateSize(img, MAX_WIDTH, MAX_HEIGHT);
-      const canvas = document.createElement("canvas");
-      canvas.width = newWidth;
-      canvas.height = newHeight;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, newWidth, newHeight);
+        // Submit the form with compressed images
+        fetch(form.action, {
+            method: form.method,
+            body: formData,
+        })
+            .then((response) => {
+                if (response.ok) {
+                } else {
 
-      // Compress the image and convert it to a blob.
-      canvas.toBlob((blob) => {
-        // Create a display message showing original and compressed sizes.
-        const displayTag = document.createElement('h1');
-        displayTag.innerText = `Original Image - ${readableBytes(file.size)} :::::: Compressed Image - ${readableBytes(blob.size)}`;
-        document.getElementById('container').append(displayTag);
+                }
+            })
+            .catch((error) => {
+                console.error('Submission error:', error);
+                alert('An error occurred during submission.');
+            });
+    });
 
-        // Optionally: you can now upload or process 'blob' as needed.
-      }, 'image/jpeg', 0.7); // Adjust image type and quality as needed.
-    };
-  }
-});
+    // Function to compress image quality without changing resolution
+    function compressImageQualityOnly(file) {
+        return new Promise((resolve) => {
+            const blobURL = URL.createObjectURL(file);
+            const img = new Image();
+            img.src = blobURL;
 
-function calculateSize(img, maxWidth, maxHeight) {
-  let width = img.width;
-  let height = img.height;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width; // Keep original width
+                canvas.height = img.height; // Keep original height
 
-  // Constrain dimensions while maintaining the aspect ratio.
-  if (width > height) {
-    if (width > maxWidth) {
-      height = Math.round((height * maxWidth) / width);
-      width = maxWidth;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // Compress the image by adjusting the quality (0.7 means 70% quality)
+                canvas.toBlob(
+                    (blob) => {
+                        resolve(blob); // Return the compressed image blob
+                    },
+                    'image/jpeg',
+                    0.5 // Adjust the compression quality here (e.g., 0.5 = 50% quality)
+                );
+            };
+        });
     }
-  } else {
-    if (height > maxHeight) {
-      width = Math.round((width * maxHeight) / height);
-      height = maxHeight;
-    }
-  }
-  return [width, height];
-}
-
-function readableBytes(bytes) {
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
-}
 </script>
-</html>
+{% endblock %}
+

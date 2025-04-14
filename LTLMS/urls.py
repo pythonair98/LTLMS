@@ -30,4 +30,4 @@ urlpatterns = [
     path("", include("ILAS.urls")),
     path("", include("user_auth.urls")),
     path("", include("reports.urls")),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]

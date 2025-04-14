@@ -9,38 +9,68 @@
 {% block content %}
 <body dir="rtl">
     <div class="container mt-5">
-        <h2 class="text-center mb-4">قم باختيار المنشأة لمعاينتها</h2>
+        <h2 class="text-center mb-4">قائمة المهام والتكليفات الموكلة إليك كمفتش لتفتيش المؤسسات والشركات</h2>
+        <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>المنشأة</th>
+                <th>وجهت في</th>
+                <th>اخر موعد</th>
+                <th>الملاحظات</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assignment in establishments %}
+            <tr class="assignment-row" data-status="{{ assignment.status }}">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ assignment.establishment.establishment_name }}</td>
+                <td>{{ assignment.assigned_at|date:"Y-m-d H:i" }}</td>
+                <td>{{ assignment.due_date|default:"-" }}</td>
+                <td>{{ assignment.notes|default:"لا يوجد ملاحظات!" }}</td>
+                <td>
+                    <a href="{% url 'inspect_establishment' assignment.establishment_id %}" style="background-color:#8A1538; color:white;" class="btn btn-sm">فتح نموذج التفتيش</a>
 
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">لا يوجد تكليفات</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
         <!-- Dropdown List -->
-        <div class="d-flex justify-content-center">
-            <div class="col-md-6">
-                <select id="establishment-dropdown" class="form-select form-select-lg">
-                    <option value="" selected disabled>-- اختر المنشأة --</option>
-                    {% for establishment in establishments %}
-                        <option value="{{ establishment.id }}">{{ establishment.establishment_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
+{#        <div class="d-flex justify-content-center">#}
+{#            <div class="col-md-6">#}
+{#                <select id="establishment-dropdown" class="form-select form-select-lg">#}
+{#                    <option value="" selected disabled>-- اختر المنشأة --</option>#}
+{#                    {% for establishment in establishments %}#}
+{#                        <option value="{{ establishment.id }}">{{ establishment.establishment_name }}</option>#}
+{#                    {% endfor %}#}
+{#                </select>#}
+{#            </div>#}
+{#        </div>#}
 
         <!-- Display Selected Establishment -->
         <div id="dataholder">
         </div>
     </div>
 
-    <script>
-        document.getElementById("establishment-dropdown").addEventListener("change", function () {
-            let establishmentId = this.value;
-            if (!establishmentId) return;
-
-            // Fetch establishment data
-            fetch(`/inspect_establishment/${establishmentId}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("dataholder").innerHTML = data.template;
-                })
-                .catch(error => console.error("Error fetching data:", error));
-        });
-    </script>
+{#    <script>#}
+{#        document.getElementById("establishment-dropdown").addEventListener("change", function () {#}
+{#            let establishmentId = this.value;#}
+{#            if (!establishmentId) return;#}
+{##}
+{#            // Fetch establishment data#}
+{#            fetch(`/inspect_establishment/${establishmentId}`)#}
+{#                .then(response => response.json())#}
+{#                .then(data => {#}
+{#                    document.getElementById("dataholder").innerHTML = data.template;#}
+{#                })#}
+{#                .catch(error => console.error("Error fetching data:", error));#}
+{#        });#}
+{#    </script>#}
 </body>
 {% endblock %}

@@ -19,11 +19,10 @@ pymysql.install_as_MySQLdb()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-STATIC_URL = "/static/"
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+#
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static"),
+# ]
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -31,7 +30,7 @@ STATICFILES_DIRS = [
 SECRET_KEY = "django-insecure-b5af10c63e**-73bnz^c*+rk5u%-9)!@#5uy5^#^*%r09rm7r1"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 CSRF_TRUSTED_ORIGINS = [
     'https://milahaarabia.com',
     "http://127.0.0.1",
@@ -159,4 +158,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']  # Folder within your project directory for static files
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # Folder for the collected static files

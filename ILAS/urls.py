@@ -32,6 +32,7 @@ from .views import (
 # URL patterns for routing different views in the Django application
 urlpatterns = [
     # Dashboard view
+    path("", dashboard, name="dashboard"),
     path("summary", dashboard, name="dashboard"),
 
     # Establishment-related URLs

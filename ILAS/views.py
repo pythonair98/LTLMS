@@ -296,7 +296,7 @@ def reader(request):
         HttpResponse: Renders the RFID reader template with assigned establishments.
     """
     establishments = [
-        assignment.establishment
+        assignment
         for assignment in InspectionAssignment.objects.filter(
             inspector=request.user, status="pending"
         )
@@ -349,10 +349,7 @@ def inspect_establishment(request, id):
             )
     
     # GET request - show the inspection form
-    return JsonResponse(
-        {
-            "found": True,
-            "template": render(
+    return  render(
                 request,
                 "licesnsing/query.html",
                 {
@@ -363,9 +360,8 @@ def inspect_establishment(request, id):
                     "found": True,
                     "register_number": establishment.get_register.id,
                 },
-            ).content.decode("utf-8"),
-        }
-    )
+            )
+
 
 
 @login_required(login_url="login")
