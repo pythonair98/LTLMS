@@ -251,7 +251,7 @@
             .then((response) => {
                 if (response.ok) {
                 } else {
-
+                    window.location = response.url;
                 }
             })
             .catch((error) => {
