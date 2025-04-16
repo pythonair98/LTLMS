@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from django.http import HttpResponse
@@ -10,12 +11,16 @@ from ILAS.models import (
 from ILAS.utils import create_license_report
 from reports.models import LicenseReport
 
+# Get a logger instance for this module
+logger = logging.getLogger(__name__)
+
 
 def report_index(request):
     """
     Display a list of available reports with their descriptions.
     Each report is represented by a dictionary containing name, description and URL slug.
     """
+    logger.info("Accessing report index page")
     reports = [
         {
             "name": "تقرير نظرة عامة على الأنشطة",
@@ -108,6 +113,7 @@ def report_index(request):
             "slug": "comprehensive-licensing-report",
         },
     ]
+    logger.debug(f"Rendering report index with {len(reports)} available reports")
     return render(request, "reports/report_page.html", {"reports": reports})
 
 
@@ -116,6 +122,7 @@ def all_establishment_report(request):
     Generate a report for all establishments.
     TODO: Implement report generation logic
     """
+    logger.warning("all_establishment_report function is not implemented yet")
     pass
 
 
@@ -130,17 +137,23 @@ def inspection_report(request, inspection_id):
     Returns:
         Rendered inspection report template with inspection details
     """
-    inspection = get_object_or_404(Inspection, pk=inspection_id)
-    register = inspection.get_register()
-    establishment = register.establishment
+    logger.info(f"Generating inspection report for inspection ID: {inspection_id}")
+    try:
+        inspection = get_object_or_404(Inspection, pk=inspection_id)
+        register = inspection.get_register()
+        establishment = register.establishment
 
-    context = {
-        "current_date": datetime.now(),
-        "register": register,
-        "establishment": establishment,
-        "inspection": inspection,
-    }
-    return render(request, "reports/new_report.html", context=context)
+        context = {
+            "current_date": datetime.now(),
+            "register": register,
+            "establishment": establishment,
+            "inspection": inspection,
+        }
+        logger.debug(f"Inspection report context prepared for inspection ID: {inspection_id}")
+        return render(request, "reports/new_report.html", context=context)
+    except Exception as e:
+        logger.error(f"Error generating inspection report for ID {inspection_id}: {str(e)}", exc_info=True)
+        raise
 
 
 def license_report(request, licence_id):
@@ -154,45 +167,60 @@ def license_report(request, licence_id):
     Returns:
         PDF file response containing the license report
     """
-    # Get required data
-    licence = get_object_or_404(EstablishmentLicence, number=licence_id)
-    register = licence.register
-    establishment = licence.establishment
-    
-    # Generate PDF report
-    report_path = create_license_report(
-        licence_=licence,
-        establishment=establishment,
-        register=register
-    )
+    logger.info(f"Generating license report PDF for license ID: {licence_id}")
+    try:
+        # Get required data
+        licence = get_object_or_404(EstablishmentLicence, number=licence_id)
+        register = licence.register
+        establishment = licence.establishment
+        
+        logger.debug(f"Retrieved license data for ID {licence_id}, establishment: {establishment.id}")
+        
+        # Generate PDF report
+        report_path = create_license_report(
+            licence_=licence,
+            establishment=establishment,
+            register=register
+        )
+        logger.info(f"PDF report generated at: {report_path}")
 
-    # Save report record
-    report = LicenseReport(
-        establishment=establishment,
-        register_number=register.id,
-        id_number=establishment.owner_number,
-        license_category=licence.main_category,
-        issue_date=licence.creation_date,
-        expired_date=licence.expiration_date,
-        activity=establishment.activity,
-        address=establishment.get_address(),
-        license_number=licence.number,
-        phone_number=establishment.phone_number,
-        email=establishment.email,
-        created_by=request.user,
-    )
-    report.save()
+        # Save report record
+        report = LicenseReport(
+            establishment=establishment,
+            register_number=register.id,
+            id_number=establishment.owner_number,
+            license_category=licence.main_category,
+            issue_date=licence.creation_date,
+            expired_date=licence.expiration_date,
+            activity=establishment.activity,
+            address=establishment.get_address(),
+            license_number=licence.number,
+            phone_number=establishment.phone_number,
+            email=establishment.email,
+            created_by=request.user,
+        )
+        report.save()
+        logger.info(f"License report record saved with ID: {report.id}")
 
-    # Return PDF file
-    with open(report_path, "rb") as report_file:
-        response = HttpResponse(report_file.read(), content_type="application/pdf")
-        response["Content-Disposition"] = f'attachment; filename="license_report_{licence_id}.pdf"'
-        return response
+        # Return PDF file
+        with open(report_path, "rb") as report_file:
+            response = HttpResponse(report_file.read(), content_type="application/pdf")
+            response["Content-Disposition"] = f'attachment; filename="license_report_{licence_id}.pdf"'
+            return response
+    except Exception as e:
+        logger.error(f"Error generating license report for ID {licence_id}: {str(e)}", exc_info=True)
+        raise
 
 
 def view_exported_report(request):
     """
     Display a list of all exported license reports.
     """
-    reports = LicenseReport.objects.all()
-    return render(request, "reports/view_exported_report.html", {"reports": reports})
+    logger.info("Accessing exported reports list view")
+    try:
+        reports = LicenseReport.objects.all()
+        logger.debug(f"Retrieved {reports.count()} exported license reports")
+        return render(request, "reports/view_exported_report.html", {"reports": reports})
+    except Exception as e:
+        logger.error(f"Error retrieving exported reports: {str(e)}", exc_info=True)
+        raise

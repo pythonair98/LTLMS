@@ -1,4 +1,8 @@
+import logging
 from datetime import date, datetime
+
+# Configure logger for this module
+logger = logging.getLogger(__name__)
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -44,9 +48,11 @@ def add_establishment(request):
     if request.method == "POST":
         form = EstablishmentForm(request.POST)
         if form.is_valid():
-            form.save()
+            establishment = form.save()
+            logger.info(f"New establishment created: {establishment.establishment_name} (ID: {establishment.id})")
             messages.success(request, "تم إضافة المنشأة بنجاح")
             return redirect("view_establishment")
+        logger.warning(f"Failed to create establishment: {form.errors}")
         messages.error(request, "حدث خطأ أثناء إضافة المنشأة")
     else:
         form = EstablishmentForm()
@@ -74,6 +80,8 @@ def dashboard(request):
     from django.utils import timezone
     from datetime import timedelta
 
+    logger.info(f"Dashboard accessed by user: {request.user.username}")
+    
     # Basic statistics
     total_establishments = Establishment.objects.count()
     total_assignments = InspectionAssignment.objects.count()
@@ -160,6 +168,8 @@ def view_establishment(request):
     paginator = Paginator(establishments, 5)
     page_obj = paginator.get_page(request.GET.get("page"))
     
+    logger.info(f"User {request.user.username} viewed establishments list (page: {request.GET.get('page', 1)})")
+    
     return render(
         request,
         "licesnsing/view_establishment.html",
@@ -184,9 +194,12 @@ def delete_establishment(request, register_number):
     """
     try:
         establishment = Establishment.objects.get(register_number=register_number)
+        establishment_name = establishment.name
         establishment.delete()
+        logger.info(f"Establishment deleted: {establishment_name} (Register: {register_number}) by user {request.user.username}")
         messages.success(request, "تم حذف المنشأة بنجاح")
     except Establishment.DoesNotExist:
+        logger.warning(f"Attempt to delete non-existent establishment with register number: {register_number} by user {request.user.username}")
         messages.error(request, "المنشأة غير موجودة")
 
     return redirect("view_establishment")
@@ -209,6 +222,7 @@ def edit_establishment(request, rifd):
     
     if request.method == "POST" and form.is_valid():
         form.save()
+        logger.info(f"Establishment updated: {establishment.establishment_name} (RFID: {rifd}) by user {request.user.username}")
         messages.success(request, "تم تحديث المنشأة بنجاح")
         return redirect("view_establishment")
 
@@ -236,6 +250,7 @@ def query(request):
 
     if not code:
         # No new unread record found
+        logger.debug("No new Arduino reader entries found")
         return JsonResponse(
             {
                 "found": False,
@@ -254,6 +269,8 @@ def query(request):
         # Mark the code as processed
         code.status = "processed"
         code.save()
+        
+        logger.info(f"RFID match found: {code.code} -> Establishment: {establishment.establishment_name}")
         
         # Return the establishment data
         return JsonResponse(
@@ -275,6 +292,7 @@ def query(request):
         )
 
     # No matching establishment found
+    logger.warning(f"No establishment found for RFID code: {code.code}")
     return JsonResponse(
         {
             "found": False,
@@ -303,6 +321,7 @@ def reader(request):
     ]
     
     if not establishments:
+        logger.info(f"No pending inspections found for user: {request.user.username}")
         messages.warning(request, "لا توجد لديك منشآت جديدة للمعاينة.")
 
     return render(
@@ -332,9 +351,11 @@ def inspect_establishment(request, id):
             inspection = form.save()
             # Mark inspection as done
             mark_inspection_as_done(get_establishment_obj_by_register(register_number))
+            logger.info(f"Inspection completed for establishment: {establishment.establishment_name} (ID: {id}) by user {request.user.username}")
             messages.success(request, "تم إرسال المعاينة بنجاح")
             return redirect("reader")
         else:
+            logger.warning(f"Inspection form validation failed for establishment {id}: {form.errors}")
             messages.warning(request, "الرجاء تصحيح الأخطاء في النموذج.")
             messages.warning(request, form.errors.as_ul())
             return render(
@@ -379,8 +400,10 @@ def inspection_delete(request, id):
     try:
         inspection = get_object_or_404(Inspection, id=id)
         inspection.delete()
+        logger.info(f"Inspection deleted: ID {id} by user {request.user.username}")
         messages.success(request, "تم حذف المعاينة بنجاح")
     except Exception as e:
+        logger.error(f"Error deleting inspection {id}: {str(e)}")
         messages.warning(request, f"حدث خطأ اثناء حذف المعاينة: {str(e)}")
     
     return redirect("view_inspections")
@@ -401,7 +424,8 @@ def register_list_create(request):
     if request.method == "POST":
         form = EstablishmentRegisterForm(request.POST)
         if form.is_valid():
-            form.save()
+            register = form.save()
+            logger.info(f"New establishment register created: ID {register.id} by user {request.user.username}")
             messages.success(request, "تم إضافة السجل بنجاح")
             return redirect("register-list")
     else:
@@ -434,8 +458,10 @@ def register_delete(request, pk):
     try:
         register = get_object_or_404(EstablishmentRegister, pk=pk)
         register.delete()
+        logger.info(f"Establishment register deleted: ID {pk} by user {request.user.username}")
         messages.success(request, "تم حذف السجل بنجاح")
     except Exception as e:
+        logger.error(f"Error deleting register {pk}: {str(e)}")
         messages.error(request, f"حدث خطأ أثناء حذف السجل: {str(e)}")
     
     return redirect("register-list")
@@ -456,7 +482,8 @@ def licence_list_create(request):
     if request.method == "POST":
         form = EstablishmentLicenceForm(request.POST)
         if form.is_valid():
-            form.save()
+            licence = form.save()
+            logger.info(f"New establishment licence created: ID {licence.id} by user {request.user.username}")
             messages.success(request, "تم إضافة الرخصة بنجاح")
             return redirect("licence-list")
     else:
@@ -489,6 +516,7 @@ def licence_delete(request, pk):
     
     if request.method == "POST":
         licence.delete()
+        logger.info(f"Establishment licence deleted: ID {pk} by user {request.user.username}")
         messages.success(request, "تم حذف الرخصة بنجاح")
     
     return redirect("licence-list")
@@ -524,6 +552,7 @@ def edit_assignment(request, pk):
         HttpResponse: Renders the edit assignment template.
     """
     # TODO: Implement assignment editing functionality
+    logger.debug(f"Assignment edit view accessed for ID {pk} (not yet implemented)")
     return render(request, "licesnsing/edit_assignment.html", {})
 
 
@@ -542,8 +571,10 @@ def delete_assignment(request, pk):
     try:
         assignment = get_object_or_404(InspectionAssignment, pk=pk)
         assignment.delete()
+        logger.info(f"Inspection assignment deleted: ID {pk} by user {request.user.username}")
         messages.success(request, "تم حذف التكليف بنجاح")
     except Exception as e:
+        logger.error(f"Error deleting assignment {pk}: {str(e)}")
         messages.error(request, f"حدث خطأ أثناء حذف التكليف: {str(e)}")
 
     return redirect("view_assignments")
@@ -567,10 +598,12 @@ def update_assignment_status(request, pk):
 
     valid_statuses = ["pending", "accepted", "in_progress", "completed", "cancelled"]
     if new_status not in valid_statuses:
+        logger.warning(f"Invalid status '{new_status}' attempted for assignment {pk} by user {request.user.username}")
         messages.error(request, "الحالة التي قمت بإدخالها خطأ.")
     else:
         assignment.status = new_status
         assignment.save()
+        logger.info(f"Assignment {pk} status updated to '{new_status}' by user {request.user.username}")
         messages.success(request, "تم تحديث حالة التكليف بنجاح.")
     
     return redirect("view_assignments")
@@ -590,10 +623,12 @@ def assign_establishment(request):
     if request.method == "POST":
         form = InspectionAssignmentForm(request.POST)
         if form.is_valid():
-            form.save()
+            assignment = form.save()
+            logger.info(f"New inspection assignment created: ID {assignment.id} by user {request.user.username}")
             messages.success(request, "تم توجيه التكليف بنجاح")
             return redirect("view_assignments")
         else:
+            logger.warning(f"Assignment form validation failed: {form.errors}")
             messages.warning(request, form.errors.as_text())
     
     # Get inspectors with appropriate permissions
@@ -606,6 +641,7 @@ def assign_establishment(request):
     )
     
     if not unassigned_establishments:
+        logger.info("No unassigned establishments available for inspection")
         messages.warning(request, "جميع المنشآت قد تم تعيينها.")
     
     form = InspectionAssignmentForm()
@@ -634,10 +670,12 @@ def create_inspection(request):
     if request.method == "POST":
         form = InspectionForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            inspection = form.save()
+            logger.info(f"New inspection created: ID {inspection.id} by user {request.user.username}")
             messages.success(request, "تم إنشاء المعاينة بنجاح!")
             return redirect("reader")
         else:
+            logger.warning(f"Inspection form validation failed: {form.errors}")
             messages.error(request, "الرجاء تصحيح الأخطاء أدناه.")
             return render(
                 request,
@@ -668,6 +706,7 @@ def view_inspections(request):
     inspections = Inspection.objects.filter(is_archived=False)
     paginator = Paginator(inspections, 5)
     page_obj = paginator.get_page(request.GET.get("page"))
+    logger.info(f"User {request.user.username} viewed inspections list (page: {request.GET.get('page', 1)})")
     return render(request, "licesnsing/view_inspections.html", {"page_obj": page_obj})
 
 
@@ -684,6 +723,7 @@ def view_inspection_data(request, pk):
         HttpResponse: Renders the inspection detail template.
     """
     inspection = get_object_or_404(Inspection, id=pk)
+    logger.info(f"User {request.user.username} viewed inspection details for ID {pk}")
     return render(
         request, "licesnsing/view_inspection_data.html", {"inspection": inspection}
     )
@@ -705,6 +745,7 @@ def archive_inspection(request, pk):
     inspection.is_archived = True
     inspection.archived_at = datetime.now()
     inspection.save()
+    logger.info(f"Inspection archived: ID {pk} by user {request.user.username}")
     messages.success(request, "تم أرشفة المعاينة بنجاح!")
     return redirect("view_inspections")
 
@@ -721,6 +762,7 @@ def view_archive(request):
         HttpResponse: Renders the archived inspections template.
     """
     inspections = Inspection.objects.filter(is_archived=True)
+    logger.info(f"User {request.user.username} viewed archived inspections")
     return render(
         request, "licesnsing/view_archived.html", {"inspections": inspections}
     )
@@ -747,12 +789,15 @@ def add_establishment_register(request):
             if EstablishmentRegister.objects.filter(
                 establishment=establishment
             ).exists():
+                logger.warning(f"Attempt to create duplicate register for establishment ID {establishment.id}")
                 messages.error(request, "هذا السجل موجود بالفعل لهذه المؤسسة!")
             else:
-                form.save()
+                register = form.save()
+                logger.info(f"New establishment register created: ID {register.id} for establishment {establishment.establishment_name}")
                 messages.success(request, "تمت إضافة السجل بنجاح!")
                 return redirect("register-list")
         else:
+            logger.warning(f"Register form validation failed: {form.errors}")
             messages.error(request, "الرجاء تصحيح الأخطاء في النموذج.")
     else:
         form = EstablishmentRegisterForm()
@@ -783,12 +828,15 @@ def add_establishment_licence(request):
 
             # Check if this register already has a license
             if EstablishmentLicence.objects.filter(register=register).exists():
+                logger.warning(f"Attempt to create duplicate licence for register ID {register.id}")
                 messages.error(request, "يوجد بالفعل رخصة لهذا التسجيل!")
             else:
-                form.save()
+                licence = form.save()
+                logger.info(f"New establishment licence created: ID {licence.id} for register {register.id}")
                 messages.success(request, "تمت إضافة الرخصة بنجاح!")
                 return redirect("licence-list")
         else:
+            logger.warning(f"Licence form validation failed: {form.errors}")
             messages.error(request, "الرجاء تصحيح الأخطاء في النموذج.")
 
     else:
@@ -810,6 +858,7 @@ def get_inspector_assignments(request):
     """
     inspector = request.user
     assignments = InspectionAssignment.objects.filter(inspector=inspector)
+    logger.info(f"Inspector {inspector.username} viewed their assignments")
     return render(
         request, "licesnsing/inspector_assignments.html", {"assignments": assignments}
     )

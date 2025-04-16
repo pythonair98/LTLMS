@@ -1,8 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+import logging
 
 from user_auth.models import Profiles, Contact, Team
+
+# Configure module-level logger
+logger = logging.getLogger(__name__)
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -20,6 +24,15 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("username", "email", "password1", "password2")
+
+    def save(self, commit=True):
+        """Override save to log user creation."""
+        user = super().save(commit=False)
+        logger.info(f"Creating new user account with username: {user.username}")
+        if commit:
+            user.save()
+            logger.info(f"User account created successfully: {user.username}")
+        return user
 
 
 class ProfileForm(forms.ModelForm):
@@ -41,6 +54,17 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profiles
         fields = ("occupation", "team")
+
+    def save(self, commit=True):
+        """Override save to log profile creation/updates."""
+        profile = super().save(commit=False)
+        action = "Creating" if profile.pk is None else "Updating"
+        logger.info(f"{action} profile for user: {getattr(profile, 'user', 'New User')}")
+        
+        if commit:
+            profile.save()
+            logger.info(f"Profile {action.lower()} successful")
+        return profile
 
 
 class TeamForm(forms.ModelForm):
@@ -65,6 +89,17 @@ class TeamForm(forms.ModelForm):
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
 
+    def save(self, commit=True):
+        """Override save to log team creation/updates."""
+        team = super().save(commit=False)
+        action = "Creating" if team.pk is None else "Updating"
+        logger.info(f"{action} team: {team.ar_name} / {team.en_name}")
+        
+        if commit:
+            team.save()
+            logger.info(f"Team {action.lower()} successful")
+        return team
+
 
 class ContactForm(forms.ModelForm):
     """
@@ -84,6 +119,17 @@ class ContactForm(forms.ModelForm):
             "phone_number",
             "email",
         )
+
+    def save(self, commit=True):
+        """Override save to log contact creation/updates."""
+        contact = super().save(commit=False)
+        action = "Creating" if contact.pk is None else "Updating"
+        logger.info(f"{action} contact information for: {contact.en_name or contact.ar_name}")
+        
+        if commit:
+            contact.save()
+            logger.info(f"Contact information {action.lower()} successful")
+        return contact
 
 
 class UserFullForm(forms.ModelForm):
@@ -148,6 +194,7 @@ class UserFullForm(forms.ModelForm):
         password = cleaned_data.get("password")
         confirm_password = cleaned_data.get("confirm_password")
         if password and confirm_password and password != confirm_password:
+            logger.warning(f"Password mismatch during user creation/update for username: {cleaned_data.get('username')}")
             self.add_error("confirm_password", "Passwords do not match.")
         return cleaned_data
 
@@ -157,8 +204,13 @@ class UserFullForm(forms.ModelForm):
         """
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
+        
+        action = "Creating" if user.pk is None else "Updating"
+        logger.info(f"{action} full user account: {user.username}")
+        
         if commit:
             user.save()
+            logger.info(f"User {action.lower()} successful with permissions - Staff: {user.is_staff}, Superuser: {user.is_superuser}")
         return user
 
 
@@ -197,3 +249,14 @@ class UserEditForm(forms.ModelForm):
         """
         super().__init__(*args, **kwargs)
         self.fields["username"].disabled = True  # Prevent username modifications
+        logger.debug(f"Initializing edit form for user: {kwargs.get('instance')}")
+
+    def save(self, commit=True):
+        """Override save to log user updates."""
+        user = super().save(commit=False)
+        logger.info(f"Updating user account: {user.username}")
+        
+        if commit:
+            user.save()
+            logger.info(f"User update successful - Active: {user.is_active}, Staff: {user.is_staff}, Superuser: {user.is_superuser}")
+        return user

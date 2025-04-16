@@ -13,6 +13,9 @@ from django.conf import settings
 from typing import Optional, Tuple
 import logging
 
+# Configure logger for this module
+logger = logging.getLogger(__name__)
+
 from ILAS.utils import inspector_assignments
 from .forms import (
     CustomUserCreationForm,
@@ -41,7 +44,9 @@ def profiles_list(request):
     Returns:
         Rendered template with all user profiles
     """
+    logger.info("Accessing profiles list view")
     profiles = User.objects.all()
+    logger.debug(f"Retrieved {profiles.count()} user profiles")
     return render(request, "users/profiles_list.html", {"profiles": profiles})
 
 
@@ -56,35 +61,43 @@ def edit_user_profile(request, pk):
     Returns:
         Rendered edit form or redirect after successful update
     """
-    user = get_object_or_404(User, pk=pk)
-    profile = user.profiles
-    contact = profile.contact
+    logger.info(f"Editing user profile with ID: {pk}")
+    try:
+        user = get_object_or_404(User, pk=pk)
+        profile = user.profiles
+        contact = profile.contact
 
-    if request.method == "POST":
-        user_form = CustomUserCreationForm(request.POST, instance=user)
-        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
-        contact_form = ContactForm(request.POST, instance=contact)
+        if request.method == "POST":
+            user_form = CustomUserCreationForm(request.POST, instance=user)
+            profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
+            contact_form = ContactForm(request.POST, instance=contact)
 
-        if all([user_form.is_valid(), profile_form.is_valid(), contact_form.is_valid()]):
-            user_form.save()
-            profile_form.save() 
-            contact_form.save()
-            messages.success(request, "User and profile updated successfully!")
-            return redirect("profiles-list")
+            if all([user_form.is_valid(), profile_form.is_valid(), contact_form.is_valid()]):
+                user_form.save()
+                profile_form.save() 
+                contact_form.save()
+                logger.info(f"Successfully updated user profile for user ID: {pk}")
+                messages.success(request, "User and profile updated successfully!")
+                return redirect("profiles-list")
 
-        messages.error(request, "Please correct the form errors and try again.")
-        
-    else:
-        user_form = CustomUserCreationForm(instance=user)
-        profile_form = ProfileForm(instance=profile)
-        contact_form = ContactForm(instance=contact)
+            logger.warning(f"Form validation failed for user ID: {pk}")
+            messages.error(request, "Please correct the form errors and try again.")
+            
+        else:
+            user_form = CustomUserCreationForm(instance=user)
+            profile_form = ProfileForm(instance=profile)
+            contact_form = ContactForm(instance=contact)
 
-    context = {
-        "user_form": user_form,
-        "profile_form": profile_form,
-        "contact_form": contact_form,
-    }
-    return render(request, "users/edit_user_profile.html", context)
+        context = {
+            "user_form": user_form,
+            "profile_form": profile_form,
+            "contact_form": contact_form,
+        }
+        return render(request, "users/edit_user_profile.html", context)
+    except Exception as e:
+        logger.error(f"Error editing user profile {pk}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while editing the profile.")
+        return redirect("profiles-list")
 
 
 @login_required(login_url="login")
@@ -98,16 +111,23 @@ def delete_user_profile(request, pk):
     Returns:
         Redirect to profiles list
     """
-    user = get_object_or_404(User, pk=pk)
-    profile = user.profiles
-    contact = profile.contact
-    
-    user.delete()
-    contact.delete()
-    profile.delete()
-    
-    messages.success(request, "User and profile deleted successfully!")
-    return redirect("profiles-list")
+    logger.info(f"Attempting to delete user profile with ID: {pk}")
+    try:
+        user = get_object_or_404(User, pk=pk)
+        profile = user.profiles
+        contact = profile.contact
+        
+        user.delete()
+        contact.delete()
+        profile.delete()
+        
+        logger.info(f"Successfully deleted user profile with ID: {pk}")
+        messages.success(request, "User and profile deleted successfully!")
+        return redirect("profiles-list")
+    except Exception as e:
+        logger.error(f"Error deleting user profile {pk}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while deleting the profile.")
+        return redirect("profiles-list")
 
 
 def login_view(request):
@@ -122,7 +142,9 @@ def login_view(request):
     Returns:
         Rendered login form or redirect after successful login
     """
+    logger.debug("Login view accessed")
     if request.user.is_authenticated:
+        logger.info(f"Already authenticated user {request.user.username} accessing login page")
         messages.info(request, "You are already logged in.")
         
         return redirect("dashboard")
@@ -135,13 +157,16 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             
+            logger.info(f"User {user.username} successfully logged in")
             assignment_count = inspector_assignments(user)
             if assignment_count > 0:
+                logger.info(f"User {user.username} has {assignment_count} pending assignments")
                 messages.info(request, f"يوجد لديك تكليفات عدد: {assignment_count}")
                 
             messages.success(request, f"مرحباً, {user.username}!")
             return redirect(next_url)
             
+        logger.warning(f"Failed login attempt for username: {request.POST.get('username')}")
         messages.error(request, "Invalid username or password.")
         
     else:
@@ -163,23 +188,31 @@ def create_new_user(request):
     Returns:
         Rendered registration form or redirect after successful creation
     """
+    logger.info("Accessing create new user view")
     if request.method == "POST":
         form = UserFullForm(request.POST)
         profile_form = ProfileForm(request.POST, request.FILES)
 
         if form.is_valid() and profile_form.is_valid():
-            user = form.save(commit=False)
-            if not user.pk:
-                user.set_password(form.cleaned_data["password"])
-            user.save()
+            try:
+                user = form.save(commit=False)
+                if not user.pk:
+                    user.set_password(form.cleaned_data["password"])
+                user.save()
 
-            profile = profile_form.save(commit=False)
-            profile.user = user
-            profile.save()
+                profile = profile_form.save(commit=False)
+                profile.user = user
+                profile.save()
 
-            messages.success(request, "تم انشاء المستخدم بنجاح!")
-            return redirect("profiles-list")
+                logger.info(f"Successfully created new user: {user.username} (ID: {user.id})")
+                messages.success(request, "تم انشاء المستخدم بنجاح!")
+                return redirect("profiles-list")
+            except Exception as e:
+                logger.error(f"Error creating new user: {str(e)}", exc_info=True)
+                messages.error(request, f"Error creating user: {str(e)}")
+                return redirect("profiles-list")
 
+        logger.warning(f"User creation form validation failed: {form.errors}")
         messages.warning(request, "Please correct the errors below.")
         messages.error(request, form.errors.as_data())
         return redirect("profiles-list")
@@ -202,6 +235,8 @@ def logout_view(request):
     Returns:
         Redirect to login page
     """
+    if request.user.is_authenticated:
+        logger.info(f"User {request.user.username} logged out")
     logout(request)
     return redirect("login")
 
@@ -216,7 +251,9 @@ def view_teams(request):
     Returns:
         Rendered template with all teams
     """
+    logger.info("Accessing teams list view")
     teams = Team.objects.all()
+    logger.debug(f"Retrieved {teams.count()} teams")
     return render(request, "users/view_teams.html", {"teams": teams})
 
 
@@ -231,15 +268,24 @@ def team_edit(request, id):
     Returns:
         Redirect to teams list
     """
-    team = get_object_or_404(Team, id=id)
-    
-    if request.method == "POST":
-        form = TeamForm(request.POST, instance=team)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "تم تحديث الفريق بنجاح!")
-    
-    return redirect("teams")
+    logger.info(f"Editing team with ID: {id}")
+    try:
+        team = get_object_or_404(Team, id=id)
+        
+        if request.method == "POST":
+            form = TeamForm(request.POST, instance=team)
+            if form.is_valid():
+                form.save()
+                logger.info(f"Successfully updated team ID: {id}")
+                messages.success(request, "تم تحديث الفريق بنجاح!")
+            else:
+                logger.warning(f"Team edit form validation failed: {form.errors}")
+        
+        return redirect("teams")
+    except Exception as e:
+        logger.error(f"Error editing team {id}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while editing the team.")
+        return redirect("teams")
 
 
 @login_required(login_url="login")
@@ -253,13 +299,20 @@ def team_delete(request, id):
     Returns:
         Redirect to teams list
     """
-    team = get_object_or_404(Team, id=id)
-    
-    if request.method == "POST":
-        team.delete()
-        messages.success(request, "تم حذف الفريق بنجاح!")
-    
-    return redirect("teams")
+    logger.info(f"Attempting to delete team with ID: {id}")
+    try:
+        team = get_object_or_404(Team, id=id)
+        
+        if request.method == "POST":
+            team.delete()
+            logger.info(f"Successfully deleted team ID: {id}")
+            messages.success(request, "تم حذف الفريق بنجاح!")
+        
+        return redirect("teams")
+    except Exception as e:
+        logger.error(f"Error deleting team {id}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while deleting the team.")
+        return redirect("teams")
 
 
 @login_required(login_url="login")
@@ -272,12 +325,15 @@ def team_create(request):
     Returns:
         Redirect to teams list
     """
+    logger.info("Attempting to create new team")
     if request.method == "POST":
         form = TeamForm(request.POST)
         if form.is_valid():
-            form.save()
+            team = form.save()
+            logger.info(f"Successfully created new team: {team.name} (ID: {team.id})")
             messages.success(request, "تم انشاء الفريق بنجاح!")
         else:
+            logger.warning(f"Team creation form validation failed: {form.errors}")
             messages.error(request, "الرجاء التاكد من اسم الفريق!")
     
     return redirect("teams")
@@ -294,31 +350,41 @@ def user_edit(request, id):
     Returns:
         Rendered edit form or redirect after successful update
     """
-    user = get_object_or_404(User, id=id)
-    
-    if user.profiles is None:
-        messages.error(request, "هذا المستخدم غير مستكمل البيانات.")
-        return redirect("profiles-list")
+    logger.info(f"Editing user with ID: {id}")
+    try:
+        user = get_object_or_404(User, id=id)
         
-    profile = get_object_or_404(Profiles, user=user)
-
-    if request.method == "POST":
-        form = UserEditForm(request.POST, instance=user)
-        profile_form = ProfileForm(request.POST, instance=profile)
-        
-        if form.is_valid():
-            form.save()
-            profile_form.save()
-            messages.success(request, "تم تحديث المستخدم بنجاح!")
+        if user.profiles is None:
+            logger.warning(f"User {id} has incomplete profile data")
+            messages.error(request, "هذا المستخدم غير مستكمل البيانات.")
             return redirect("profiles-list")
+            
+        profile = get_object_or_404(Profiles, user=user)
 
-    context = {
-        "form": UserEditForm(instance=user),
-        "user": user,
-        "occupations": Occupation.objects.all(),
-        "teams": Team.objects.all(),
-    }
-    return render(request, "users/edit_user.html", context)
+        if request.method == "POST":
+            form = UserEditForm(request.POST, instance=user)
+            profile_form = ProfileForm(request.POST, instance=profile)
+            
+            if form.is_valid():
+                form.save()
+                profile_form.save()
+                logger.info(f"Successfully updated user ID: {id}")
+                messages.success(request, "تم تحديث المستخدم بنجاح!")
+                return redirect("profiles-list")
+            else:
+                logger.warning(f"User edit form validation failed: {form.errors}")
+
+        context = {
+            "form": UserEditForm(instance=user),
+            "user": user,
+            "occupations": Occupation.objects.all(),
+            "teams": Team.objects.all(),
+        }
+        return render(request, "users/edit_user.html", context)
+    except Exception as e:
+        logger.error(f"Error editing user {id}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while editing the user.")
+        return redirect("profiles-list")
 
 
 @login_required(login_url="login")
@@ -332,11 +398,18 @@ def user_deactivate(request, id):
     Returns:
         Redirect to profiles list
     """
-    user = get_object_or_404(User, id=id)
-    user.is_active = False
-    user.save()
-    messages.success(request, "تم تعطيل المستخدم بنجاح!")
-    return redirect("profiles-list")
+    logger.info(f"Deactivating user with ID: {id}")
+    try:
+        user = get_object_or_404(User, id=id)
+        user.is_active = False
+        user.save()
+        logger.info(f"Successfully deactivated user ID: {id}")
+        messages.success(request, "تم تعطيل المستخدم بنجاح!")
+        return redirect("profiles-list")
+    except Exception as e:
+        logger.error(f"Error deactivating user {id}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while deactivating the user.")
+        return redirect("profiles-list")
 
 
 @login_required(login_url="login")
@@ -350,11 +423,18 @@ def user_activate(request, id):
     Returns:
         Redirect to profiles list
     """
-    user = get_object_or_404(User, id=id)
-    user.is_active = True
-    user.save()
-    messages.success(request, "تم تفعيل المستخدم بنجاح!")
-    return redirect("profiles-list")
+    logger.info(f"Activating user with ID: {id}")
+    try:
+        user = get_object_or_404(User, id=id)
+        user.is_active = True
+        user.save()
+        logger.info(f"Successfully activated user ID: {id}")
+        messages.success(request, "تم تفعيل المستخدم بنجاح!")
+        return redirect("profiles-list")
+    except Exception as e:
+        logger.error(f"Error activating user {id}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while activating the user.")
+        return redirect("profiles-list")
 
 
 @login_required(login_url="login")
@@ -368,10 +448,17 @@ def user_delete(request, id):
     Returns:
         Redirect to profiles list
     """
-    user = get_object_or_404(User, id=id)
-    user.delete()
-    messages.success(request, "تم حذف المستخدم بنجاح!")
-    return redirect("profiles-list")
+    logger.info(f"Deleting user with ID: {id}")
+    try:
+        user = get_object_or_404(User, id=id)
+        user.delete()
+        logger.info(f"Successfully deleted user ID: {id}")
+        messages.success(request, "تم حذف المستخدم بنجاح!")
+        return redirect("profiles-list")
+    except Exception as e:
+        logger.error(f"Error deleting user {id}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while deleting the user.")
+        return redirect("profiles-list")
 
 
 @login_required(login_url="login")
@@ -386,18 +473,25 @@ def get_team_members(request, id):
     Returns:
         Rendered template with team members
     """
-    # Get team or return 404 if not found
-    team = get_object_or_404(Team, id=id)
-    
-    # Get all profiles associated with the team and extract users
-    team_members = team.profiles_set.select_related('user').all()
-    users = [profile.user for profile in team_members]
-    
-    return render(
-        request,
-        "users/profiles_list.html",
-        {"profiles": users}
-    )
+    logger.info(f"Retrieving members for team ID: {id}")
+    try:
+        # Get team or return 404 if not found
+        team = get_object_or_404(Team, id=id)
+        
+        # Get all profiles associated with the team and extract users
+        team_members = team.profiles_set.select_related('user').all()
+        users = [profile.user for profile in team_members]
+        
+        logger.debug(f"Retrieved {len(users)} members for team ID: {id}")
+        return render(
+            request,
+            "users/profiles_list.html",
+            {"profiles": users}
+        )
+    except Exception as e:
+        logger.error(f"Error retrieving team members for team {id}: {str(e)}", exc_info=True)
+        messages.error(request, "An error occurred while retrieving team members.")
+        return redirect("teams")
 
 
 def send_confirmation_email(request, user: Optional[User] = None) -> Tuple[bool, str]:
@@ -413,12 +507,13 @@ def send_confirmation_email(request, user: Optional[User] = None) -> Tuple[bool,
             - bool: Success status
             - str: Message describing the result
     """
-    logger = logging.getLogger(__name__)
+    logger.info("Attempting to send confirmation email")
     
     try:
         # Get user from parameter or request
         target_user = user or request.user
         if not target_user:
+            logger.warning("No user specified for confirmation email")
             return False, "No user specified"
             
         # Generate confirmation token and URL
@@ -458,7 +553,7 @@ def send_confirmation_email(request, user: Optional[User] = None) -> Tuple[bool,
         return True, "Confirmation email sent successfully"
         
     except Exception as e:
-        logger.error(f"Failed to send confirmation email: {str(e)}")
+        logger.error(f"Failed to send confirmation email: {str(e)}", exc_info=True)
         return False, f"Failed to send confirmation email: {str(e)}"
 
 
@@ -474,6 +569,7 @@ def confirm_email(request, uidb64, token):
     Returns:
         HttpResponse: Redirects to login page with success/error message
     """
+    logger.info(f"Processing email confirmation with token: {token}")
     try:
         from django.utils.http import urlsafe_base64_decode
         uid = urlsafe_base64_decode(uidb64).decode()
@@ -482,13 +578,15 @@ def confirm_email(request, uidb64, token):
         if default_token_generator.check_token(user, token):
             user.is_active = True
             user.save()
+            logger.info(f"Successfully confirmed email and activated user ID: {uid}")
             messages.success(request, "تم تفعيل حسابك بنجاح! يمكنك الآن تسجيل الدخول.")
             return redirect('login')
         else:
+            logger.warning(f"Invalid token used for user ID: {uid}")
             messages.error(request, "رابط التفعيل غير صالح!")
             return redirect('login')
             
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist) as e:
+        logger.error(f"Error confirming email: {str(e)}", exc_info=True)
         messages.error(request, "رابط التفعيل غير صالح!")
         return redirect('login')
-

@@ -6,6 +6,7 @@ and related data. Each form handles validation and provides appropriate
 widgets for data entry.
 """
 
+import logging
 from django import forms
 from django.contrib.admin.widgets import AutocompleteSelect
 from django.core.exceptions import ValidationError
@@ -21,6 +22,9 @@ from .models import (
     InspectionAssignment,
 )
 import LTLMS.settings as settings
+
+# Configure module-level logger
+logger = logging.getLogger(__name__)
 
 
 class EstablishmentForm(forms.ModelForm):
@@ -107,7 +111,9 @@ class EstablishmentForm(forms.ModelForm):
             .filter(rifd=rifd)
             .exists()
         ):
+            logger.warning(f"Duplicate RFID attempted: {rifd}")
             raise ValidationError("Establishment with this RFID already exists.")
+        logger.debug(f"RFID validation passed: {rifd}")
         return rifd
 
     def clean_email(self):
@@ -118,14 +124,22 @@ class EstablishmentForm(forms.ModelForm):
             .filter(email=email)
             .exists()
         ):
+            logger.warning(f"Duplicate email attempted: {email}")
             raise ValidationError("Establishment with this Email already exists.")
+        logger.debug(f"Email validation passed: {email}")
         return email
 
     def get_register_number_for_form(self):
         """Returns the register number associated with this establishment."""
-        return (
-            EstablishmentRegister.objects.filter(establishment=self.instance).first().id
-        )
+        try:
+            register = EstablishmentRegister.objects.filter(establishment=self.instance).first()
+            if register:
+                return register.id
+            logger.warning(f"No register found for establishment: {self.instance.id}")
+            return None
+        except Exception as e:
+            logger.error(f"Error retrieving register number: {str(e)}", exc_info=True)
+            return None
 
 
 class InspectionForm(forms.ModelForm):
@@ -170,6 +184,12 @@ class InspectionForm(forms.ModelForm):
             "cars_building_photo": "Cars Building Photo",
         }
 
+    def clean(self):
+        """Validate the inspection form data."""
+        cleaned_data = super().clean()
+        logger.info(f"Processing inspection form for register: {cleaned_data.get('register_number')}")
+        return cleaned_data
+
 
 class EstablishmentRegisterForm(forms.ModelForm):
     """
@@ -188,6 +208,19 @@ class EstablishmentRegisterForm(forms.ModelForm):
             ),
             "establishment": forms.Select(attrs={"class": "form-control"}),
         }
+
+    def clean(self):
+        """Validate establishment register dates."""
+        cleaned_data = super().clean()
+        issuance_date = cleaned_data.get("issuance_date")
+        expiration_date = cleaned_data.get("expiration_date")
+        
+        if issuance_date and expiration_date and issuance_date > expiration_date:
+            logger.warning(f"Invalid date range: issuance {issuance_date} > expiration {expiration_date}")
+            raise ValidationError("Issuance date cannot be after expiration date.")
+        
+        logger.info(f"Register form validated for establishment: {cleaned_data.get('establishment')}")
+        return cleaned_data
 
 
 class EstablishmentLicenceForm(forms.ModelForm):
@@ -218,6 +251,19 @@ class EstablishmentLicenceForm(forms.ModelForm):
             "sub_category": forms.Select(attrs={"class": "form-control"}),
         }
 
+    def clean(self):
+        """Validate license dates and related fields."""
+        cleaned_data = super().clean()
+        creation_date = cleaned_data.get("creation_date")
+        expiration_date = cleaned_data.get("expiration_date")
+        
+        if creation_date and expiration_date and creation_date > expiration_date:
+            logger.warning(f"Invalid license date range: creation {creation_date} > expiration {expiration_date}")
+            raise ValidationError("Creation date cannot be after expiration date.")
+        
+        logger.info(f"License form validated for register: {cleaned_data.get('register')}")
+        return cleaned_data
+
 
 class InspectionAssignmentForm(forms.ModelForm):
     """
@@ -233,3 +279,11 @@ class InspectionAssignmentForm(forms.ModelForm):
             "due_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
+        
+    def save(self, commit=True):
+        """Save the assignment and log the action."""
+        instance = super().save(commit=False)
+        if commit:
+            instance.save()
+            logger.info(f"Inspection assigned to {instance.inspector} for establishment {instance.establishment}")
+        return instance

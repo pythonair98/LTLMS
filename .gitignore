@@ -39,4 +39,6 @@ __pycache__/
 media
 /static/media
 /static/media/*
+logs
+logs/*
 
