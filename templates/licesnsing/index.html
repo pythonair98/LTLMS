@@ -1,78 +1,94 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
 {% block title %}
-<title>LTLMS Dashboard</title>
+<title>لوحة التحكم</title>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid p-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-primary">Dashboard Overview</h2>
-        <div class="text-muted">Last updated: {% now "Y-m-d H:i" %}</div>
+<div class="container-fluid p-3 p-md-4" dir="rtl">
+    <!-- Header Card -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center bg-gradient-maroon py-3">
+            <h3 class="m-0 font-weight-bold text-white">لوحة المعلومات</h3>
+            <div class="text-white d-flex align-items-center">
+                <i class="fas fa-sync-alt me-2"></i>
+                <span>آخر تحديث: {% now "Y-m-d H:i" %}</span>
+            </div>
+        </div>
     </div>
 
     <!-- Key Statistics Cards -->
     <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-xl-3">
-            <div class="card bg-primary text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-white-50">Total Establishments</h6>
-                            <h2 class="mb-0">{{ total_establishments }}</h2>
-                        </div>
-                        <div class="ms-3">
-                            <i class="fas fa-building fa-2x opacity-75"></i>
-                        </div>
+        <div class="col-6 col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0 stats-card">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="stats-icon bg-primary">
+                        <i class="fas fa-building"></i>
                     </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-0">إجمالي المنشآت</h6>
+                        <h3 class="mb-0 mt-1 fw-bold">{{ total_establishments }}</h3>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-end border-top-0 pt-0">
+                    <a href="{% url 'view_establishment' %}" class="text-primary text-decoration-none">
+                        <small>عرض التفاصيل <i class="fas fa-arrow-left ms-1"></i></small>
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-white-50">Total Licenses</h6>
-                            <h2 class="mb-0">{{ total_licenses }}</h2>
-                        </div>
-                        <div class="ms-3">
-                            <i class="fas fa-id-card fa-2x opacity-75"></i>
-                        </div>
+        <div class="col-6 col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0 stats-card">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="stats-icon bg-success">
+                        <i class="fas fa-id-card"></i>
                     </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-0">إجمالي التراخيص</h6>
+                        <h3 class="mb-0 mt-1 fw-bold">{{ total_licenses }}</h3>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-end border-top-0 pt-0">
+                    <a href="{% url 'licence-list' %}" class="text-success text-decoration-none">
+                        <small>عرض التفاصيل <i class="fas fa-arrow-left ms-1"></i></small>
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card bg-info text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-white-50">Total Assignments</h6>
-                            <h2 class="mb-0">{{ total_assignments }}</h2>
-                        </div>
-                        <div class="ms-3">
-                            <i class="fas fa-tasks fa-2x opacity-75"></i>
-                        </div>
+        <div class="col-6 col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0 stats-card">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="stats-icon bg-info">
+                        <i class="fas fa-tasks"></i>
                     </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-0">إجمالي التكليفات</h6>
+                        <h3 class="mb-0 mt-1 fw-bold">{{ total_assignments }}</h3>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-end border-top-0 pt-0">
+                    <a href="{% url 'view_assignments' %}" class="text-info text-decoration-none">
+                        <small>عرض التفاصيل <i class="fas fa-arrow-left ms-1"></i></small>
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="card bg-warning text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="text-white-50">Total Inspections</h6>
-                            <h2 class="mb-0">{{ total_inspections }}</h2>
-                        </div>
-                        <div class="ms-3">
-                            <i class="fas fa-clipboard-check fa-2x opacity-75"></i>
-                        </div>
+        <div class="col-6 col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0 stats-card">
+                <div class="card-body d-flex align-items-center p-3">
+                    <div class="stats-icon bg-warning">
+                        <i class="fas fa-clipboard-check"></i>
                     </div>
+                    <div class="ms-3">
+                        <h6 class="text-muted mb-0">إجمالي المعاينات</h6>
+                        <h3 class="mb-0 mt-1 fw-bold">{{ total_inspections }}</h3>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent text-end border-top-0 pt-0">
+                    <a href="{% url 'view_inspections' %}" class="text-warning text-decoration-none">
+                        <small>عرض التفاصيل <i class="fas fa-arrow-left ms-1"></i></small>
+                    </a>
                 </div>
             </div>
         </div>
@@ -81,103 +97,323 @@
     <!-- Charts Section -->
     <div class="row g-3">
         <!-- Assignment Status Chart -->
-        <div class="col-12 col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">Assignment Status Distribution</h5>
+        <div class="col-12 col-lg-6 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header border-0 py-3" style="background-color: #f8f9fa;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title m-0 fw-bold">توزيع حالة التكليفات</h5>
+                        <span class="badge bg-light text-dark p-2 rounded-pill">
+                            <i class="fas fa-chart-pie text-primary me-1"></i>
+                            إجمالي: {{ total_assignments }}
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <canvas id="assignmentChart"></canvas>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="assignmentChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Monthly Inspections Chart -->
-        <div class="col-12 col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">Monthly Inspections</h5>
+        <div class="col-12 col-lg-6 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header border-0 py-3" style="background-color: #f8f9fa;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title m-0 fw-bold">المعاينات الشهرية</h5>
+                        <span class="badge bg-light text-dark p-2 rounded-pill">
+                            <i class="fas fa-calendar-alt text-primary me-1"></i>
+                            آخر 6 أشهر
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <canvas id="monthlyInspectionsChart"></canvas>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="monthlyInspectionsChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Municipality Distribution Chart -->
-        <div class="col-12 col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">Top Municipalities</h5>
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header border-0 py-3" style="background-color: #f8f9fa;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title m-0 fw-bold">أعلى البلديات</h5>
+                        <span class="badge bg-light text-dark p-2 rounded-pill">
+                            <i class="fas fa-map-marker-alt text-info me-1"></i>
+                            أعلى 5
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <canvas id="municipalityChart"></canvas>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="municipalityChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- License Status Chart -->
-        <div class="col-12 col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">License Status</h5>
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header border-0 py-3" style="background-color: #f8f9fa;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title m-0 fw-bold">حالة التراخيص</h5>
+                        <span class="badge bg-light text-dark p-2 rounded-pill">
+                            <i class="fas fa-id-card text-success me-1"></i>
+                            إجمالي: {{ total_licenses }}
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <canvas id="licenseStatusChart"></canvas>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="licenseStatusChart"></canvas>
+                    </div>
+                    <div class="chart-legend mt-3 row text-center">
+                        <div class="col-6">
+                            <span class="badge bg-success">نشط</span>
+                            <div class="fw-bold mt-1">{{ license_status.0.count }}</div>
+                        </div>
+                        <div class="col-6">
+                            <span class="badge bg-danger">منتهي</span>
+                            <div class="fw-bold mt-1">{{ license_status.1.count }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Activity Distribution Chart -->
-        <div class="col-12 col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">Top Activities</h5>
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header border-0 py-3" style="background-color: #f8f9fa;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title m-0 fw-bold">أهم الأنشطة</h5>
+                        <span class="badge bg-light text-dark p-2 rounded-pill">
+                            <i class="fas fa-briefcase text-warning me-1"></i>
+                            أعلى 3
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <canvas id="activityChart"></canvas>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="activityChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Inspection Status Chart -->
-        <div class="col-12 col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">Inspection Results</h5>
+        <div class="col-12 col-md-6 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header border-0 py-3" style="background-color: #f8f9fa;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title m-0 fw-bold">نتائج المعاينات</h5>
+                        <span class="badge bg-light text-dark p-2 rounded-pill">
+                            <i class="fas fa-clipboard-check text-danger me-1"></i>
+                            إجمالي: {{ total_inspections }}
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <canvas id="inspectionStatusChart"></canvas>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="inspectionStatusChart"></canvas>
+                    </div>
+                    <div class="chart-legend mt-3 row text-center">
+                        <div class="col-6">
+                            <span class="badge bg-success">مستوفي الشروط</span>
+                            <div class="fw-bold mt-1">{{ inspection_status.0.count }}</div>
+                        </div>
+                        <div class="col-6">
+                            <span class="badge bg-danger">غير مستوفي</span>
+                            <div class="fw-bold mt-1">{{ inspection_status.1.count }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- CSS Styles -->
+<style>
+    .bg-gradient-maroon {
+        background: linear-gradient(45deg, #8A1538, #c01f48);
+    }
+    
+    .stats-card {
+        transition: transform 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stats-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .chart-container {
+        margin: 0 auto;
+    }
+    
+    .card {
+        border-radius: 0.5rem;
+    }
+    
+    .card-header {
+        border-top-right-radius: 0.5rem !important;
+        border-top-left-radius: 0.5rem !important;
+    }
+    
+    /* Responsive fixes */
+    @media (max-width: 767.98px) {
+        .stats-card .card-body {
+            padding: 1rem 0.75rem;
+        }
+        
+        .stats-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+        
+        .stats-card h3 {
+            font-size: 1.25rem;
+        }
+        
+        .stats-card h6 {
+            font-size: 0.75rem;
+        }
+        
+        .card-footer {
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .card-title {
+            font-size: 1rem;
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+        }
+        
+        .chart-container {
+            height: 200px !important;
+        }
+    }
+    
+    @media (max-width: 575.98px) {
+        .container-fluid {
+            padding: 0.5rem !important;
+        }
+        
+        .row {
+            margin-right: -0.25rem;
+            margin-left: -0.25rem;
+        }
+        
+        .col-6, .col-12 {
+            padding-right: 0.25rem;
+            padding-left: 0.25rem;
+        }
+        
+        .g-3 {
+            --bs-gutter-x: 0.5rem;
+            --bs-gutter-y: 0.5rem;
+        }
+        
+        .mb-4 {
+            margin-bottom: 0.75rem !important;
+        }
+    }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Configure RTL for charts globally
+    Chart.defaults.font.family = '"Cairo", sans-serif';
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#6c757d';
+    
+    // Responsive options for all charts
+    const responsiveOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                padding: 10,
+                titleFont: {
+                    size: 14,
+                    weight: 'bold'
+                },
+                bodyFont: {
+                    size: 13
+                },
+                cornerRadius: 5,
+                displayColors: true
+            }
+        }
+    };
+    
     const chartColors = {
         primary: '#0d6efd',
+        secondary: '#6c757d',
         success: '#198754',
         warning: '#ffc107',
         danger: '#dc3545',
-        info: '#0dcaf0'
+        info: '#0dcaf0',
+        light: '#f8f9fa',
+        dark: '#343a40',
+        primaryLight: '#cfe2ff',
+        successLight: '#d1e7dd',
+        warningLight: '#fff3cd',
+        dangerLight: '#f8d7da',
+        infoLight: '#cff4fc'
     };
 
-    // Assignment Status Chart
+    // Assignment Status Chart with better colors and labels
     new Chart(document.getElementById('assignmentChart'), {
         type: 'pie',
         data: {
-            labels: [{% for status in assignments_by_status %}'{{ status.status }}',{% endfor %}],
+            labels: [{% for status in assignments_by_status %}
+                '{{ status.status|default:"غير محدد" }}',
+            {% endfor %}],
             datasets: [{
                 data: [{% for status in assignments_by_status %}{{ status.count }},{% endfor %}],
-                backgroundColor: [chartColors.primary, chartColors.success, chartColors.warning, chartColors.danger]
+                backgroundColor: [
+                    chartColors.primary, 
+                    chartColors.success, 
+                    chartColors.warning, 
+                    chartColors.danger
+                ],
+                borderWidth: 2,
+                borderColor: chartColors.light
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false
+            ...responsiveOptions
         }
     });
 
@@ -187,21 +423,34 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels: [{% for item in monthly_inspections %}'{{ item.month|date:"F Y" }}',{% endfor %}],
             datasets: [{
-                label: 'Number of Inspections',
+                label: 'عدد المعاينات',
                 data: [{% for item in monthly_inspections %}{{ item.count }},{% endfor %}],
                 borderColor: chartColors.primary,
-                tension: 0.1,
-                fill: false
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: chartColors.light,
+                pointBorderColor: chartColors.primary,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            ...responsiveOptions,
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
                     }
                 }
             }
@@ -212,21 +461,32 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(document.getElementById('municipalityChart'), {
         type: 'bar',
         data: {
-            labels: [{% for item in municipality_stats %}'{{ item.municipality_name }}',{% endfor %}],
+            labels: [{% for item in municipality_stats %}'{{ item.municipality_name|default:"غير محدد" }}',{% endfor %}],
             datasets: [{
-                label: 'Number of Establishments',
+                label: 'عدد المنشآت',
                 data: [{% for item in municipality_stats %}{{ item.count }},{% endfor %}],
-                backgroundColor: chartColors.info
+                backgroundColor: chartColors.infoLight,
+                borderColor: chartColors.info,
+                borderWidth: 1,
+                borderRadius: 4
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            ...responsiveOptions,
+            indexAxis: 'y',
             scales: {
-                y: {
+                x: {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
                     }
                 }
             }
@@ -237,15 +497,17 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(document.getElementById('licenseStatusChart'), {
         type: 'doughnut',
         data: {
-            labels: [{% for item in license_status %}'{{ item.status }}',{% endfor %}],
+            labels: ['نشط', 'منتهي'],
             datasets: [{
                 data: [{% for item in license_status %}{{ item.count }},{% endfor %}],
-                backgroundColor: [chartColors.success, chartColors.danger]
+                backgroundColor: [chartColors.success, chartColors.danger],
+                borderWidth: 2,
+                borderColor: chartColors.light
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false
+            ...responsiveOptions,
+            cutout: '65%'
         }
     });
 
@@ -253,21 +515,31 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(document.getElementById('activityChart'), {
         type: 'bar',
         data: {
-            labels: [{% for item in activity_stats %}'{{ item.activity__ar_name }}',{% endfor %}],
+            labels: [{% for item in activity_stats %}'{{ item.activity__ar_name|default:"غير محدد" }}',{% endfor %}],
             datasets: [{
-                label: 'Number of Establishments',
+                label: 'عدد المنشآت',
                 data: [{% for item in activity_stats %}{{ item.count }},{% endfor %}],
-                backgroundColor: chartColors.warning
+                backgroundColor: chartColors.warningLight,
+                borderColor: chartColors.warning,
+                borderWidth: 1,
+                borderRadius: 4
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            ...responsiveOptions,
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
                     }
                 }
             }
@@ -281,14 +553,36 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: ['مستوفي الشروط', 'غير مستوفي الشروط'],
             datasets: [{
                 data: [{% for item in inspection_status %}{{ item.count }},{% endfor %}],
-                backgroundColor: [chartColors.success, chartColors.danger]
+                backgroundColor: [chartColors.success, chartColors.danger],
+                borderWidth: 2,
+                borderColor: chartColors.light
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false
+            ...responsiveOptions,
+            cutout: '65%'
         }
     });
+    
+    // Make charts responsive
+    function resizeCharts() {
+        const chartContainers = document.querySelectorAll('.chart-container');
+        if (window.innerWidth < 768) {
+            chartContainers.forEach(container => {
+                container.style.height = '200px';
+            });
+        } else {
+            chartContainers.forEach(container => {
+                container.style.height = '250px';
+            });
+        }
+    }
+    
+    // Initial resize
+    resizeCharts();
+    
+    // Listen for window resize
+    window.addEventListener('resize', resizeCharts);
 });
 </script>
 {% endblock %}
