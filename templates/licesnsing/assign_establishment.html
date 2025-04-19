@@ -1,60 +1,332 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
 {% load static %}
 
 {% block title %}
-    <title>Assign Establishment for Inspection</title>
+    <title>تعيين منشأة للتفتيش</title>
 {% endblock %}
 
 {% block content %}
-    <div class="container mt-4" dir="rtl">
-        <h2 class="text-center">تعيين منشأة للتفتيش</h2>
-        <form method="post">
-            {% csrf_token %}
-
-
-            <div id="div_id_inspector" class="mb-3"><label
-                    for="id_inspector" class="form-label requiredField">
-                المفتش<span class="asteriskField">*</span> </label>
-                <select name="inspector"
-                                                                               class="select form-select" required
-                                                                               id="id_inspector">
-                <option value="">----</option>
-                {% for inspector in inspectors %}
-                	<option value="{{ inspector.user.id }}">{{ inspector.user.first_name  }}</option>
-                {% endfor %}
-
-
-
-
-            </select>
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Form Card -->
+            <div class="card shadow-sm border-0">
+                <!-- Card Header -->
+                <div class="card-header py-3" style="background-color: #8A1538; color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 fw-bold">
+                            <i class="fas fa-clipboard-list me-2"></i>تعيين منشأة للتفتيش
+                        </h4>
+                        <a href="{% url 'assign_establishment' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-right me-1"></i>العودة إلى قائمة التكليفات
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Progress Indicator -->
+                <div class="progress" style="height: 4px; border-radius: 0;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 0%;" id="form-progress"></div>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body p-4">
+                    {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-info-circle me-2"></i>{{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Form -->
+                    <form method="post" class="assignment-form" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="form-section mb-4">
+                            <h5 class="section-title">
+                                <i class="fas fa-user-tie me-2"></i>اختيار المفتش
+                                <div class="section-line"></div>
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <!-- Inspector Field -->
+                                <div class="col-md-12 form-field-wrapper">
+                                    <div class="form-group">
+                                        <label for="id_inspector" class="form-label">
+                                            المفتش <span class="text-danger">*</span>
+                                        </label>
+                                        <select name="inspector" class="form-select" id="id_inspector" required>
+                                            <option value="">-- اختر المفتش --</option>
+                                            {% for inspector in inspectors %}
+                                                <option value="{{ inspector.user.id }}">{{ inspector.user.first_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="form-text text-muted">اختر المفتش الذي سيقوم بالمعاينة</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section mb-4">
+                            <h5 class="section-title">
+                                <i class="fas fa-building me-2"></i>اختيار المنشأة
+                                <div class="section-line"></div>
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <!-- Establishment Field -->
+                                <div class="col-md-12 form-field-wrapper">
+                                    <div class="form-group">
+                                        <label for="id_establishment" class="form-label">
+                                            المنشأة <span class="text-danger">*</span>
+                                        </label>
+                                        <select name="establishment" class="form-select" id="id_establishment" required>
+                                            <option value="">-- اختر المنشأة --</option>
+                                            {% for unassigned_establishment in unassigned_establishments %}
+                                                <option value="{{ unassigned_establishment.id }}">{{ unassigned_establishment.establishment_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="form-text text-muted">اختر المنشأة التي سيتم معاينتها</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section mb-4">
+                            <h5 class="section-title">
+                                <i class="fas fa-calendar-alt me-2"></i>تفاصيل التكليف
+                                <div class="section-line"></div>
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <!-- Due Date Field -->
+                                <div class="col-md-12 form-field-wrapper">
+                                    <div class="form-group">
+                                        <label for="id_due_date" class="form-label">
+                                            الموعد النهائي
+                                        </label>
+                                        <input type="datetime-local" name="due_date" class="form-control" id="id_due_date">
+                                        <small class="form-text text-muted">آخر موعد لإكمال المعاينة (اختياري)</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Notes Field -->
+                                <div class="col-md-12 form-field-wrapper">
+                                    <div class="form-group">
+                                        <label for="id_notes" class="form-label">
+                                            ملاحظات التكليف
+                                        </label>
+                                        <textarea name="notes" rows="3" class="form-control" id="id_notes" placeholder="أدخل أي ملاحظات أو تعليمات للمفتش..."></textarea>
+                                        <small class="form-text text-muted">إضافة ملاحظات أو تعليمات إضافية للمفتش (اختياري)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="form-actions mt-4 d-flex justify-content-between align-items-center">
+                            <a href="{% url "view_assignments" %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>إلغاء
+                            </a>
+                            <button type="submit" class="btn btn-lg px-5" style="background-color:#8A1538; color:white;">
+                                <i class="fas fa-check me-1"></i>تعيين المفتش
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div id="div_id_establishment" class="mb-3"><label
-                    for="id_establishment" class="form-label requiredField">
-                المنشأة<span class="asteriskField">*</span> </label> <select name="establishment"
-                                                                                   class="select form-select" required
-                                                                                   id="id_establishment">
-                <option value="" selected>---------</option>
-                {% for unassigned_establishment in unassigned_establishments %}
-
-                <option value="{{ unassigned_establishment.id }}"> {{ unassigned_establishment.establishment_name}}</option>
-                {% endfor %}
-
-            </select></div>
-            <div id="div_id_due_date" class="mb-3"><label
-                    for="id_due_date" class="form-label">
-                Due Date
-            </label> <input type="datetime-local" name="due_date" class="datetimeinput form-control" id="id_due_date">
+            
+            <!-- Help Section -->
+            <div class="card mt-4 border-0 shadow-sm">
+                <div class="card-body">
+                    <h5><i class="fas fa-question-circle text-primary me-2"></i>مساعدة</h5>
+                    <ul class="mb-0 text-muted small">
+                        <li>يجب اختيار المفتش والمنشأة لإكمال التكليف</li>
+                        <li>يمكنك إضافة موعد نهائي اختياري للمعاينة</li>
+                        <li>أضف ملاحظات لمساعدة المفتش في فهم متطلبات المعاينة</li>
+                        <li>سيتم إعلام المفتش بالتكليف الجديد فور إرساله</li>
+                    </ul>
+                </div>
             </div>
-            <div id="div_id_notes" class="mb-3"><label
-                    for="id_notes" class="form-label">
-                Assignment Notes
-            </label> <textarea name="notes" cols="40" rows="3" class="textarea form-control" id="id_notes">
-</textarea></div>
-
-            <div class="text-center">
-                <button type="submit" class="btn btn-lg" style="background-color:#8A1538; color:white;">تعيين</button>
-            </div>
-        </form>
+        </div>
     </div>
+</div>
+
+<style>
+    /* Form Styling */
+    .form-section {
+        position: relative;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        color: #8A1538;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(to right, rgba(138, 21, 56, 0.5), rgba(138, 21, 56, 0.1));
+        margin-right: 1rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        padding: 0.6rem 0.75rem;
+        border-radius: 0.375rem;
+        border: 1px solid #ced4da;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: rgba(138, 21, 56, 0.4);
+        box-shadow: 0 0 0 0.25rem rgba(138, 21, 56, 0.15);
+    }
+    
+    .form-field-wrapper {
+        transition: all 0.3s ease;
+    }
+    
+    .form-field-wrapper.highlight {
+        transform: translateY(-3px);
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 767.98px) {
+        .form-actions {
+            flex-direction: column-reverse;
+            gap: 1rem;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .card-header a {
+            margin-top: 0.5rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form field validation
+        const formFields = document.querySelectorAll('.form-control, .form-select');
+        const formProgress = document.getElementById('form-progress');
+        
+        function updateProgress() {
+            const totalFields = formFields.length;
+            let filledFields = 0;
+            
+            formFields.forEach(field => {
+                if (field.value && field.value.trim() !== '') {
+                    filledFields++;
+                    field.closest('.form-field-wrapper').classList.add('is-valid');
+                } else {
+                    field.closest('.form-field-wrapper').classList.remove('is-valid');
+                }
+            });
+            
+            const progressPercentage = Math.round((filledFields / totalFields) * 100);
+            formProgress.style.width = progressPercentage + '%';
+        }
+        
+        // Add event listeners
+        formFields.forEach(field => {
+            // Highlight current field
+            field.addEventListener('focus', function() {
+                const wrapper = this.closest('.form-field-wrapper');
+                wrapper.classList.add('highlight');
+            });
+            
+            field.addEventListener('blur', function() {
+                const wrapper = this.closest('.form-field-wrapper');
+                wrapper.classList.remove('highlight');
+                updateProgress();
+            });
+            
+            field.addEventListener('change', function() {
+                updateProgress();
+            });
+        });
+        
+        // Form validation
+        document.querySelector('.assignment-form').addEventListener('submit', function(event) {
+            let isValid = true;
+            const inspector = document.getElementById('id_inspector');
+            const establishment = document.getElementById('id_establishment');
+            
+            if (!inspector.value) {
+                isValid = false;
+                inspector.classList.add('is-invalid');
+                if (!inspector.nextElementSibling || !inspector.nextElementSibling.classList.contains('invalid-feedback')) {
+                    const feedback = document.createElement('div');
+                    feedback.classList.add('invalid-feedback');
+                    feedback.textContent = 'يرجى اختيار المفتش';
+                    inspector.parentNode.insertBefore(feedback, inspector.nextSibling);
+                }
+            } else {
+                inspector.classList.remove('is-invalid');
+                const feedback = inspector.nextElementSibling;
+                if (feedback && feedback.classList.contains('invalid-feedback')) {
+                    feedback.remove();
+                }
+            }
+            
+            if (!establishment.value) {
+                isValid = false;
+                establishment.classList.add('is-invalid');
+                if (!establishment.nextElementSibling || !establishment.nextElementSibling.classList.contains('invalid-feedback')) {
+                    const feedback = document.createElement('div');
+                    feedback.classList.add('invalid-feedback');
+                    feedback.textContent = 'يرجى اختيار المنشأة';
+                    establishment.parentNode.insertBefore(feedback, establishment.nextSibling);
+                }
+            } else {
+                establishment.classList.remove('is-invalid');
+                const feedback = establishment.nextElementSibling;
+                if (feedback && feedback.classList.contains('invalid-feedback')) {
+                    feedback.remove();
+                }
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+                return false;
+            }
+        });
+        
+        // Initialize selectize for better dropdown experience
+        try {
+            $('#id_inspector, #id_establishment').selectize({
+                sortField: 'text'
+            });
+        } catch (e) {
+            console.log('Selectize not available, using default select');
+        }
+        
+        // Initialize progress
+        updateProgress();
+    });
+</script>
 {% endblock %}

@@ -1,93 +1,289 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  <title>المعاينات المؤرشفة</title>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-3">🔍 قائمة المعاينات</h2>
+  <div class="card shadow-sm border-0">
+    <div class="card-header py-3" style="background-color: #8A1538; color: white;">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0 fw-bold">
+          <i class="fas fa-archive me-2"></i>المعاينات المؤرشفة
+        </h4>
+        <a href="{% url 'view_inspections' %}" class="btn btn-light btn-sm">
+          <i class="fas fa-clipboard-list me-1"></i>عرض المعاينات النشطة
+        </a>
+      </div>
+    </div>
 
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>المنشأة</th>
-                <th>رقم السجل</th>
-                <th>المفتش</th>
-                <th>الحالة</th>
-                <th>الملاحظات</th>
-                <th>الموقع</th>
-                <th>التاريخ</th>
-                <th>الإجراءات</th>
-            </tr>
+    <!-- Search and Filter Section -->
+    <div class="p-3 bg-light border-bottom">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="fas fa-search text-muted"></i>
+            </span>
+            <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث في المعاينات المؤرشفة...">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select id="statusFilter" class="form-select">
+            <option value="all">جميع الحالات</option>
+            <option value="accepted">مقبول</option>
+            <option value="rejected">مرفوض</option>
+          </select>
+        </div>
+        <div class="col-md-3 text-md-end">
+          <span class="badge bg-secondary p-2">
+            <i class="fas fa-archive me-1"></i> إجمالي المؤرشفة: <span class="fw-bold">{{ inspections|length }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="archivedTable">
+        <thead style="background-color: #f8f9fa;">
+          <tr>
+            <th scope="col" class="sortable" data-sort="id">
+              <i class="fas fa-hashtag me-1 text-muted small"></i>#
+            </th>
+            <th scope="col" class="sortable" data-sort="establishment">
+              <i class="fas fa-building me-1 text-muted small"></i>المنشأة
+            </th>
+            <th scope="col" class="sortable" data-sort="register">
+              <i class="fas fa-clipboard-list me-1 text-muted small"></i>رقم السجل
+            </th>
+            <th scope="col" class="sortable" data-sort="inspector">
+              <i class="fas fa-user-tie me-1 text-muted small"></i>المفتش
+            </th>
+            <th scope="col">
+              <i class="fas fa-check-circle me-1 text-muted small"></i>الحالة
+            </th>
+            <th scope="col">
+              <i class="fas fa-comment me-1 text-muted small"></i>الملاحظات
+            </th>
+            <th scope="col">
+              <i class="fas fa-map-marker-alt me-1 text-muted small"></i>الموقع
+            </th>
+            <th scope="col" class="sortable" data-sort="date">
+              <i class="fas fa-calendar-alt me-1 text-muted small"></i>التاريخ
+            </th>
+            <th scope="col" class="text-center">الإجراءات</th>
+          </tr>
         </thead>
         <tbody>
-            {% for inspection in inspections %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ inspection.get_register.establishment.establishment_name }}</td>
-                <td>{{ inspection.register_number }}</td>
-                <td>{{ inspection.inspector.get_full_name }}</td>
-                <td>
-                    {% if inspection.status %}
-                        <span class="badge bg-success">مقبول</span>
-                    {% else %}
-                        <span class="badge bg-danger">مرفوض</span>
-                    {% endif %}
-                </td>
-            <td>{{ inspection.notes }}</td>
-                <td>
-                    <!-- Map Button to Show Coordinates -->
-                    <button class="btn btn-info btn-sm" onclick="showMap('{{ inspection.latitude }}', '{{ inspection.longitude }}')">
-                        عرض الموقع
-                    </button>
-                </td>
-                <td>{{ inspection.created_at|date:"Y-m-d H:i" }}</td>
-                <td>
-                    <a href="{% url 'view_inspection_data' inspection.id %}" style="background-color:#8A1538; color:white;" class="btn btn-sm">عرض</a>
-                    <a href="{% url 'inspection_report' inspection.id %}" target="_blank" style="background-color:#8A1538; color:white;" class="btn btn-sm">طباعة</a>
-                    {% if not inspection.is_archived %}
-                        <a href="{% url 'archive_inspection' inspection.id %}" class="btn btn-warning btn-sm">أرشفة</a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="text-center">لا توجد معاينات متاحة</td>
-            </tr>
-            {% endfor %}
+          {% for inspection in inspections %}
+          <tr class="archived-row">
+            <td data-title="#">{{ forloop.counter }}</td>
+            <td data-title="المنشأة" class="fw-bold">{{ inspection.get_register.establishment.establishment_name }}</td>
+            <td data-title="رقم السجل">{{ inspection.register_number }}</td>
+            <td data-title="المفتش">{{ inspection.inspector.get_full_name }}</td>
+            <td data-title="الحالة">
+                {% if inspection.status %}
+                    <span class="badge bg-success">مقبول</span>
+                {% else %}
+                    <span class="badge bg-danger">مرفوض</span>
+                {% endif %}
+            </td>
+            <td data-title="الملاحظات" class="text-truncate" style="max-width: 200px;">{{ inspection.notes|default:"--" }}</td>
+            <td data-title="الموقع">
+                <button class="btn btn-sm btn-info" onclick="showMap('{{ inspection.latitude }}', '{{ inspection.longitude }}')">
+                    <i class="fas fa-map-marker-alt me-1"></i>عرض الموقع
+                </button>
+            </td>
+            <td data-title="التاريخ">{{ inspection.created_at|date:"Y-m-d H:i" }}</td>
+            <td data-title="الإجراءات" class="text-center">
+              <div class="action-buttons">
+                <a href="{% url 'view_inspection_data' inspection.id %}" class="btn btn-sm btn-primary mx-1" title="عرض تفاصيل المعاينة">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a href="{% url 'inspection_report' inspection.id %}" target="_blank" class="btn btn-sm btn-success mx-1" title="طباعة تقرير المعاينة">
+                  <i class="fas fa-print"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center py-5">
+              <div class="empty-state">
+                <i class="fas fa-archive fa-3x text-muted mb-3"></i>
+                <h5>لا توجد معاينات مؤرشفة</h5>
+                <p class="text-muted">لم يتم العثور على أي معاينات مؤرشفة في النظام</p>
+                <a href="{% url 'view_inspections' %}" class="btn btn-sm" style="background-color: #8A1538; color: white;">
+                  <i class="fas fa-clipboard-list me-1"></i>عرض المعاينات النشطة
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
+      </table>
+    </div>
+  </div>
 </div>
 
 <!-- Map Modal -->
 <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="mapModalLabel">خريطة الموقع</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="map" style="height: 400px;"></div>
-            </div>
-        </div>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="mapModalLabel">
+          <i class="fas fa-map-marker-alt me-2"></i>خريطة الموقع
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="map" style="height: 400px; border-radius: 0.375rem;"></div>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- LeafletJS & Bootstrap -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<style>
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  
+  .action-buttons .btn {
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+  }
+  
+  /* Empty State */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 992px) {
+    .table thead {
+      display: none;
+    }
+    
+    .table tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .table tbody td {
+      display: flex;
+      justify-content: space-between;
+      border-top: none;
+      border-bottom: 1px solid #dee2e6;
+      padding: 0.75rem 1rem;
+    }
+    
+    .table tbody td:last-child {
+      border-bottom: none;
+    }
+    
+    .table tbody td::before {
+      content: attr(data-title);
+      font-weight: 600;
+      color: #6c757d;
+    }
+    
+    .table tbody td.text-center {
+      justify-content: center;
+    }
+    
+    .table tbody td.text-center::before {
+      display: none;
+    }
+    
+    .action-buttons {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    
+    .action-buttons .btn {
+      margin: 0.25rem;
+    }
+  }
+</style>
 
 <script>
-function showMap(lat, lng) {
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keyup', filterTable);
+    
+    // Status filter
+    const statusFilter = document.getElementById('statusFilter');
+    statusFilter.addEventListener('change', filterTable);
+    
+    function filterTable() {
+      const searchValue = searchInput.value.toLowerCase();
+      const statusValue = statusFilter.value;
+      const rows = document.querySelectorAll('.archived-row');
+      
+      rows.forEach(row => {
+        const establishment = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const register = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        const inspector = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+        
+        const statusEl = row.querySelector('td:nth-child(5) .badge');
+        const status = statusEl ? statusEl.textContent.trim() : '';
+        
+        // Search filter
+        const matchesSearch = establishment.includes(searchValue) || 
+                             register.includes(searchValue) || 
+                             inspector.includes(searchValue);
+        
+        // Status filter
+        let matchesStatus = true;
+        if (statusValue === 'accepted') {
+          matchesStatus = status === 'مقبول';
+        } else if (statusValue === 'rejected') {
+          matchesStatus = status === 'مرفوض';
+        }
+        
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  });
+  
+  // Map functionality
+  function showMap(lat, lng) {
     var modal = new bootstrap.Modal(document.getElementById('mapModal'));
     modal.show();
 
     setTimeout(() => {
+      try {
         var map = L.map('map').setView([lat, lng], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
+          attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
-        L.marker([lat, lng]).addTo(map).bindPopup("الموقع المحدد").openPopup();
+        L.marker([lat, lng]).addTo(map)
+          .bindPopup("<strong>موقع المعاينة</strong><br>خط العرض: " + lat + "<br>خط الطول: " + lng)
+          .openPopup();
+      } catch (error) {
+        document.getElementById('map').innerHTML = '<div class="alert alert-danger">حدث خطأ أثناء تحميل الخريطة. يرجى التأكد من تثبيت Leaflet JS.</div>';
+      }
     }, 500);
-}
+  }
 </script>
+
+
 {% endblock %}

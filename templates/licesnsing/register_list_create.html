@@ -1,73 +1,263 @@
 {% extends 'base.html' %}
 {% load crispy_forms_filters %}
+{% load static %}
 
 {% block title %}
   <title>بيانات السجل</title>
 {% endblock %}
 
 {% block content %}
-<body dir="rtl">
-  <div class="container">
-    <br />
-    <div class="card">
-      <div class="card-header">
-        <h3 style="text-align: center">بيانات المنشأة - السجل</h3>
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header py-3" style="background-color: #8A1538; color: white;">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0 fw-bold">
+          <i class="fas fa-clipboard-list me-2"></i>بيانات السجلات
+        </h4>
+        <a href="{% url 'add_register' %}" class="btn btn-light btn-sm">
+          <i class="fas fa-plus-circle me-1"></i>إضافة سجل جديد
+        </a>
       </div>
-      <table class="table table-hover table-condensed">
-        <thead>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="p-3 bg-light border-bottom">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="fas fa-search text-muted"></i>
+            </span>
+            <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن سجل...">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select id="statusFilter" class="form-select">
+            <option value="all">جميع الحالات</option>
+            <option value="active">ساري المفعول</option>
+            <option value="expired">منتهي</option>
+          </select>
+        </div>
+        <div class="col-md-3 text-md-end">
+          <span class="badge bg-secondary p-2">
+            <i class="fas fa-clipboard-list me-1"></i> إجمالي السجلات: <span class="fw-bold">{{ page_obj.paginator.count }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="registerTable">
+        <thead style="background-color: #f8f9fa;">
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">اسم المنشأة</th>
-            <th scope="col">رقم السجل</th>
-            <th scope="col">تاريخ انتهاء السجل</th>
-            <th scope="col">حالة السجل</th>
-            <th scope="col">تعديل السجل</th>
-            <th scope="col">حذف السجل</th>
+            <th scope="col" class="sortable" data-sort="id">
+              <i class="fas fa-hashtag me-1 text-muted small"></i>الرقم
+            </th>
+            <th scope="col" class="sortable" data-sort="name">
+              <i class="fas fa-building me-1 text-muted small"></i>اسم المنشأة
+            </th>
+            <th scope="col" class="sortable" data-sort="regid">
+              <i class="fas fa-id-card me-1 text-muted small"></i>رقم السجل
+            </th>
+            <th scope="col" class="sortable" data-sort="expdate">
+              <i class="fas fa-calendar-alt me-1 text-muted small"></i>تاريخ انتهاء السجل
+            </th>
+            <th scope="col">
+              <i class="fas fa-check-circle me-1 text-muted small"></i>حالة السجل
+            </th>
+            <th scope="col" class="text-center">إجراءات</th>
           </tr>
         </thead>
         <tbody>
           {% for reg in page_obj %}
-          <tr>
-            <!-- Display the RFID or an index number -->
-            <th scope="row">{{ reg.rfid }}</th>
-            <!-- Assuming the related Establishment model has a 'name' field -->
-            <td>{{ reg.establishment.establishment_name }}</td>
-            <!-- Using the register's primary key as its number -->
-            <td>{{ reg.id }}</td>
-            <!-- Display the register's expiration date -->
-            <td>{{ reg.expiration_date }}</td>
-            <!-- Example status: if the expiration date is greater than today, it's active -->
-            <td>
-                  {% if reg.expiration_date > today %}
-                    ساري المفعول
-                  {% else %}
-                    منتهي
-                  {% endif %}
-                </td>
-
-            <td>
-              <!-- Edit link: Adjust the URL name and parameter as needed -->
-              <a href="{% url 'register-list' %}">
-                <button class="btn" style="background-color:#8A1538; color:white;" type="button">تعديل</button>
-              </a>
+          <tr class="register-row">
+            <td data-title="الرقم">{{ reg.rfid }}</td>
+            <td data-title="اسم المنشأة" class="fw-bold">{{ reg.establishment.establishment_name }}</td>
+            <td data-title="رقم السجل">{{ reg.id }}</td>
+            <td data-title="تاريخ انتهاء السجل">{{ reg.expiration_date|date:"Y/m/d" }}</td>
+            <td data-title="حالة السجل">
+              {% if reg.expiration_date > today %}
+                <span class="badge bg-success">ساري المفعول</span>
+              {% else %}
+                <span class="badge bg-danger">منتهي</span>
+              {% endif %}
             </td>
-            <td>
-              <!-- Delete button triggers a confirmation function -->
-              <button class="btn btn-danger" type="button"
-                onclick="confirmToPost('{% url 'register-delete' reg.id %}')">
-                حذف
-              </button>
+            <td data-title="إجراءات" class="text-center">
+              <div class="action-buttons">
+                <a href="{% url 'register-list' %}" class="btn btn-sm btn-primary mx-1" title="تعديل السجل">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <button class="btn btn-sm btn-danger mx-1" onclick="confirmRegisterDelete('{{ reg.id }}')" title="حذف السجل">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="7" class="text-center">لا توجد سجلات.</td>
+            <td colspan="6" class="text-center py-5">
+              <div class="empty-state">
+                <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                <h5>لا توجد سجلات</h5>
+                <p class="text-muted">لم يتم العثور على أي سجلات في النظام</p>
+                <a href="{% url 'add_register' %}" class="btn btn-sm" style="background-color: #8A1538; color: white;">
+                  <i class="fas fa-plus-circle me-1"></i>إضافة سجل جديد
+                </a>
+              </div>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
-    {% include "include/pagination.html" %}
+    </div>
+    
+    <!-- Pagination -->
+    <div class="p-3 border-top">
+      {% include "include/pagination.html" %}
     </div>
   </div>
-</body>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteRegisterModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">تأكيد الحذف</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>هل أنت متأكد من رغبتك في حذف هذا السجل؟</p>
+        <p class="text-danger small">تحذير: سيتم حذف جميع البيانات المرتبطة بهذا السجل.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <a id="deleteRegisterLink" href="#" class="btn btn-danger">تأكيد الحذف</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .action-buttons .btn {
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+  }
+  
+  /* Empty State */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 992px) {
+    .table thead {
+      display: none;
+    }
+    
+    .table tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .table tbody td {
+      display: flex;
+      justify-content: space-between;
+      border-top: none;
+      border-bottom: 1px solid #dee2e6;
+      padding: 0.75rem 1rem;
+    }
+    
+    .table tbody td:last-child {
+      border-bottom: none;
+    }
+    
+    .table tbody td::before {
+      content: attr(data-title);
+      font-weight: 600;
+      color: #6c757d;
+    }
+    
+    .table tbody td.text-center {
+      justify-content: center;
+    }
+    
+    .table tbody td.text-center::before {
+      display: none;
+    }
+    
+    .action-buttons {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    
+    .action-buttons .btn {
+      margin: 0.25rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keyup', filterTable);
+    
+    // Status filter
+    const statusFilter = document.getElementById('statusFilter');
+    statusFilter.addEventListener('change', filterTable);
+    
+    function filterTable() {
+      const searchValue = searchInput.value.toLowerCase();
+      const statusValue = statusFilter.value;
+      const rows = document.querySelectorAll('.register-row');
+      
+      rows.forEach(row => {
+        const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const regId = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        
+        const statusEl = row.querySelector('td:nth-child(5) .badge');
+        const status = statusEl ? statusEl.textContent.trim() : '';
+        
+        // Search filter
+        const matchesSearch = name.includes(searchValue) || regId.includes(searchValue);
+        
+        // Status filter
+        let matchesStatus = true;
+        if (statusValue === 'active') {
+          matchesStatus = status === 'ساري المفعول';
+        } else if (statusValue === 'expired') {
+          matchesStatus = status === 'منتهي';
+        }
+        
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  });
+  
+  // Delete confirmation
+  function confirmRegisterDelete(id) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteRegisterModal'));
+    document.getElementById('deleteRegisterLink').href = '/register-delete/' + id;
+    modal.show();
+  }
+</script>
 {% endblock %}

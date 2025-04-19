@@ -9,62 +9,279 @@
 <body dir="rtl">
   <div class="container">
     <br />
-    <div class="card">
-      <div class="card-header d-flex justify-content-between">
-        <h3 style="text-align: center">قائمة المستخدمين</h3>
-        <a href="{% url 'register' %}" class="btn" style="background-color:#8A1538; color:white;">إضافة مستخدم جديد</a>
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+        <h3 class="m-0 font-weight-bold" style="color: #8A1538;">قائمة المستخدمين</h3>
+        <a href="{% url 'register' %}" class="btn" style="background-color:#8A1538; color:white;">
+          <i class="fas fa-plus-circle me-1"></i> إضافة مستخدم جديد
+        </a>
       </div>
-      <table class="table table-hover table-responsive">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">الاسم الكامل</th>
-            <th scope="col">البريد الإلكتروني</th>
-            <th scope="col">المهنة</th>
-            <th scope="col">الفريق</th>
-            <th scope="col">تاريخ الإنشاء</th>
-            <th scope="col">الإجراءات</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for profile in profiles %}
-          <tr>
-            <th scope="row">{{ forloop.counter }}</th>
-            <td>{{ profile.get_full_name }}</td>
-            <td>{{ profile.email }}</td>
-            <td>{{ profile.profiles.occupation.ar_name }} / {{ profile.profiles.occupation.en_name }}</td>
-            <td>
-{#              {% if profile.team %}#}
-                {{ profile.profiles.team.ar_name }} / {{ profile.profiles.team.en_name }}
-{#              {% else %}#}
-{#                غير منتمي لفريق#}
-{#              {% endif %}#}
-            </td>
-            <td>{{ profile.date_joined|date:"Y-m-d H:i" }}</td>
-            <td>
-              <!-- Edit Button -->
-              <a href="{% url 'user_edit' profile.id %}" class="btn btn-primary btn-sm">تعديل</a>
+      
+      <div class="card-body">
+        <!-- Search and Filter Section -->
+        <div class="row mb-3">
+          <div class="col-md-6 mb-2 mb-md-0">
+            <div class="input-group">
+              <input type="text" id="searchInput" class="form-control" placeholder="البحث عن مستخدم...">
+              <div class="input-group-append">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 mb-2 mb-md-0">
+            <select id="statusFilter" class="form-control">
+              <option value="all">جميع المستخدمين</option>
+              <option value="active">المستخدمين النشطين</option>
+              <option value="inactive">المستخدمين غير النشطين</option>
+            </select>
+          </div>
+          <div class="col-md-3 text-md-end">
+            <span class="badge bg-info text-white p-2">
+              إجمالي المستخدمين: <span id="userCount">{{ profiles|length }}</span>
+            </span>
+          </div>
+        </div>
+        
+        <div class="table-responsive">
+          <table class="table table-hover" id="usersTable">
+            <thead class="table-light">
+              <tr>
+                <th scope="col" class="sortable" data-sort="counter">#</th>
+                <th scope="col" class="sortable" data-sort="name">الاسم الكامل</th>
+                <th scope="col" class="sortable" data-sort="email">البريد الإلكتروني</th>
+                <th scope="col" class="sortable" data-sort="occupation">المهنة</th>
+                <th scope="col" class="sortable" data-sort="team">الفريق</th>
+                <th scope="col" class="sortable" data-sort="date">تاريخ الإنشاء</th>
+                <th scope="col">الحالة</th>
+                <th scope="col">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for profile in profiles %}
+              <tr class="user-row" data-status="{% if profile.is_active %}active{% else %}inactive{% endif %}">
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ profile.get_full_name }}</td>
+                <td>{{ profile.email }}</td>
+                <td>{{ profile.profiles.occupation.ar_name }} / {{ profile.profiles.occupation.en_name }}</td>
+                <td>
+                  {{ profile.profiles.team.ar_name }} / {{ profile.profiles.team.en_name }}
+                </td>
+                <td>{{ profile.date_joined|date:"Y-m-d" }}</td>
+                <td>
+                  {% if profile.is_active %}
+                    <span class="badge bg-success">نشط</span>
+                  {% else %}
+                    <span class="badge bg-secondary">غير نشط</span>
+                  {% endif %}
+                </td>
+                <td class="action-buttons">
+                  <div class="d-flex flex-wrap gap-1">
+                    <!-- Edit Button -->
+                    <a href="{% url 'user_edit' profile.id %}" class="btn btn-primary btn-sm" title="تعديل">
+                      <i class="fas fa-edit"></i>
+                    </a>
 
-              <!-- Deactivate Button -->
-              {% if profile.is_active %}
-                <a href="{% url 'user_deactivate' profile.id %}" class="btn btn-warning btn-sm">تعطيل</a>
-              {% else %}
-                <a href="{% url 'user_activate' profile.id %}" class="btn btn-success btn-sm">تفعيل</a>
-              {% endif %}
+                    <!-- Deactivate/Activate Button -->
+                    {% if profile.is_active %}
+                      <a href="{% url 'user_deactivate' profile.id %}" class="btn btn-warning btn-sm" title="تعطيل">
+                        <i class="fas fa-user-slash"></i>
+                      </a>
+                    {% else %}
+                      <a href="{% url 'user_activate' profile.id %}" class="btn btn-success btn-sm" title="تفعيل">
+                        <i class="fas fa-user-check"></i>
+                      </a>
+                    {% endif %}
 
-              <!-- Delete Button with Confirmation -->
-              <a href="{% url 'user_delete' profile.id %}" class="btn btn-danger btn-sm">حذف</a>
-
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="8" class="text-center">لا توجد سجلات مستخدمين.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+                    <!-- Delete Button -->
+                    <button type="button" class="btn btn-danger btn-sm" title="حذف" 
+                            data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                            data-user-id="{{ profile.id }}" 
+                            data-user-name="{{ profile.get_full_name }}">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr id="emptyRow">
+                <td colspan="8" class="text-center py-5">
+                  <div class="empty-state">
+                    <i class="fas fa-users fa-3x mb-3 text-muted"></i>
+                    <h5>لا توجد سجلات مستخدمين.</h5>
+                    <p class="text-muted">قم بإضافة مستخدمين جدد للنظام</p>
+                    <a href="{% url 'register' %}" class="btn btn-sm" style="background-color:#8A1538; color:white;">
+                      <i class="fas fa-plus-circle"></i> إضافة مستخدم جديد
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
+  
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">تأكيد الحذف</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          هل أنت متأكد من رغبتك في حذف المستخدم <span id="userName"></span>؟
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+          <a href="#" id="confirmDelete" class="btn btn-danger">حذف</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- CSS Styles -->
+  <style>
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .sortable {
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .sortable:after {
+      content: "↕";
+      position: absolute;
+      right: 8px;
+      color: #999;
+      font-size: 12px;
+    }
+    
+    .action-buttons {
+      min-width: 120px;
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 767.98px) {
+      table.table {
+        display: block;
+      }
+      
+      table.table thead {
+        display: none;
+      }
+      
+      table.table tbody {
+        display: block;
+      }
+      
+      table.table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        position: relative;
+      }
+      
+      table.table td, table.table th {
+        display: flex;
+        justify-content: space-between;
+        border: none;
+        border-bottom: 1px solid #dee2e6;
+        padding: 0.75rem;
+        text-align: right;
+      }
+      
+      table.table td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-left: 1rem;
+      }
+      
+      table.table th:first-child {
+        background-color: #f8f9fa;
+        color: #8A1538;
+      }
+      
+      table.table td:last-child, table.table th:last-child {
+        border-bottom: none;
+      }
+      
+      .action-buttons {
+        justify-content: center;
+      }
+    }
+  </style>
+  
+  <!-- JavaScript for Search, Filter, and Modal -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('searchInput');
+      const statusFilter = document.getElementById('statusFilter');
+      const userRows = document.querySelectorAll('.user-row');
+      const userCount = document.getElementById('userCount');
+      const emptyRow = document.getElementById('emptyRow');
+      
+      // Initialize data attributes for mobile view
+      userRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        cells.forEach((cell, index) => {
+          const headerText = row.closest('table').querySelector('thead th:nth-child(' + (index + 2) + ')').textContent;
+          cell.setAttribute('data-label', headerText);
+        });
+      });
+      
+      // Search functionality
+      function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        let visibleCount = 0;
+        
+        userRows.forEach(row => {
+          const status = row.getAttribute('data-status');
+          const rowText = row.textContent.toLowerCase();
+          const statusMatch = statusValue === 'all' || status === statusValue;
+          const searchMatch = rowText.includes(searchTerm);
+          
+          if (statusMatch && searchMatch) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        userCount.textContent = visibleCount;
+        
+        // Show/hide empty state message
+        if (emptyRow) {
+          emptyRow.style.display = visibleCount === 0 ? '' : 'none';
+        }
+      }
+      
+      searchInput.addEventListener('input', applyFilters);
+      statusFilter.addEventListener('change', applyFilters);
+      
+      // Delete confirmation modal
+      const deleteModal = document.getElementById('deleteModal');
+      if (deleteModal) {
+        deleteModal.addEventListener('show.bs.modal', function(event) {
+          const button = event.relatedTarget;
+          const userId = button.getAttribute('data-user-id');
+          const userName = button.getAttribute('data-user-name');
+          
+          document.getElementById('userName').textContent = userName;
+          document.getElementById('confirmDelete').href = "{% url 'user_delete' 0 %}".replace('0', userId);
+        });
+      }
+    });
+  </script>
 </body>
 {% endblock %}

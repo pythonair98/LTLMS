@@ -1,78 +1,414 @@
-{% extends "base.html" %}  {# Ensure this extends your main template #}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  <title>تكليفاتي</title>
+{% endblock %}
+
 {% block content %}
-
 <div class="container mt-4">
-    <h2 class="mb-3">📋 تكليفاتي</h2>
+  <div class="card shadow-sm border-0">
+    <div class="card-header py-3" style="background-color: #8A1538; color: white;">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0 fw-bold">
+          <i class="fas fa-tasks me-2"></i>تكليفاتي
+        </h4>
+        <a href="#" class="btn btn-light btn-sm">
+          <i class="fas fa-sync-alt me-1"></i>تحديث
+        </a>
+      </div>
+    </div>
 
-    <!-- Status Filter -->
-    <div class="mb-3">
-        <label for="statusFilter" class="form-label">فرز حسب: الحالة</label>
-        <select id="statusFilter" class="form-select" onchange="filterAssignments()">
-            <option value="">الجميع</option>
+    <!-- Search and Filter Section -->
+    <div class="p-3 bg-light border-bottom">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="fas fa-search text-muted"></i>
+            </span>
+            <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن تكليف...">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select id="statusFilter" class="form-select">
+            <option value="">جميع الحالات</option>
             <option value="pending">أنتظار</option>
             <option value="accepted">مقبولة</option>
             <option value="in_progress">قيد المعاينة</option>
             <option value="completed">مكتلمة</option>
             <option value="cancelled">ملغاة</option>
-        </select>
+          </select>
+        </div>
+        <div class="col-md-3 text-md-end">
+          <span class="badge bg-secondary p-2">
+            <i class="fas fa-tasks me-1"></i> إجمالي التكليفات: <span class="fw-bold">{{ assignments|length }}</span>
+          </span>
+        </div>
+      </div>
     </div>
 
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>المنشأة</th>
-                <th>وجهت في</th>
-                <th>اخر موعد</th>
-                <th>الحالة</th>
-                <th>الملاحظات</th>
-                <th>إجراءات</th>
-            </tr>
+    <!-- Table Section -->
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="assignmentsTable">
+        <thead style="background-color: #f8f9fa;">
+          <tr>
+            <th scope="col" class="sortable" data-sort="id">
+              <i class="fas fa-hashtag me-1 text-muted small"></i>#
+            </th>
+            <th scope="col" class="sortable" data-sort="establishment">
+              <i class="fas fa-building me-1 text-muted small"></i>المنشأة
+            </th>
+            <th scope="col" class="sortable" data-sort="assigned">
+              <i class="fas fa-calendar-plus me-1 text-muted small"></i>وجهت في
+            </th>
+            <th scope="col" class="sortable" data-sort="due">
+              <i class="fas fa-calendar-times me-1 text-muted small"></i>اخر موعد
+            </th>
+            <th scope="col">
+              <i class="fas fa-check-circle me-1 text-muted small"></i>الحالة
+            </th>
+            <th scope="col">
+              <i class="fas fa-comment me-1 text-muted small"></i>الملاحظات
+            </th>
+            <th scope="col" class="text-center">إجراءات</th>
+          </tr>
         </thead>
         <tbody>
-            {% for assignment in assignments %}
-            <tr class="assignment-row" data-status="{{ assignment.status }}">
-                <td>{{ forloop.counter }}</td>
-                <td>{{ assignment.establishment }}</td>
-                <td>{{ assignment.assigned_at|date:"Y-m-d H:i" }}</td>
-                <td>{{ assignment.due_date|default:"-" }}</td>
-                <td>
-                    <span class="badge bg-{% if assignment.status == 'pending' %}warning
-                                      {% elif assignment.status == 'accepted' %}primary
-                                      {% elif assignment.status == 'in_progress' %}info
-                                      {% elif assignment.status == 'completed' %}success
-                                      {% else %}danger{% endif %}">
-                        {{ assignment.get_status_display }}
-                    </span>
-                </td>
-                <td>{{ assignment.notes|default:"لا يوجد ملاحظات!" }}</td>
-                <td>
-                    {{ assignment.status }}
-
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="text-center text-muted">لا يوجد تكليفات</td>
-            </tr>
-            {% endfor %}
+          {% for assignment in assignments %}
+          <tr class="assignment-row" data-status="{{ assignment.status }}" data-id="{{ assignment.id }}">
+            <td data-title="#">{{ forloop.counter }}</td>
+            <td data-title="المنشأة" class="fw-bold">{{ assignment.establishment }}</td>
+            <td data-title="وجهت في">{{ assignment.assigned_at|date:"Y-m-d H:i" }}</td>
+            <td data-title="اخر موعد">{{ assignment.due_date|default:"-" }}</td>
+            <td data-title="الحالة">
+              <span class="badge bg-{% if assignment.status == 'pending' %}warning
+                              {% elif assignment.status == 'accepted' %}primary
+                              {% elif assignment.status == 'in_progress' %}info
+                              {% elif assignment.status == 'completed' %}success
+                              {% else %}danger{% endif %}">
+                {{ assignment.get_status_display }}
+              </span>
+            </td>
+            <td data-title="الملاحظات" class="text-truncate" style="max-width: 200px;">{{ assignment.notes|default:"لا يوجد ملاحظات" }}</td>
+            <td data-title="إجراءات" class="text-center">
+              <div class="action-buttons">
+                {% if assignment.status == 'pending' %}
+                  <a href="#" onclick="changeStatus('{{ assignment.id }}', 'accepted'); return false;" class="btn btn-sm btn-primary mx-1" title="قبول التكليف">
+                    <i class="fas fa-check"></i>
+                  </a>
+                  <a href="#" onclick="changeStatus('{{ assignment.id }}', 'cancelled'); return false;" class="btn btn-sm btn-danger mx-1" title="رفض التكليف">
+                    <i class="fas fa-times"></i>
+                  </a>
+                {% elif assignment.status == 'accepted' %}
+                  <a href="#" onclick="changeStatus('{{ assignment.id }}', 'in_progress'); return false;" class="btn btn-sm btn-info mx-1" title="بدء المعاينة">
+                    <i class="fas fa-play"></i>
+                  </a>
+                {% elif assignment.status == 'in_progress' %}
+                  <a href="{% url 'reader' %}" class="btn btn-sm btn-success mx-1" title="اضافة معاينة">
+                    <i class="fas fa-clipboard-check"></i>
+                  </a>
+                {% endif %}
+                
+                <a href="#" onclick="viewDetails('{{ assignment.id }}'); return false;" class="btn btn-sm btn-secondary mx-1" title="عرض التفاصيل">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5">
+              <div class="empty-state">
+                <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                <h5>لا يوجد تكليفات</h5>
+                <p class="text-muted">لم يتم تعيين أي تكليفات لك حتى الآن</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
+      </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="p-3 border-top">
+      {% include "include/pagination.html" %}
+    </div>
+  </div>
 </div>
 
-<script>
-    function filterAssignments() {
-        var selectedStatus = document.getElementById("statusFilter").value;
-        var rows = document.querySelectorAll(".assignment-row");
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="statusChangeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #8A1538; color: white;">
+        <h5 class="modal-title">تأكيد تغيير الحالة</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>هل أنت متأكد من رغبتك في تغيير حالة هذا التكليف؟</p>
+        <p id="statusChangeMessage" class="text-muted"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <a id="confirmStatusChange" href="#" class="btn btn-primary">تأكيد التغيير</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-        rows.forEach(row => {
-            if (selectedStatus === "" || row.dataset.status === selectedStatus) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        });
+<!-- Assignment Details Modal -->
+<div class="modal fade" id="assignmentDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #8A1538; color: white;">
+        <h5 class="modal-title">
+          <i class="fas fa-info-circle me-2"></i>تفاصيل التكليف
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="assignmentDetailsContent">
+        <!-- Content will be loaded dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  
+  .action-buttons .btn {
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+  }
+  
+  /* Empty State */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 992px) {
+    .table thead {
+      display: none;
     }
-</script>
+    
+    .table tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .table tbody td {
+      display: flex;
+      justify-content: space-between;
+      border-top: none;
+      border-bottom: 1px solid #dee2e6;
+      padding: 0.75rem 1rem;
+    }
+    
+    .table tbody td:last-child {
+      border-bottom: none;
+    }
+    
+    .table tbody td::before {
+      content: attr(data-title);
+      font-weight: 600;
+      color: #6c757d;
+    }
+    
+    .table tbody td.text-center {
+      justify-content: center;
+    }
+    
+    .table tbody td.text-center::before {
+      display: none;
+    }
+    
+    .action-buttons {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    
+    .action-buttons .btn {
+      margin: 0.25rem;
+    }
+  }
+</style>
 
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keyup', filterTable);
+    
+    // Status filter
+    const statusFilter = document.getElementById('statusFilter');
+    statusFilter.addEventListener('change', filterTable);
+    
+    function filterTable() {
+      const searchValue = searchInput.value.toLowerCase();
+      const statusValue = statusFilter.value;
+      const rows = document.querySelectorAll('.assignment-row');
+      
+      rows.forEach(row => {
+        const establishment = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const notes = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
+        const rowStatus = row.dataset.status;
+        
+        // Search filter
+        const matchesSearch = establishment.includes(searchValue) || 
+                              notes.includes(searchValue);
+        
+        // Status filter
+        const matchesStatus = statusValue === '' || rowStatus === statusValue;
+        
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  });
+  
+  // Status change function
+  function changeStatus(assignmentId, newStatus) {
+    const modal = new bootstrap.Modal(document.getElementById('statusChangeModal'));
+    const confirmBtn = document.getElementById('confirmStatusChange');
+    const messageEl = document.getElementById('statusChangeMessage');
+    
+    // Set appropriate message based on status
+    let statusMessage = '';
+    let btnClass = 'primary';
+    
+    if (newStatus === 'accepted') {
+      statusMessage = 'سيتم قبول هذا التكليف وستكون مسؤولاً عن إكماله.';
+      btnClass = 'success';
+    } else if (newStatus === 'cancelled') {
+      statusMessage = 'سيتم رفض هذا التكليف وإرجاعه للإدارة.';
+      btnClass = 'danger';
+    } else if (newStatus === 'in_progress') {
+      statusMessage = 'سيتم تغيير حالة التكليف إلى قيد المعاينة.';
+      btnClass = 'info';
+    }
+    
+    messageEl.textContent = statusMessage;
+    
+    // Update button class
+    confirmBtn.className = `btn btn-${btnClass}`;
+    
+    // Update confirm button action
+    confirmBtn.onclick = function() {
+      // Create a form and submit it
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/update-assignment-status/';
+      
+      // CSRF token
+      const csrfToken = document.createElement('input');
+      csrfToken.type = 'hidden';
+      csrfToken.name = 'csrfmiddlewaretoken';
+      csrfToken.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      form.appendChild(csrfToken);
+      
+      // Assignment ID
+      const assignmentIdInput = document.createElement('input');
+      assignmentIdInput.type = 'hidden';
+      assignmentIdInput.name = 'assignment_id';
+      assignmentIdInput.value = assignmentId;
+      form.appendChild(assignmentIdInput);
+      
+      // New status
+      const statusInput = document.createElement('input');
+      statusInput.type = 'hidden';
+      statusInput.name = 'status';
+      statusInput.value = newStatus;
+      form.appendChild(statusInput);
+      
+      document.body.appendChild(form);
+      form.submit();
+      
+      return false;
+    };
+    
+    modal.show();
+  }
+  
+  // View assignment details
+  function viewDetails(assignmentId) {
+    const modal = new bootstrap.Modal(document.getElementById('assignmentDetailsModal'));
+    const content = document.getElementById('assignmentDetailsContent');
+    
+    // Find the assignment row to get the data
+    const row = document.querySelector(`.assignment-row[data-id="${assignmentId}"]`);
+    
+    if (row) {
+      const establishment = row.querySelector('td:nth-child(2)').textContent;
+      const assignedDate = row.querySelector('td:nth-child(3)').textContent;
+      const dueDate = row.querySelector('td:nth-child(4)').textContent;
+      const status = row.querySelector('td:nth-child(5) .badge').textContent.trim();
+      const notes = row.querySelector('td:nth-child(6)').textContent;
+      
+      content.innerHTML = `
+        <div class="p-3">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">رقم التكليف</h6>
+                <p class="fw-bold mb-0">${assignmentId}</p>
+              </div>
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">المنشأة</h6>
+                <p class="fw-bold mb-0">${establishment}</p>
+              </div>
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">تاريخ التكليف</h6>
+                <p class="mb-0">${assignedDate}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">الموعد النهائي</h6>
+                <p class="mb-0">${dueDate}</p>
+              </div>
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">الحالة</h6>
+                <p class="mb-0">${status}</p>
+              </div>
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">ملاحظات</h6>
+                <p class="mb-0">${notes}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+          </div>
+        </div>
+      `;
+    } else {
+      content.innerHTML = `
+        <div class="alert alert-warning">
+          لا يمكن العثور على بيانات هذا التكليف
+        </div>
+      `;
+    }
+    
+    modal.show();
+  }
+</script>
 {% endblock %}

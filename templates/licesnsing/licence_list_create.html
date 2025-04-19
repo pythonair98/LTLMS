@@ -1,80 +1,280 @@
 {% extends 'base.html' %}
 {% load crispy_forms_filters %}
+{% load static %}
 
 {% block title %}
   <title>بيانات الترخيص</title>
 {% endblock %}
 
 {% block content %}
-<body dir="rtl">
-  <div class="container">
-    <br />
-    <div class="card">
-      <div class="card-header">
-        <h3 style="text-align: center">بيانات الترخيص</h3>
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-header py-3" style="background-color: #8A1538; color: white;">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0 fw-bold">
+          <i class="fas fa-certificate me-2"></i>بيانات التراخيص
+        </h4>
+        <a href="{% url 'add_licence' %}" class="btn btn-light btn-sm">
+          <i class="fas fa-plus-circle me-1"></i>إضافة ترخيص جديد
+        </a>
       </div>
-      <table class="table table-hover table-responsive">
-        <thead>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="p-3 bg-light border-bottom">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="fas fa-search text-muted"></i>
+            </span>
+            <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن ترخيص...">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select id="statusFilter" class="form-select">
+            <option value="all">جميع الحالات</option>
+            <option value="active">ساري المفعول</option>
+            <option value="expired">منتهي</option>
+          </select>
+        </div>
+        <div class="col-md-3 text-md-end">
+          <span class="badge bg-secondary p-2">
+            <i class="fas fa-certificate me-1"></i> إجمالي التراخيص: <span class="fw-bold">{{ page_obj.paginator.count }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="licenseTable">
+        <thead style="background-color: #f8f9fa;">
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">رقم الترخيص</th>
-            <th scope="col">رقم السجل</th>
-            <th scope="col">تاريخ إنشاء الترخيص</th>
-            <th scope="col">تاريخ انتهاء الترخيص</th>
-            <th scope="col">الفئة الرئيسية</th>
-            <th scope="col">النشاط</th>
-            <th scope="col">الفئة الفرعية</th>
-            <th scope="col">تعديل الترخيص</th>
-            <th scope="col">طباعة الرخصة</th>
-            <th scope="col">حذف الترخيص</th>
+            <th scope="col" class="sortable" data-sort="id">
+              <i class="fas fa-hashtag me-1 text-muted small"></i>الرقم
+            </th>
+            <th scope="col" class="sortable" data-sort="licnum">
+              <i class="fas fa-id-badge me-1 text-muted small"></i>رقم الترخيص
+            </th>
+            <th scope="col" class="sortable" data-sort="regnum">
+              <i class="fas fa-clipboard-list me-1 text-muted small"></i>رقم السجل
+            </th>
+            <th scope="col" class="sortable" data-sort="credate">
+              <i class="fas fa-calendar-plus me-1 text-muted small"></i>تاريخ الإنشاء
+            </th>
+            <th scope="col" class="sortable" data-sort="expdate">
+              <i class="fas fa-calendar-times me-1 text-muted small"></i>تاريخ الانتهاء
+            </th>
+            <th scope="col">
+              <i class="fas fa-layer-group me-1 text-muted small"></i>الفئة الرئيسية
+            </th>
+            <th scope="col">
+              <i class="fas fa-tasks me-1 text-muted small"></i>النشاط
+            </th>
+            <th scope="col">
+              <i class="fas fa-tag me-1 text-muted small"></i>الفئة الفرعية
+            </th>
+            <th scope="col" class="text-center">إجراءات</th>
           </tr>
         </thead>
         <tbody>
           {% for lic in page_obj %}
-          <tr>
-            <!-- Display the license primary key or another unique identifier -->
-            <th scope="row">{{ lic.counter }}</th>
-            <!-- License number can be the same as the primary key -->
-            <td>{{ lic }}</td>
-            <!-- Display the associated register's number -->
-            <td>{{ lic.register }}</td>
-            <!-- Date fields for the license -->
-            <td>{{ lic.creation_date }}</td>
-            <td>{{ lic.expiration_date }}</td>
-            <!-- Display related category/activity names; adjust field names if necessary -->
-            <td>{{ lic.main_category.ar_name }}</td>
-            <td>{{ lic.activity.ar_name }}</td>
-            <td>{{ lic.sub_category.ar_name }}</td>
-            <td>
-              <!-- Edit link for the license -->
-              <a href="{% url 'licence-list'  %}">
-                <button class="btn" style="background-color:#8A1538; color:white;" type="button">تعديل</button>
-              </a>
-            </td>
-
-              <td>
-              <!-- Edit link for the license -->
-              <a target="_blank" href="{% url 'license_report' lic.number  %}">
-                <button class="btn" style="background-color:#8A1538; color:white;" type="button">طباعة الرخصة</button>
-              </a>
-            </td>
-            <td>
-              <!-- Delete button for the license -->
-              <button class="btn btn-danger" type="button"
-                onclick="confirmToPost('{% url 'licence-delete' lic.number %}')">
-                حذف
-              </button>
+          <tr class="license-row">
+            <td data-title="الرقم">{{ lic.counter }}</td>
+            <td data-title="رقم الترخيص" class="fw-bold">{{ lic }}</td>
+            <td data-title="رقم السجل">{{ lic.register }}</td>
+            <td data-title="تاريخ الإنشاء">{{ lic.creation_date|date:"Y/m/d" }}</td>
+            <td data-title="تاريخ الانتهاء">{{ lic.expiration_date|date:"Y/m/d" }}</td>
+            <td data-title="الفئة الرئيسية">{{ lic.main_category.ar_name }}</td>
+            <td data-title="النشاط">{{ lic.activity.ar_name }}</td>
+            <td data-title="الفئة الفرعية">{{ lic.sub_category.ar_name }}</td>
+            <td data-title="إجراءات" class="text-center">
+              <div class="action-buttons">
+                <a href="{% url 'licence-list' %}" class="btn btn-sm btn-primary mx-1" title="تعديل الترخيص">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'license_report' lic.number %}" target="_blank" class="btn btn-sm btn-success mx-1" title="طباعة الترخيص">
+                  <i class="fas fa-print"></i>
+                </a>
+                <button class="btn btn-sm btn-danger mx-1" onclick="confirmLicenseDelete('{{ lic.number }}')" title="حذف الترخيص">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="10" class="text-center">لا توجد تراخيص.</td>
+            <td colspan="9" class="text-center py-5">
+              <div class="empty-state">
+                <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
+                <h5>لا توجد تراخيص</h5>
+                <p class="text-muted">لم يتم العثور على أي تراخيص في النظام</p>
+                <a href="{% url 'add_licence' %}" class="btn btn-sm" style="background-color: #8A1538; color: white;">
+                  <i class="fas fa-plus-circle me-1"></i>إضافة ترخيص جديد
+                </a>
+              </div>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
-    {% include 'include/pagination.html' %}
+    </div>
+    
+    <!-- Pagination -->
+    <div class="p-3 border-top">
+      {% include 'include/pagination.html' %}
     </div>
   </div>
-</body>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteLicenseModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">تأكيد الحذف</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>هل أنت متأكد من رغبتك في حذف هذا الترخيص؟</p>
+        <p class="text-danger small">تحذير: سيتم حذف جميع البيانات المرتبطة بهذا الترخيص.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <a id="deleteLicenseLink" href="#" class="btn btn-danger">تأكيد الحذف</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  
+  .action-buttons .btn {
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+  }
+  
+  /* Empty State */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 992px) {
+    .table thead {
+      display: none;
+    }
+    
+    .table tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .table tbody td {
+      display: flex;
+      justify-content: space-between;
+      border-top: none;
+      border-bottom: 1px solid #dee2e6;
+      padding: 0.75rem 1rem;
+    }
+    
+    .table tbody td:last-child {
+      border-bottom: none;
+    }
+    
+    .table tbody td::before {
+      content: attr(data-title);
+      font-weight: 600;
+      color: #6c757d;
+    }
+    
+    .table tbody td.text-center {
+      justify-content: center;
+    }
+    
+    .table tbody td.text-center::before {
+      display: none;
+    }
+    
+    .action-buttons {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    
+    .action-buttons .btn {
+      margin: 0.25rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keyup', filterTable);
+    
+    // Status filter
+    const statusFilter = document.getElementById('statusFilter');
+    statusFilter.addEventListener('change', filterTable);
+    
+    function filterTable() {
+      const searchValue = searchInput.value.toLowerCase();
+      const statusValue = statusFilter.value;
+      const rows = document.querySelectorAll('.license-row');
+      
+      rows.forEach(row => {
+        const licNum = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const regNum = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        const category = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
+        const activity = row.querySelector('td:nth-child(7)').textContent.toLowerCase();
+        
+        // Calculate status based on expiration date
+        const expDate = new Date(row.querySelector('td:nth-child(5)').textContent);
+        const today = new Date();
+        const status = expDate > today ? 'ساري المفعول' : 'منتهي';
+        
+        // Search filter
+        const matchesSearch = licNum.includes(searchValue) || 
+                             regNum.includes(searchValue) || 
+                             category.includes(searchValue) || 
+                             activity.includes(searchValue);
+        
+        // Status filter
+        let matchesStatus = true;
+        if (statusValue === 'active') {
+          matchesStatus = status === 'ساري المفعول';
+        } else if (statusValue === 'expired') {
+          matchesStatus = status === 'منتهي';
+        }
+        
+        if (matchesSearch && matchesStatus) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  });
+  
+  // Delete confirmation
+  function confirmLicenseDelete(licenseNumber) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteLicenseModal'));
+    document.getElementById('deleteLicenseLink').href = '{% url "licence-delete" 0 %}'.replace('0', licenseNumber);
+    modal.show();
+  }
+</script>
 {% endblock %}

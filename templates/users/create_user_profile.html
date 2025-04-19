@@ -4,197 +4,648 @@
 {% load static %}
 
 {% block title %}
-    <title>Create User and Profile</title>
+    <title>إنشاء مستخدم جديد</title>
 {% endblock %}
 
 {% block content %}
-    <div class="container" dir="rtl">
-        <h2 class="text-center">إنشاء مستخدم جديد مع ملفه الشخصي</h2>
-        <form method="post" enctype="multipart/form-data">
-            <input type="hidden" name="csrfmiddlewaretoken"
-                   value="s8gdfCYzjFPovNSACUJ0SbQAWrDgQWEsh4VxlVa0iwDdz5beozK36U7dX7c70LeN">
-            <fieldset>
-                <legend>معلومات المستخدم</legend>
-
-
-                <div id="div_id_username" class="mb-3"><label
-                        for="id_username" class="form-label requiredField">
-                    اسم المستخدم<span class="asteriskField">*</span> </label> <input type="text" name="username"
-                                                                                     maxlength="150" autofocus
-                                                                                     class="textinput form-control"
-                                                                                     required
-                                                                                     aria-describedby="id_username_helptext"
-                                                                                     id="id_username">
-                    <div id="id_username_helptext" class="form-text">Required. 150 characters or fewer. Letters, digits
-                        and @/./+/-/_ only.
-                    </div>
+<div class="container" dir="rtl">
+    <br />
+    <div class="card shadow">
+        <div class="card-header d-flex justify-content-between align-items-center bg-gradient-maroon py-3">
+            <h3 class="m-0 font-weight-bold text-white">إنشاء مستخدم جديد</h3>
+            <a href="{% url 'profiles-list' %}" class="btn btn-light">
+                <i class="fas fa-arrow-right me-1"></i> العودة إلى القائمة
+            </a>
+        </div>
+        
+        <div class="card-body p-4">
+            <!-- Progress indicator -->
+            <div class="mb-4">
+                <div class="progress" style="height: 8px; border-radius: 4px; background-color: #f0f0f0;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" id="formProgress" 
+                         style="width: 0%; background: linear-gradient(45deg, #8A1538, #c01f48);" 
+                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-                <div id="div_id_email" class="mb-3"><label
-                        for="id_email" class="form-label requiredField">
-                    البريد الاكتروني<span class="asteriskField">*</span> </label> <input type="email" name="email"
-                                                                                         maxlength="320"
-                                                                                         class="emailinput form-control"
-                                                                                         required
-                                                                                         aria-describedby="id_email_helptext"
-                                                                                         id="id_email">
-                    <div id="id_email_helptext" class="form-text">Required. Enter a valid email address.</div>
+                <div class="d-flex justify-content-between mt-2">
+                    <small id="step1" class="text-primary fw-bold"><i class="fas fa-circle me-1"></i> معلومات المستخدم</small>
+                    <small id="step2" class="text-muted"><i class="far fa-circle me-1"></i> معلومات الملف الشخصي</small>
                 </div>
-
-
-                <div id="first_name" class="mb-3"><label
-                        for="first_name" class="form-label requiredField">
-                    البريد الاكتروني<span class="asteriskField">*</span> </label> <input type="text" name="first_name"
-                                                                                         maxlength="320"
-                                                                                         class="form-control"
-                                                                                         required
-                                                                                         aria-describedby="id_email_helptext"
-                                                                                         id="first_name">
-                </div>
-
-
-
-                <div id="last_name" class="mb-3"><label
-                        for="last_name" class="form-label requiredField">
-                    البريد الاكتروني<span class="asteriskField">*</span> </label> <input type="text" name="last_name"
-                                                                                         maxlength="320"
-                                                                                         class="form-control"
-                                                                                         required
-                                                                                         id="last_name">
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <div id="div_id_password1" class="mb-3"><label
-                        for="id_password1" class="form-label">
-                    كلمة المرور
-                </label> <input type="password" name="password1" autocomplete="new-password"
-                                class="passwordinput form-control" aria-describedby="id_password1_helptext"
-                                id="id_password1">
-                    <div id="id_password1_helptext" class="form-text">
-                        <ul>
-                            <li>Your password can’t be too similar to your other personal information.</li>
-                            <li>Your password must contain at least 8 characters.</li>
-                            <li>Your password can’t be a commonly used password.</li>
-                            <li>Your password can’t be entirely numeric.</li>
-                        </ul>
-                    </div>
-                </div>
-                <div id="div_id_password2" class="mb-3"><label
-                        for="id_password2" class="form-label">
-                    تاكيد كلمة المرور
-                </label> <input type="password" name="password2" autocomplete="new-password"
-                                class="passwordinput form-control" aria-describedby="id_password2_helptext"
-                                id="id_password2">
-                    <div id="id_password2_helptext" class="form-text">Enter the same password as before, for
-                        verification.
-                    </div>
-                </div>
-
-            </fieldset>
-            <fieldset>
-                <legend>معلومات الملف الشخصي</legend>
-
-
-                <div id="div_id_occupation" class="mb-3"><label
-                        for="id_occupation" class="form-label requiredField">
-                    المسمى الوظيفي<span class="asteriskField">*</span> </label> <select name="occupation"
-                                                                                        class="select form-select"
-                                                                                        required id="id_occupation">
-                    <option value="" selected>---------</option>
-                    <option value="1">Head of Licsesing</option>
-                    <option value="2">Head of inspection Dept</option>
-                    <option value="3">Inspector</option>
-
-                </select></div>
-                <div id="div_id_team" class="mb-3"><label
-                        for="id_team" class="form-label">
-                    الفريق
-                </label> <select name="team" class="select form-select" id="id_team">
-                    <option value="" selected>---------</option>
-                    <option value="2">Caesar Eatonصصص</option>
-                    <option value="3">Test</option>
-
-                </select></div>
-
-            </fieldset>
-{#            <fieldset>#}
-{#                <legend>معلومات جهة الاتصال</legend>#}
-{##}
-{##}
-{#                <div id="div_id_ar_name" class="mb-3"><label#}
-{#                        for="id_ar_name" class="form-label requiredField">#}
-{#                    Ar name<span class="asteriskField">*</span> </label> <input type="text" name="ar_name"#}
-{#                                                                                maxlength="200"#}
-{#                                                                                class="textinput form-control" required#}
-{#                                                                                id="id_ar_name"></div>#}
-{#                <div id="div_id_en_name" class="mb-3"><label#}
-{#                        for="id_en_name" class="form-label">#}
-{#                    En name#}
-{#                </label> <input type="text" name="en_name" maxlength="200" class="textinput form-control"#}
-{#                                id="id_en_name"></div>#}
-{#                <div id="div_id_ar_fname" class="mb-3"><label#}
-{#                        for="id_ar_fname" class="form-label">#}
-{#                    Ar fname#}
-{#                </label> <input type="text" name="ar_fname" maxlength="100" class="textinput form-control"#}
-{#                                id="id_ar_fname"></div>#}
-{#                <div id="div_id_ar_lname" class="mb-3"><label#}
-{#                        for="id_ar_lname" class="form-label">#}
-{#                    Ar lname#}
-{#                </label> <input type="text" name="ar_lname" maxlength="100" class="textinput form-control"#}
-{#                                id="id_ar_lname"></div>#}
-{#                <div id="div_id_en_fname" class="mb-3"><label#}
-{#                        for="id_en_fname" class="form-label">#}
-{#                    En fname#}
-{#                </label> <input type="text" name="en_fname" maxlength="100" class="textinput form-control"#}
-{#                                id="id_en_fname"></div>#}
-{#                <div id="div_id_en_lname" class="mb-3"><label#}
-{#                        for="id_en_lname" class="form-label">#}
-{#                    En lname#}
-{#                </label> <input type="text" name="en_lname" maxlength="100" class="textinput form-control"#}
-{#                                id="id_en_lname"></div>#}
-{#                <div id="div_id_phone_number" class="mb-3"><label#}
-{#                        for="id_phone_number" class="form-label requiredField">#}
-{#                    Phone number<span class="asteriskField">*</span> </label> <input type="text" name="phone_number"#}
-{#                                                                                     maxlength="20"#}
-{#                                                                                     class="textinput form-control"#}
-{#                                                                                     required id="id_phone_number">#}
-{#                </div>#}
-{#                <div id="div_id_email" class="mb-3"><label#}
-{#                        for="id_email" class="form-label requiredField">#}
-{#                    Email<span class="asteriskField">*</span> </label> <input type="email" name="email" maxlength="255"#}
-{#                                                                              class="emailinput form-control" required#}
-{#                                                                              id="id_email"></div>#}
-{##}
-{#            </fieldset>#}
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary">إنشاء المستخدم</button>
             </div>
-        </form>
+            
+            <form method="post" enctype="multipart/form-data" id="userProfileForm" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div id="userInfoSection" class="fade-in">
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-header bg-light border-start border-4" style="border-color: #8A1538 !important;">
+                            <h5 class="mb-0"><i class="fas fa-user-circle me-2 text-primary"></i> معلومات المستخدم</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6 col-lg-6 mb-3">
+                                    <label for="id_username" class="form-label fw-bold">اسم المستخدم<span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light"><i class="fas fa-user text-primary"></i></span>
+                                        <input type="text" name="username" maxlength="150" autofocus class="form-control form-control-lg border-end-0" 
+                                               required id="id_username" placeholder="أدخل اسم المستخدم">
+                                        <div class="invalid-feedback">اسم المستخدم مطلوب</div>
+                                    </div>
+                                    <small class="form-text text-muted">مطلوب. 150 حرفًا أو أقل. الأحرف والأرقام و@/.+/-/_ فقط.</small>
+                                </div>
+                                
+                                <div class="col-md-6 col-lg-6 mb-3">
+                                    <label for="id_email" class="form-label fw-bold">البريد الإلكتروني<span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light"><i class="fas fa-envelope text-primary"></i></span>
+                                        <input type="email" name="email" maxlength="320" class="form-control form-control-lg border-end-0" 
+                                               required id="id_email" placeholder="example@domain.com">
+                                        <div class="invalid-feedback">يرجى إدخال بريد إلكتروني صالح</div>
+                                    </div>
+                                    <small class="form-text text-muted">أدخل عنوان بريد إلكتروني صالح.</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6 col-lg-6 mb-3">
+                                    <label for="first_name" class="form-label fw-bold">الاسم الأول<span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light"><i class="fas fa-id-card text-primary"></i></span>
+                                        <input type="text" name="first_name" maxlength="150" class="form-control form-control-lg" 
+                                               required id="first_name" placeholder="الاسم الأول">
+                                        <div class="invalid-feedback">الاسم الأول مطلوب</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 col-lg-6 mb-3">
+                                    <label for="last_name" class="form-label fw-bold">اسم العائلة<span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light"><i class="fas fa-id-card text-primary"></i></span>
+                                        <input type="text" name="last_name" maxlength="150" class="form-control form-control-lg" 
+                                               required id="last_name" placeholder="اسم العائلة">
+                                        <div class="invalid-feedback">اسم العائلة مطلوب</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6 col-lg-6 mb-3">
+                                    <label for="id_password1" class="form-label fw-bold">كلمة المرور<span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light"><i class="fas fa-lock text-primary"></i></span>
+                                        <input type="password" name="password1" autocomplete="new-password" 
+                                               class="form-control form-control-lg" required id="id_password1" placeholder="********">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="id_password1">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="invalid-feedback">كلمة المرور مطلوبة</div>
+                                    </div>
+                                    <div class="form-text">
+                                        <ul class="small ps-3 mb-0 mt-2 password-requirements">
+                                            <li id="req-length" class="req-item">يجب أن تحتوي على 8 أحرف على الأقل.</li>
+                                            <li id="req-similarity" class="req-item">لا يمكن أن تكون مشابهة للمعلومات الشخصية.</li>
+                                            <li id="req-common" class="req-item">لا يمكن أن تكون كلمة مرور شائعة.</li>
+                                            <li id="req-numeric" class="req-item">لا يمكن أن تتكون من أرقام فقط.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 col-lg-6 mb-3">
+                                    <label for="id_password2" class="form-label fw-bold">تأكيد كلمة المرور<span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light"><i class="fas fa-lock text-primary"></i></span>
+                                        <input type="password" name="password2" autocomplete="new-password" 
+                                               class="form-control form-control-lg" required id="id_password2" placeholder="********">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="id_password2">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <div class="invalid-feedback">تأكيد كلمة المرور مطلوب</div>
+                                    </div>
+                                    <small class="form-text text-muted">أدخل نفس كلمة المرور للتأكيد.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary btn-lg" disabled>
+                            <i class="fas fa-arrow-right me-1"></i> السابق
+                        </button>
+                        <button type="button" id="nextBtn" class="btn btn-lg btn-pulse" style="background: linear-gradient(45deg, #8A1538, #c01f48); color:white;">
+                            التالي <i class="fas fa-arrow-left ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="profileInfoSection" class="fade-in" style="display: none;">
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-header bg-light border-start border-4" style="border-color: #8A1538 !important;">
+                            <h5 class="mb-0"><i class="fas fa-id-card me-2 text-primary"></i> معلومات الملف الشخصي</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6 col-lg-6 mb-3">
+                                    <label for="id_occupation" class="form-label fw-bold">المسمى الوظيفي<span class="text-danger">*</span></label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light"><i class="fas fa-briefcase text-primary"></i></span>
+                                        <select name="occupation" class="form-select form-select-lg" required id="id_occupation">
+                                            <option value="" selected>اختر المسمى الوظيفي</option>
+                                            <option value="1">Head of Licsesing</option>
+                                            <option value="2">Head of inspection Dept</option>
+                                            <option value="3">Inspector</option>
+                                        </select>
+                                        <div class="invalid-feedback">المسمى الوظيفي مطلوب</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 col-lg-6 mb-3">
+                                    <label for="id_team" class="form-label fw-bold">الفريق</label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-light"><i class="fas fa-users text-primary"></i></span>
+                                        <select name="team" class="form-select form-select-lg" id="id_team">
+                                            <option value="" selected>اختر الفريق</option>
+                                            <option value="2">Caesar Eatonصصص</option>
+                                            <option value="3">Test</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Add any other profile fields here as needed -->
+                            
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" id="prevBtn" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-right me-1"></i> السابق
+                        </button>
+                        <button type="submit" class="btn btn-lg btn-pulse" style="background: linear-gradient(45deg, #8A1538, #c01f48); color:white;">
+                            <i class="fas fa-save me-1"></i> إنشاء المستخدم
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
+
+<!-- CSS Styles -->
+<style>
+    /* Custom gradient header */
+    .bg-gradient-maroon {
+        background: linear-gradient(45deg, #8A1538, #c01f48);
+    }
+    
+    /* Improved form styling */
+    .form-label {
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #8A1538;
+        box-shadow: 0 0 0 0.25rem rgba(138, 21, 56, 0.25);
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+    
+    .form-control, .form-select {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    
+    /* Password toggle button */
+    .toggle-password {
+        cursor: pointer;
+        z-index: 10;
+    }
+    
+    /* Password requirements styling */
+    .password-requirements {
+        padding-left: 0;
+        list-style-type: none;
+    }
+    
+    .password-requirements li {
+        position: relative;
+        padding-left: 1.5rem;
+        margin-bottom: 0.25rem;
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+    
+    .password-requirements li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #ddd;
+        transition: all 0.3s ease;
+    }
+    
+    .password-requirements li.valid {
+        color: #28a745;
+    }
+    
+    .password-requirements li.valid:before {
+        color: #28a745;
+    }
+    
+    /* Form validation styles */
+    .form-control.is-invalid,
+    .was-validated .form-control:invalid {
+        border-color: #dc3545;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+    
+    /* Animation effects */
+    .fade-in {
+        animation: fadeIn 0.5s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .btn-pulse {
+        animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(138, 21, 56, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(138, 21, 56, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(138, 21, 56, 0);
+        }
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 767.98px) {
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .card-header a {
+            margin-top: 0.5rem;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .form-control, .form-select, .input-group-text, .btn {
+            font-size: 16px !important; /* Prevent zoom on mobile */
+        }
+        
+        .btn-lg {
+            width: 45%;
+            padding: 0.75rem 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .d-flex.justify-content-between {
+            padding: 0 0.5rem;
+        }
+        
+        .card-body {
+            padding: 1.25rem !important;
+        }
+        
+        .container {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    }
+    
+    /* Tablet responsiveness */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .input-group-lg input, 
+        .input-group-lg select {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<!-- JavaScript for form steps and validation -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const userInfoSection = document.getElementById('userInfoSection');
+        const profileInfoSection = document.getElementById('profileInfoSection');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const progressBar = document.getElementById('formProgress');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const form = document.getElementById('userProfileForm');
+        const passwordInput = document.getElementById('id_password1');
+        const passwordConfirm = document.getElementById('id_password2');
+        
+        // Initialize with progress
+        progressBar.style.width = '33%';
+        progressBar.setAttribute('aria-valuenow', '33');
+        
+        // Toggle password visibility with animation
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                
+                // Apply animation
+                this.classList.add('animate__animated', 'animate__pulse');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+                
+                // Remove animation classes after animation ends
+                setTimeout(() => {
+                    this.classList.remove('animate__animated', 'animate__pulse');
+                }, 500);
+            });
+        });
+        
+        // Real-time password validation
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            
+            // Check length
+            const reqLength = document.getElementById('req-length');
+            if (password.length >= 8) {
+                reqLength.classList.add('valid');
+            } else {
+                reqLength.classList.remove('valid');
+            }
+            
+            // Check if it's not all numeric
+            const reqNumeric = document.getElementById('req-numeric');
+            if (!/^\d+$/.test(password) && password.length > 0) {
+                reqNumeric.classList.add('valid');
+            } else {
+                reqNumeric.classList.remove('valid');
+            }
+            
+            // Basic check for common passwords (simplified)
+            const reqCommon = document.getElementById('req-common');
+            const commonPasswords = ['password', '12345678', 'qwerty', 'admin'];
+            if (!commonPasswords.includes(password.toLowerCase()) && password.length > 0) {
+                reqCommon.classList.add('valid');
+            } else {
+                reqCommon.classList.remove('valid');
+            }
+            
+            // Match with user info (simplified)
+            const reqSimilarity = document.getElementById('req-similarity');
+            const username = document.getElementById('id_username').value;
+            if (password.toLowerCase() !== username.toLowerCase() && password.length > 0) {
+                reqSimilarity.classList.add('valid');
+            } else {
+                reqSimilarity.classList.remove('valid');
+            }
+        });
+        
+        // Password match validation
+        passwordConfirm.addEventListener('input', function() {
+            if (this.value === passwordInput.value) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                if (this.value.length > 0) {
+                    this.classList.add('is-invalid');
+                }
+            }
+        });
+        
+        // Handle next button click with enhanced validation
+        nextBtn.addEventListener('click', function() {
+            // Basic validation before proceeding
+            const username = document.getElementById('id_username').value;
+            const email = document.getElementById('id_email').value;
+            const firstName = document.getElementById('first_name').value;
+            const lastName = document.getElementById('last_name').value;
+            const password1 = document.getElementById('id_password1').value;
+            const password2 = document.getElementById('id_password2').value;
+            
+            let isValid = true;
+            let errors = [];
+            
+            // Reset previous validation
+            document.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            
+            // Validate each field
+            if (!username) {
+                isValid = false;
+                document.getElementById('id_username').classList.add('is-invalid');
+                errors.push('اسم المستخدم مطلوب');
+            }
+            
+            if (!email) {
+                isValid = false;
+                document.getElementById('id_email').classList.add('is-invalid');
+                errors.push('البريد الإلكتروني مطلوب');
+            } else if (!isValidEmail(email)) {
+                isValid = false;
+                document.getElementById('id_email').classList.add('is-invalid');
+                errors.push('البريد الإلكتروني غير صالح');
+            }
+            
+            if (!firstName) {
+                isValid = false;
+                document.getElementById('first_name').classList.add('is-invalid');
+                errors.push('الاسم الأول مطلوب');
+            }
+            
+            if (!lastName) {
+                isValid = false;
+                document.getElementById('last_name').classList.add('is-invalid');
+                errors.push('اسم العائلة مطلوب');
+            }
+            
+            if (!password1) {
+                isValid = false;
+                document.getElementById('id_password1').classList.add('is-invalid');
+                errors.push('كلمة المرور مطلوبة');
+            } else if (password1.length < 8) {
+                isValid = false;
+                document.getElementById('id_password1').classList.add('is-invalid');
+                errors.push('كلمة المرور قصيرة جدًا');
+            }
+            
+            if (!password2) {
+                isValid = false;
+                document.getElementById('id_password2').classList.add('is-invalid');
+                errors.push('تأكيد كلمة المرور مطلوب');
+            } else if (password1 !== password2) {
+                isValid = false;
+                document.getElementById('id_password2').classList.add('is-invalid');
+                errors.push('كلمات المرور غير متطابقة');
+            }
+            
+            if (isValid) {
+                // Add animation when transitioning
+                userInfoSection.style.opacity = '0';
+                userInfoSection.style.transform = 'translateY(-20px)';
+                
+                setTimeout(() => {
+                    userInfoSection.style.display = 'none';
+                    profileInfoSection.style.display = 'block';
+                    
+                    // Trigger reflow
+                    void profileInfoSection.offsetWidth;
+                    
+                    // Update progress bar with animation
+                    progressBar.style.width = '66%';
+                    progressBar.setAttribute('aria-valuenow', '66');
+                    
+                    // Update step indicators
+                    step1.classList.remove('text-primary', 'fw-bold');
+                    step1.classList.add('text-success');
+                    step1.innerHTML = '<i class="fas fa-check-circle me-1"></i> معلومات المستخدم';
+                    step2.classList.remove('text-muted');
+                    step2.classList.add('text-primary', 'fw-bold');
+                    step2.innerHTML = '<i class="fas fa-circle me-1"></i> معلومات الملف الشخصي';
+                    
+                    // Reset opacity and transform for profileInfoSection
+                    profileInfoSection.style.opacity = '1';
+                    profileInfoSection.style.transform = 'translateY(0)';
+                }, 300);
+            } else {
+                // Shake the form on error
+                form.classList.add('animate__animated', 'animate__shakeX');
+                setTimeout(() => {
+                    form.classList.remove('animate__animated', 'animate__shakeX');
+                }, 500);
+                
+                // Focus the first invalid field
+                document.querySelector('.is-invalid').focus();
+            }
+        });
+        
+        // Handle previous button click with animation
+        prevBtn.addEventListener('click', function() {
+            profileInfoSection.style.opacity = '0';
+            profileInfoSection.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                profileInfoSection.style.display = 'none';
+                userInfoSection.style.display = 'block';
+                
+                // Trigger reflow
+                void userInfoSection.offsetWidth;
+                
+                // Update progress with animation
+                progressBar.style.width = '33%';
+                progressBar.setAttribute('aria-valuenow', '33');
+                
+                // Update step indicators
+                step1.classList.add('text-primary', 'fw-bold');
+                step1.classList.remove('text-success');
+                step1.innerHTML = '<i class="fas fa-circle me-1"></i> معلومات المستخدم';
+                step2.classList.add('text-muted');
+                step2.classList.remove('text-primary', 'fw-bold');
+                step2.innerHTML = '<i class="far fa-circle me-1"></i> معلومات الملف الشخصي';
+                
+                // Reset opacity and transform for userInfoSection
+                userInfoSection.style.opacity = '1';
+                userInfoSection.style.transform = 'translateY(0)';
+            }, 300);
+        });
+        
+        // Form validation on submit with visual feedback
+        form.addEventListener('submit', function(event) {
+            const occupation = document.getElementById('id_occupation').value;
+            
+            let isValid = true;
+            
+            if (!occupation) {
+                isValid = false;
+                document.getElementById('id_occupation').classList.add('is-invalid');
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+                
+                // Shake the form on error
+                form.classList.add('animate__animated', 'animate__shakeX');
+                setTimeout(() => {
+                    form.classList.remove('animate__animated', 'animate__shakeX');
+                }, 500);
+                
+                // Focus the invalid field
+                document.getElementById('id_occupation').focus();
+            } else {
+                // Add loading state to submit button
+                const submitButton = document.querySelector('button[type="submit"]');
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> جاري الإنشاء...';
+                submitButton.disabled = true;
+            }
+        });
+        
+        // Real-time validation for all fields
+        const inputs = form.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.required && !this.value) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                    
+                    // Special case for email
+                    if (this.type === 'email' && !isValidEmail(this.value) && this.value) {
+                        this.classList.add('is-invalid');
+                    }
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.required && this.value) {
+                    this.classList.remove('is-invalid');
+                    
+                    // Special case for email
+                    if (this.type === 'email' && !isValidEmail(this.value)) {
+                        this.classList.add('is-invalid');
+                    } else {
+                        this.classList.remove('is-invalid');
+                    }
+                }
+            });
+        });
+        
+        // Helper function to validate email
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+    });
+</script>
 {% endblock %}

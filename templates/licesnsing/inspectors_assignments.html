@@ -1,54 +1,400 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}
-    <title>Inspection Assignments</title>
+    <title>تكليفات المفتشين</title>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="text-center">📋 تكليفات المفتشين</h2>
-    <table class="table table-bordered table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>المنشأة</th>
-                <th>المفتش</th>
-                <th>الحالة</th>
-                <th>تاريخ التكليف</th>
-                <th>الموعد النهائي</th>
-                <th>اجراءات</th>
-            </tr>
+  <div class="card shadow-sm border-0">
+    <div class="card-header py-3" style="background-color: #8A1538; color: white;">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0 fw-bold">
+          <i class="fas fa-tasks me-2"></i>تكليفات المفتشين
+        </h4>
+        <a href="{% url 'assign_establishment' %}" class="btn btn-light btn-sm">
+          <i class="fas fa-plus-circle me-1"></i>تكليف جديد
+        </a>
+      </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="p-3 bg-light border-bottom">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="fas fa-search text-muted"></i>
+            </span>
+            <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن تكليف...">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select id="statusFilter" class="form-select">
+            <option value="all">جميع الحالات</option>
+            <option value="pending">أنتظار</option>
+            <option value="accepted">مقبولة</option>
+            <option value="in_progress">قيد المعاينة</option>
+            <option value="completed">مكتلمة</option>
+            <option value="cancelled">ملغاة</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select id="inspectorFilter" class="form-select">
+            <option value="all">جميع المفتشين</option>
+            {% for inspector in inspectors %}
+              <option value="{{ inspector.id }}">{{ inspector.get_full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2 text-md-end">
+          <span class="badge bg-secondary p-2">
+            <i class="fas fa-clipboard-list me-1"></i> الإجمالي: <span class="fw-bold">{{ assignments|length }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-responsive">
+      <table class="table table-hover mb-0" id="assignmentsTable">
+        <thead style="background-color: #f8f9fa;">
+          <tr>
+            <th scope="col" class="sortable" data-sort="id">
+              <i class="fas fa-hashtag me-1 text-muted small"></i>#
+            </th>
+            <th scope="col" class="sortable" data-sort="establishment">
+              <i class="fas fa-building me-1 text-muted small"></i>المنشأة
+            </th>
+            <th scope="col" class="sortable" data-sort="inspector">
+              <i class="fas fa-user-tie me-1 text-muted small"></i>المفتش
+            </th>
+            <th scope="col">
+              <i class="fas fa-check-circle me-1 text-muted small"></i>الحالة
+            </th>
+            <th scope="col" class="sortable" data-sort="assigned">
+              <i class="fas fa-calendar-plus me-1 text-muted small"></i>تاريخ التكليف
+            </th>
+            <th scope="col" class="sortable" data-sort="due">
+              <i class="fas fa-calendar-times me-1 text-muted small"></i>الموعد النهائي
+            </th>
+            <th scope="col" class="text-center">إجراءات</th>
+          </tr>
         </thead>
         <tbody>
-            {% for assignment in assignments %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ assignment.establishment }}</td>
-                    <td>{{ assignment.inspector.get_full_name }} {{ assignment.inspector.last_name }}</td>
-                    <td>
-                        <form method="post" action="{% url 'update_assignment_status' assignment.id %}">
-                            {% csrf_token %}
-                            <select name="status" class="form-select" onchange="this.form.submit()">
-                                <option class="bg-warning" value="pending" {% if assignment.status == 'pending' %}selected{% endif %}>Pending</option>
-                                <option class="bg-primary" value="accepted" {% if assignment.status == 'accepted' %}selected{% endif %}>Accepted</option>
-                                <option class="bg-secondary" value="in_progress" {% if assignment.status == 'in_progress' %}selected{% endif %}>In Progress</option>
-                                <option class="bg-success" value="completed" {% if assignment.status == 'completed' %}selected{% endif %}>Completed</option>
-                                <option class="bg-danger" value="cancelled" {% if assignment.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
-                            </select>
-                        </form>
-                    </td>
-                    <td>{{ assignment.assigned_at|date:"Y-m-d" }}</td>
-                    <td>{{ assignment.due_date|date:"Y-m-d" }}</td>
-                    <td>
-                        <a href="{% url 'edit_assignment' assignment.id %}" style="background-color:#8A1538; color:white;" class="btn btn-sm">تعديل</a>
-                        <a href="{% url 'delete_assignment' assignment.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this assignment?');">حذف</a>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center">لا يوجد تكليفات.</td>
-                </tr>
-            {% endfor %}
+          {% for assignment in assignments %}
+          <tr class="assignment-row" data-status="{{ assignment.status }}" data-inspector="{{ assignment.inspector.id }}">
+            <td data-title="#">{{ forloop.counter }}</td>
+            <td data-title="المنشأة" class="fw-bold">{{ assignment.establishment }}</td>
+            <td data-title="المفتش">{{ assignment.inspector.get_full_name }}</td>
+            <td data-title="الحالة">
+              <div class="d-flex align-items-center">
+                <span class="badge bg-{% if assignment.status == 'pending' %}warning
+                              {% elif assignment.status == 'accepted' %}primary
+                              {% elif assignment.status == 'in_progress' %}info
+                              {% elif assignment.status == 'completed' %}success
+                              {% else %}danger{% endif %} me-2">
+                  {{ assignment.get_status_display }}
+                </span>
+                <form method="post" action="{% url 'update_assignment_status' assignment.id %}" class="d-inline status-form">
+                  {% csrf_token %}
+                  <select name="status" class="form-select form-select-sm status-select" style="width: auto; display: inline-block;">
+                    <option value="pending" {% if assignment.status == 'pending' %}selected{% endif %}>أنتظار</option>
+                    <option value="accepted" {% if assignment.status == 'accepted' %}selected{% endif %}>مقبولة</option>
+                    <option value="in_progress" {% if assignment.status == 'in_progress' %}selected{% endif %}>قيد المعاينة</option>
+                    <option value="completed" {% if assignment.status == 'completed' %}selected{% endif %}>مكتلمة</option>
+                    <option value="cancelled" {% if assignment.status == 'cancelled' %}selected{% endif %}>ملغاة</option>
+                  </select>
+                  <button type="submit" class="btn btn-sm btn-outline-secondary ms-1">تحديث</button>
+                </form>
+              </div>
+            </td>
+            <td data-title="تاريخ التكليف">{{ assignment.assigned_at|date:"Y-m-d" }}</td>
+            <td data-title="الموعد النهائي">{{ assignment.due_date|date:"Y-m-d"|default:"-" }}</td>
+            <td data-title="إجراءات" class="text-center">
+              <div class="action-buttons">
+                <a href="{% url 'edit_assignment' assignment.id %}" class="btn btn-sm btn-primary mx-1" title="تعديل التكليف">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <button class="btn btn-sm btn-danger mx-1" onclick="confirmDelete('{{ assignment.id }}')" title="حذف التكليف">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+                <button class="btn btn-sm btn-secondary mx-1" onclick="viewDetails('{{ assignment.id }}')" title="عرض التفاصيل">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-5">
+              <div class="empty-state">
+                <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                <h5>لا يوجد تكليفات</h5>
+                <p class="text-muted">لم يتم إنشاء أي تكليفات للمفتشين بعد</p>
+                <a href="{% url 'assign_establishment' %}" class="btn btn-sm" style="background-color: #8A1538; color: white;">
+                  <i class="fas fa-plus-circle me-1"></i>إنشاء تكليف جديد
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
+      </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="p-3 border-top">
+      {% include "include/pagination.html" %}
+    </div>
+  </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #8A1538; color: white;">
+        <h5 class="modal-title">تأكيد الحذف</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>هل أنت متأكد من رغبتك في حذف هذا التكليف؟</p>
+        <p class="text-danger small">تحذير: سيتم حذف جميع البيانات المرتبطة بهذا التكليف.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+        <a id="deleteLink" href="#" class="btn btn-danger">تأكيد الحذف</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Assignment Details Modal -->
+<div class="modal fade" id="assignmentDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #8A1538; color: white;">
+        <h5 class="modal-title">
+          <i class="fas fa-info-circle me-2"></i>تفاصيل التكليف
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="assignmentDetailsContent">
+        <!-- Content will be loaded dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+  
+  .action-buttons .btn {
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+  }
+  
+  /* Status Select */
+  .status-select {
+    max-width: 120px;
+  }
+  
+  /* Empty State */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 992px) {
+    .table thead {
+      display: none;
+    }
+    
+    .table tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .table tbody td {
+      display: flex;
+      justify-content: space-between;
+      border-top: none;
+      border-bottom: 1px solid #dee2e6;
+      padding: 0.75rem 1rem;
+    }
+    
+    .table tbody td:last-child {
+      border-bottom: none;
+    }
+    
+    .table tbody td::before {
+      content: attr(data-title);
+      font-weight: 600;
+      color: #6c757d;
+    }
+    
+    .table tbody td.text-center {
+      justify-content: center;
+    }
+    
+    .table tbody td.text-center::before {
+      display: none;
+    }
+    
+    .action-buttons {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    
+    .action-buttons .btn {
+      margin: 0.25rem;
+    }
+    
+    .status-form {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    
+    .status-select {
+      max-width: 100%;
+      margin-bottom: 0.5rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('keyup', filterTable);
+    
+    // Status filter
+    const statusFilter = document.getElementById('statusFilter');
+    statusFilter.addEventListener('change', filterTable);
+    
+    // Inspector filter
+    const inspectorFilter = document.getElementById('inspectorFilter');
+    inspectorFilter.addEventListener('change', filterTable);
+    
+    function filterTable() {
+      const searchValue = searchInput.value.toLowerCase();
+      const statusValue = statusFilter.value;
+      const inspectorValue = inspectorFilter.value;
+      const rows = document.querySelectorAll('.assignment-row');
+      
+      rows.forEach(row => {
+        const establishment = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const inspector = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        const rowStatus = row.dataset.status;
+        const rowInspector = row.dataset.inspector;
+        
+        // Search filter
+        const matchesSearch = establishment.includes(searchValue) || 
+                              inspector.includes(searchValue);
+        
+        // Status filter
+        const matchesStatus = statusValue === 'all' || rowStatus === statusValue;
+        
+        // Inspector filter
+        const matchesInspector = inspectorValue === 'all' || rowInspector === inspectorValue;
+        
+        if (matchesSearch && matchesStatus && matchesInspector) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+  });
+  
+  // Delete confirmation
+  function confirmDelete(assignmentId) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    document.getElementById('deleteLink').href = '{% url "delete_assignment" 0 %}'.replace('0', assignmentId);
+    modal.show();
+  }
+  
+  // View assignment details
+  function viewDetails(assignmentId) {
+    const modal = new bootstrap.Modal(document.getElementById('assignmentDetailsModal'));
+    const content = document.getElementById('assignmentDetailsContent');
+    
+    // Find the assignment row
+    const row = document.querySelector(`.assignment-row[data-id="${assignmentId}"]`);
+    
+    if (row) {
+      const establishment = row.querySelector('td:nth-child(2)').textContent;
+      const inspector = row.querySelector('td:nth-child(3)').textContent;
+      const status = row.querySelector('td:nth-child(4) .badge').textContent.trim();
+      const assignedDate = row.querySelector('td:nth-child(5)').textContent;
+      const dueDate = row.querySelector('td:nth-child(6)').textContent;
+      
+      content.innerHTML = `
+        <div class="p-3">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">رقم التكليف</h6>
+                <p class="fw-bold mb-0">${assignmentId}</p>
+              </div>
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">المنشأة</h6>
+                <p class="fw-bold mb-0">${establishment}</p>
+              </div>
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">المفتش</h6>
+                <p class="fw-bold mb-0">${inspector}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">تاريخ التكليف</h6>
+                <p class="mb-0">${assignedDate}</p>
+              </div>
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">الموعد النهائي</h6>
+                <p class="mb-0">${dueDate}</p>
+              </div>
+              <div class="mb-3">
+                <h6 class="text-muted mb-1">الحالة</h6>
+                <p class="mb-0">${status}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-end">
+            <a href="{% url 'edit_assignment' 0 %}".replace('0', assignmentId) class="btn btn-primary me-2">
+              <i class="fas fa-edit me-1"></i>تعديل
+            </a>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+          </div>
+        </div>
+      `;
+    } else {
+      content.innerHTML = `
+        <div class="alert alert-warning">
+          لا يمكن العثور على بيانات هذا التكليف
+        </div>
+      `;
+    }
+    
+    modal.show();
+  }
+</script>
 {% endblock %}

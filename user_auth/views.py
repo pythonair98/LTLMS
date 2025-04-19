@@ -223,7 +223,7 @@ def create_new_user(request):
         "occupations": Occupation.objects.all(),
         "teams": Team.objects.all(),
     }
-    return render(request, "users/register.html", context)
+    return render(request, "users/create_user_profile.html", context)
 
 
 def logout_view(request):

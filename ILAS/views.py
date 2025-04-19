@@ -832,7 +832,7 @@ def add_establishment_licence(request):
                 messages.error(request, "يوجد بالفعل رخصة لهذا التسجيل!")
             else:
                 licence = form.save()
-                logger.info(f"New establishment licence created: ID {licence.id} for register {register.id}")
+                logger.info(f"New establishment licence created: ID {licence.number} for register {register.id}")
                 messages.success(request, "تمت إضافة الرخصة بنجاح!")
                 return redirect("licence-list")
         else:
