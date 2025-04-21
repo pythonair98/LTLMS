@@ -239,6 +239,9 @@
 </style>
 
 <div class="container multi-form-container">
+    <!-- Add global status message outside forms so it's always accessible -->
+    <div id="global-status" class="alert" style="display: none; position: sticky; top: 20px; z-index: 1000;"></div>
+    
     <div class="step-indicator">
         <div class="step active">1. بيانات المنشأة</div>
         <div class="step">2. بيانات المعاينة</div>
@@ -832,11 +835,13 @@
         event.preventDefault(); // Prevent regular form submission
         const formData = new FormData(form);
         
-        // Status message
-        const statusElement = document.getElementById('status');
-        statusElement.textContent = 'جاري معالجة الصور وإرسال البيانات...';
-        statusElement.style.display = 'block';
-        statusElement.className = 'alert alert-info';
+        // Use the global status element instead of the one in the form
+        const statusElement = document.getElementById('global-status');
+        if (statusElement) {
+            statusElement.textContent = 'جاري معالجة الصور وإرسال البيانات...';
+            statusElement.style.display = 'block';
+            statusElement.className = 'alert alert-info';
+        }
 
         // List of image fields to compress
         const imageFields = ['register_photo', 'license_photo', 'establishment_photo', 'cars_building_photo'];
@@ -864,8 +869,10 @@
             })
             .then((response) => {
                 if (response.ok) { 
-                    statusElement.textContent = 'تم إرسال البيانات بنجاح!';
-                    statusElement.className = 'alert alert-success';
+                    if (statusElement) {
+                        statusElement.textContent = 'تم إرسال البيانات بنجاح!';
+                        statusElement.className = 'alert alert-success';
+                    }
                     setTimeout(() => {
                         window.location.href = "{% url 'reader' %}";
                     }, 1000);
@@ -875,8 +882,13 @@
             })
             .catch((error) => {
                 console.error('Submission error:', error);
-                statusElement.textContent = 'حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.';
-                statusElement.className = 'alert alert-danger';
+                if (statusElement) {
+                    statusElement.textContent = 'حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.';
+                    statusElement.className = 'alert alert-danger';
+                } else {
+                    // Fallback if status element doesn't exist
+                    alert('حدث خطأ أثناء إرسال البيانات. يرجى المحاولة مرة أخرى.');
+                }
             });
     }
 
