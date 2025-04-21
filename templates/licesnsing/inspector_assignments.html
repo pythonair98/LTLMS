@@ -38,7 +38,7 @@
             <option value="in_progress">قيد المعاينة</option>
             <option value="completed">مكتلمة</option>
             <option value="cancelled">ملغاة</option>
-          </select>
+        </select>
         </div>
         <div class="col-md-3 text-md-end">
           <span class="badge bg-secondary p-2">
@@ -72,24 +72,24 @@
               <i class="fas fa-comment me-1 text-muted small"></i>الملاحظات
             </th>
             <th scope="col" class="text-center">إجراءات</th>
-          </tr>
+            </tr>
         </thead>
         <tbody>
-          {% for assignment in assignments %}
+            {% for assignment in assignments %}
           <tr class="assignment-row" data-status="{{ assignment.status }}" data-id="{{ assignment.id }}">
             <td data-title="#">{{ forloop.counter }}</td>
             <td data-title="المنشأة" class="fw-bold">{{ assignment.establishment }}</td>
             <td data-title="وجهت في">{{ assignment.assigned_at|date:"Y-m-d H:i" }}</td>
             <td data-title="اخر موعد">{{ assignment.due_date|default:"-" }}</td>
             <td data-title="الحالة">
-              <span class="badge bg-{% if assignment.status == 'pending' %}warning
-                              {% elif assignment.status == 'accepted' %}primary
-                              {% elif assignment.status == 'in_progress' %}info
-                              {% elif assignment.status == 'completed' %}success
-                              {% else %}danger{% endif %}">
-                {{ assignment.get_status_display }}
-              </span>
-            </td>
+                    <span class="badge bg-{% if assignment.status == 'pending' %}warning
+                                      {% elif assignment.status == 'accepted' %}primary
+                                      {% elif assignment.status == 'in_progress' %}info
+                                      {% elif assignment.status == 'completed' %}success
+                                      {% else %}danger{% endif %}">
+                        {{ assignment.get_status_display }}
+                    </span>
+                </td>
             <td data-title="الملاحظات" class="text-truncate" style="max-width: 200px;">{{ assignment.notes|default:"لا يوجد ملاحظات" }}</td>
             <td data-title="إجراءات" class="text-center">
               <div class="action-buttons">
@@ -114,10 +114,10 @@
                   <i class="fas fa-eye"></i>
                 </a>
               </div>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
             <td colspan="7" class="text-center py-5">
               <div class="empty-state">
                 <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
@@ -125,11 +125,11 @@
                 <p class="text-muted">لم يتم تعيين أي تكليفات لك حتى الآن</p>
               </div>
             </td>
-          </tr>
-          {% endfor %}
+            </tr>
+            {% endfor %}
         </tbody>
-      </table>
-    </div>
+    </table>
+</div>
     
     <!-- Pagination -->
     <div class="p-3 border-top">
@@ -262,8 +262,8 @@
       const searchValue = searchInput.value.toLowerCase();
       const statusValue = statusFilter.value;
       const rows = document.querySelectorAll('.assignment-row');
-      
-      rows.forEach(row => {
+
+        rows.forEach(row => {
         const establishment = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
         const notes = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
         const rowStatus = row.dataset.status;
@@ -277,7 +277,7 @@
         
         if (matchesSearch && matchesStatus) {
           row.style.display = '';
-        } else {
+            } else {
           row.style.display = 'none';
         }
       });
@@ -409,6 +409,6 @@
     }
     
     modal.show();
-  }
+    }
 </script>
 {% endblock %}

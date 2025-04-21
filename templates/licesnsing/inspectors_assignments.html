@@ -80,10 +80,10 @@
               <i class="fas fa-calendar-times me-1 text-muted small"></i>الموعد النهائي
             </th>
             <th scope="col" class="text-center">إجراءات</th>
-          </tr>
+            </tr>
         </thead>
         <tbody>
-          {% for assignment in assignments %}
+            {% for assignment in assignments %}
           <tr class="assignment-row" data-status="{{ assignment.status }}" data-inspector="{{ assignment.inspector.id }}">
             <td data-title="#">{{ forloop.counter }}</td>
             <td data-title="المنشأة" class="fw-bold">{{ assignment.establishment }}</td>
@@ -98,18 +98,18 @@
                   {{ assignment.get_status_display }}
                 </span>
                 <form method="post" action="{% url 'update_assignment_status' assignment.id %}" class="d-inline status-form">
-                  {% csrf_token %}
+                            {% csrf_token %}
                   <select name="status" class="form-select form-select-sm status-select" style="width: auto; display: inline-block;">
                     <option value="pending" {% if assignment.status == 'pending' %}selected{% endif %}>أنتظار</option>
                     <option value="accepted" {% if assignment.status == 'accepted' %}selected{% endif %}>مقبولة</option>
                     <option value="in_progress" {% if assignment.status == 'in_progress' %}selected{% endif %}>قيد المعاينة</option>
                     <option value="completed" {% if assignment.status == 'completed' %}selected{% endif %}>مكتلمة</option>
                     <option value="cancelled" {% if assignment.status == 'cancelled' %}selected{% endif %}>ملغاة</option>
-                  </select>
+                            </select>
                   <button type="submit" class="btn btn-sm btn-outline-secondary ms-1">تحديث</button>
-                </form>
+                        </form>
               </div>
-            </td>
+                    </td>
             <td data-title="تاريخ التكليف">{{ assignment.assigned_at|date:"Y-m-d" }}</td>
             <td data-title="الموعد النهائي">{{ assignment.due_date|date:"Y-m-d"|default:"-" }}</td>
             <td data-title="إجراءات" class="text-center">
@@ -124,10 +124,10 @@
                   <i class="fas fa-eye"></i>
                 </button>
               </div>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
             <td colspan="7" class="text-center py-5">
               <div class="empty-state">
                 <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
@@ -138,11 +138,11 @@
                 </a>
               </div>
             </td>
-          </tr>
-          {% endfor %}
+                </tr>
+            {% endfor %}
         </tbody>
-      </table>
-    </div>
+    </table>
+</div>
     
     <!-- Pagination -->
     <div class="p-3 border-top">

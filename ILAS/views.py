@@ -703,7 +703,7 @@ def view_inspections(request):
     Returns:
         HttpResponse: Renders the inspections list template with context.
     """
-    inspections = Inspection.objects.filter(is_archived=False)
+    inspections = Inspection.objects.filter(is_archived=False).order_by('-created_at')
     paginator = Paginator(inspections, 5)
     page_obj = paginator.get_page(request.GET.get("page"))
     logger.info(f"User {request.user.username} viewed inspections list (page: {request.GET.get('page', 1)})")

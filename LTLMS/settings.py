@@ -211,8 +211,14 @@ LOGGING = {
     },
 }
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']  # Folder within your project directory for static files
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Folder for the collected static files
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = [BASE_DIR / 'static']  # Folder within your project directory for static files
+# STATIC_ROOT = BASE_DIR / 'staticfiles'  # Folder for the collected static files
 # MEDIA_URL = '/media/'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATIC_URL = '/staticfiles/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = '/static/media/'
+MEDIA_ROOT = BASE_DIR / 'static/media'

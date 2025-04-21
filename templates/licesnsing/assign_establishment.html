@@ -43,8 +43,8 @@
                     
                     <!-- Form -->
                     <form method="post" class="assignment-form" novalidate>
-                        {% csrf_token %}
-                        
+            {% csrf_token %}
+
                         <div class="form-section mb-4">
                             <h5 class="section-title">
                                 <i class="fas fa-user-tie me-2"></i>اختيار المفتش
@@ -60,9 +60,9 @@
                                         </label>
                                         <select name="inspector" class="form-select" id="id_inspector" required>
                                             <option value="">-- اختر المفتش --</option>
-                                            {% for inspector in inspectors %}
+                {% for inspector in inspectors %}
                                                 <option value="{{ inspector.user.id }}">{{ inspector.user.first_name }}</option>
-                                            {% endfor %}
+                {% endfor %}
                                         </select>
                                         <small class="form-text text-muted">اختر المفتش الذي سيقوم بالمعاينة</small>
                                     </div>
@@ -111,7 +111,7 @@
                                         <input type="datetime-local" name="due_date" class="form-control" id="id_due_date">
                                         <small class="form-text text-muted">آخر موعد لإكمال المعاينة (اختياري)</small>
                                     </div>
-                                </div>
+            </div>
                                 
                                 <!-- Notes Field -->
                                 <div class="col-md-12 form-field-wrapper">
