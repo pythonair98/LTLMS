@@ -280,7 +280,7 @@
                     {% if inspection.register_photo %}
                         <div class="col-md-6">
                             <div class="photo-wrapper">
-                                <img src="/static{{ inspection.register_photo.url }}" alt="صورة السجل" class="img-fluid">
+                                <img src="{{ inspection.register_photo.url }}" alt="صورة السجل" class="img-fluid">
                                 <div class="photo-caption">صورة السجل</div>
                             </div>
                         </div>
@@ -289,7 +289,7 @@
                     {% if inspection.license_photo %}
                         <div class="col-md-6">
                             <div class="photo-wrapper">
-                                <img src="/static{{ inspection.license_photo.url }}" alt="صورة الرخصة" class="img-fluid">
+                                <img src="{{ inspection.license_photo.url }}" alt="صورة الرخصة" class="img-fluid">
                                 <div class="photo-caption">صورة الرخصة</div>
                             </div>
                         </div>
@@ -298,7 +298,7 @@
                     {% if inspection.establishment_photo %}
                         <div class="col-md-6">
                             <div class="photo-wrapper">
-                                <img src="/static{{ inspection.establishment_photo.url }}" alt="صورة المنشاة" class="img-fluid">
+                                <img src={{ inspection.establishment_photo.url }}" alt="صورة المنشاة" class="img-fluid">
                                 <div class="photo-caption">صورة المنشاة</div>
                             </div>
                         </div>
@@ -307,7 +307,7 @@
                     {% if inspection.cars_building_photo %}
                         <div class="col-md-6">
                             <div class="photo-wrapper">
-                                <img src="/static{{ inspection.cars_building_photo.url }}" alt="صورة المبنى" class="img-fluid">
+                                <img src="{{ inspection.cars_building_photo.url }}" alt="صورة المبنى" class="img-fluid">
                                 <div class="photo-caption">صورة المبنى</div>
                             </div>
                         </div>
