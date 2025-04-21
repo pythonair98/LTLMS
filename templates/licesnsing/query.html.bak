@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .inspection-container {
+        max-width: 1000px;
+        margin: 30px auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .inspection-header {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        color: white;
+        padding: 25px 20px;
+        position: relative;
+    }
+    
+    .inspection-body {
+        padding: 25px;
+    }
+    
+    .status-badge {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-weight: 500;
+        display: inline-block;
+        margin-top: 8px;
+    }
+    
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-left: 4px solid #2575fc;
+        transition: all 0.3s ease;
+    }
+    
+    .info-card:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    
+    .info-card h5 {
+        color: #2575fc;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+    
+    .photos-container img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .photos-container img:hover {
+        transform: scale(1.02);
+    }
+    
+    .photo-caption {
+        background: rgba(0,0,0,0.6);
+        color: white;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 8px;
+        text-align: center;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .photo-wrapper {
+        position: relative;
+        margin-bottom: 20px;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .photo-wrapper:hover .photo-caption {
+        opacity: 1;
+    }
+    
+    .map-container {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .back-button {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: white;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .back-button:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateX(-3px);
+    }
+    
+    .section-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    
+    .section-title i {
+        margin-right: 10px;
+        color: #2575fc;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+        margin-top: 20px;
+    }
+    
+    .timeline:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 5px;
+        height: 100%;
+        width: 3px;
+        background: #e0e0e0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+    }
+    
+    .timeline-item:before {
+        content: '';
+        position: absolute;
+        left: -30px;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #2575fc;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.2);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .inspection-header {
+            padding: 20px 15px;
+        }
+        
+        .inspection-body {
+            padding: 15px;
+        }
+        
+        .info-card {
+            padding: 12px;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="inspection-container">
+        <div class="inspection-header">
+            <a href="javascript:history.back()" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="text-center">
+                <h2>تفاصيل المعاينة</h2>
+                <p>رقم السجل: <strong>{{ inspection.register_number }}</strong></p>
+                <span class="status-badge {% if inspection.status %} bg-success {% else %} bg-danger {% endif %}">
+                    {{ inspection.get_status_display }}
+                </span>
+            </div>
+        </div>
+        
+        <div class="inspection-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <div class="section-title">
+                            <i class="fas fa-user-tie"></i>
+                            <h5>معلومات المفتش</h5>
+                        </div>
+                        <p><strong>الاسم:</strong> {{ inspection.inspector.get_full_name }}</p>
+                        <p><strong>تاريخ المعاينة:</strong> {{ inspection.created_at|date:"F j, Y, g:i a" }}</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <div class="section-title">
+                            <i class="fas fa-clipboard-check"></i>
+                            <h5>حالة المعاينة</h5>
+                        </div>
+                        <p><strong>الحالة:</strong> 
+                            <span class="badge {% if inspection.status %} bg-success {% else %} bg-danger {% endif %}">
+                                {{ inspection.get_status_display }}
+                            </span>
+                        </p>
+                        {% if inspection.is_archived %}
+                            <p><strong>حالة الأرشفة:</strong> <span class="badge bg-warning">مؤرشف</span></p>
+                            <p><strong>تاريخ الأرشفة:</strong> {{ inspection.archived_at|date:"F j, Y, g:i a" }}</p>
+                        {% else %}
+                            <p><strong>حالة الأرشفة:</strong> <span class="badge bg-info">غير مؤرشف</span></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-card mt-4">
+                <div class="section-title">
+                    <i class="fas fa-comment-alt"></i>
+                    <h5>ملاحظات المفتش</h5>
+                </div>
+                <div class="p-3 bg-white rounded">
+                    {% if inspection.notes %}
+                        <p>{{ inspection.notes }}</p>
+                    {% else %}
+                        <p class="text-muted">لا يوجد ملاحظات</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="info-card mt-4">
+                <div class="section-title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h5>الموقع الجغرافي</h5>
+                </div>
+                <div class="map-container">
+                    <iframe
+                        width="100%"
+                        height="300"
+                        loading="lazy"
+                        allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="https://www.google.com/maps?q={{ inspection.latitude }},{{ inspection.longitude }}&output=embed">
+                    </iframe>
+                </div>
+                {% if inspection.latitude and inspection.longitude %}
+                <div class="mt-2 text-center">
+                    <a href="https://www.google.com/maps?q={{ inspection.latitude }},{{ inspection.longitude }}" 
+                       target="_blank" 
+                       class="btn btn-sm btn-primary">
+                        <i class="fas fa-directions"></i> فتح في خرائط Google
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="info-card mt-4">
+                <div class="section-title">
+                    <i class="fas fa-images"></i>
+                    <h5>مرفقات المعاينة</h5>
+                </div>
+                
+                <div class="row photos-container">
+                    {% if inspection.register_photo %}
+                        <div class="col-md-6">
+                            <div class="photo-wrapper">
+                                <img src="/static/{{ inspection.register_photo.url }}" alt="صورة السجل" class="img-fluid">
+                                <div class="photo-caption">صورة السجل</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if inspection.license_photo %}
+                        <div class="col-md-6">
+                            <div class="photo-wrapper">
+                                <img src="/static/{{ inspection.license_photo.url }}" alt="صورة الرخصة" class="img-fluid">
+                                <div class="photo-caption">صورة الرخصة</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if inspection.establishment_photo %}
+                        <div class="col-md-6">
+                            <div class="photo-wrapper">
+                                <img src="/static/{{ inspection.establishment_photo.url }}" alt="صورة المنشاة" class="img-fluid">
+                                <div class="photo-caption">صورة المنشاة</div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if inspection.cars_building_photo %}
+                        <div class="col-md-6">
+                            <div class="photo-wrapper">
+                                <img src="/static/{{ inspection.cars_building_photo.url }}" alt="صورة المبنى" class="img-fluid">
+                                <div class="photo-caption">صورة المبنى</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if not inspection.register_photo and not inspection.license_photo and not inspection.establishment_photo and not inspection.cars_building_photo %}
+                        <div class="col-12 text-center py-4">
+                            <i class="fas fa-camera-retro fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">لا توجد صور مرفقة</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="timeline mt-4">
+                <div class="section-title">
+                    <i class="fas fa-history"></i>
+                    <h5>سجل المعاينة</h5>
+                </div>
+                <div class="timeline-item">
+                    <p><strong>تاريخ إنشاء المعاينة:</strong> {{ inspection.created_at|date:"F j, Y, g:i a" }}</p>
+                </div>
+                {% if inspection.is_archived %}
+                <div class="timeline-item">
+                    <p><strong>تاريخ أرشفة المعاينة:</strong> {{ inspection.archived_at|date:"F j, Y, g:i a" }}</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="d-flex justify-content-between mt-5">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> العودة
+                </a>
+                <div>
+                    {% if not inspection.is_archived %}
+                    <a href="#" class="btn btn-warning me-2">
+                        <i class="fas fa-archive me-1"></i> أرشفة
+                    </a>
+                    {% endif %}
+                    <a href="#" class="btn btn-primary">
+                        <i class="fas fa-print me-1"></i> طباعة التقرير
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Enlarge photos when clicked
+    document.addEventListener('DOMContentLoaded', function() {
+        const photos = document.querySelectorAll('.photos-container img');
+        
+        photos.forEach(photo => {
+            photo.addEventListener('click', function() {
+                // Simple lightbox implementation
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.backgroundColor = 'rgba(0,0,0,0.9)';
+                overlay.style.display = 'flex';
+                overlay.style.alignItems = 'center';
+                overlay.style.justifyContent = 'center';
+                overlay.style.zIndex = '9999';
+                overlay.style.cursor = 'pointer';
+                
+                const img = document.createElement('img');
+                img.src = this.src;
+                img.style.maxHeight = '90%';
+                img.style.maxWidth = '90%';
+                img.style.objectFit = 'contain';
+                
+                overlay.appendChild(img);
+                document.body.appendChild(overlay);
+                
+                overlay.addEventListener('click', function() {
+                    document.body.removeChild(overlay);
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
