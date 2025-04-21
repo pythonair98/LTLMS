@@ -37,8 +37,8 @@ __pycache__/
 *.env
 *.env.*
 media
-/static/media
-/static/media/*
+/media
+/media/*
 logs
 logs/*
 
