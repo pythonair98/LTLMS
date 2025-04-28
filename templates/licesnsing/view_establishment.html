@@ -8,11 +8,77 @@
 
 {% block content %}
 <div class="container mt-4">
+    <!-- Dashboard Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon-circle bg-primary bg-opacity-10 me-3">
+                            <i class="fas fa-building text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 text-muted">إجمالي المنشآت</h6>
+                            <h3 class="mb-0 fw-bold">{{ page_obj.paginator.count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon-circle bg-success bg-opacity-10 me-3">
+                            <i class="fas fa-check-circle text-success"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 text-muted">سجلات سارية</h6>
+                            <h3 class="mb-0 fw-bold">{{ active_registers|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon-circle bg-warning bg-opacity-10 me-3">
+                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 text-muted">سجلات منتهية</h6>
+                            <h3 class="mb-0 fw-bold">{{ expired_registers|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon-circle bg-info bg-opacity-10 me-3">
+                            <i class="fas fa-certificate text-info"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 text-muted">تراخيص سارية</h6>
+                            <h3 class="mb-0 fw-bold">{{ active_licenses|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card shadow-sm border-0">
         <div class="card-header py-3" style="background-color: #8A1538; color: white;">
             <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0 fw-bold">بيانات المنشأة</h4>
-                <a href="{% url 'add_establishment' %}" class="btn btn-light btn-sm">
+                <h4 class="mb-0 fw-bold">
+                    <i class="fas fa-building me-2"></i>بيانات المنشآت
+                </h4>
+                <a href="{% url 'add_establishment' %}" class="btn btn-light btn-sm d-flex align-items-center">
                     <i class="fas fa-plus-circle me-1"></i>إضافة منشأة جديدة
                 </a>
             </div>
@@ -27,89 +93,143 @@
                             <span class="input-group-text bg-white border-end-0">
                                 <i class="fas fa-search text-muted"></i>
                             </span>
-                            <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن منشأة...">
+                            <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن منشأة (اسم، رقم، مالك)...">
                         </div>
+                        <div class="form-text">يمكنك البحث باسم المنشأة، رقم السجل، رقم الترخيص أو اسم المالك</div>
                     </div>
                     <div class="col-md-3">
+                        <label for="statusFilter" class="form-label small">تصفية حسب الحالة</label>
                         <select id="statusFilter" class="form-select">
                             <option value="all">جميع الحالات</option>
-                            <option value="active">ساري المفعول</option>
-                            <option value="expired">منتهي</option>
+                            <option value="active">سارية المفعول</option>
+                            <option value="expired">منتهية</option>
+                            <option value="missing">غير متوفر</option>
                         </select>
                     </div>
-                    <div class="col-md-3 text-md-end">
-                        <span class="badge bg-secondary p-2">
-                            <i class="fas fa-building me-1"></i> إجمالي المنشآت: <span class="fw-bold">{{ page_obj.paginator.count }}</span>
-                        </span>
+                    <div class="col-md-3 text-md-end d-flex align-items-end">
+                        <button id="exportBtn" class="btn btn-sm btn-outline-secondary ms-2">
+                            <i class="fas fa-download me-1"></i>تصدير
+                        </button>
+                        <button id="refreshBtn" class="btn btn-sm btn-outline-primary" onclick="window.location.reload()">
+                            <i class="fas fa-sync-alt me-1"></i>تحديث
+                        </button>
                     </div>
                 </div>
             </div>
             
             <!-- Table Section -->
             <div class="table-responsive">
-                <table class="table table-hover mb-0" id="establishmentTable">
-                    <thead style="background-color: #f8f9fa;">
+                <table class="table table-hover align-middle mb-0" id="establishmentTable">
+                    <thead class="table-light">
                         <tr>
                             <th scope="col" class="sortable" data-sort="id">
-                                <i class="fas fa-hashtag me-1 text-muted small"></i>رقم المنشأة
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-hashtag me-1 text-muted small"></i>
+                                    <span>رقم المنشأة</span>
+                                    <i class="fas fa-sort ms-1 text-muted small"></i>
+                                </div>
                             </th>
                             <th scope="col" class="sortable" data-sort="name">
-                                <i class="fas fa-building me-1 text-muted small"></i>اسم المنشأة
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-building me-1 text-muted small"></i>
+                                    <span>اسم المنشأة</span>
+                                    <i class="fas fa-sort ms-1 text-muted small"></i>
+                                </div>
                             </th>
                             <th scope="col" class="sortable" data-sort="regid">
-                                <i class="fas fa-clipboard-list me-1 text-muted small"></i>رقم السجل
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clipboard-list me-1 text-muted small"></i>
+                                    <span>رقم السجل</span>
+                                    <i class="fas fa-sort ms-1 text-muted small"></i>
+                                </div>
                             </th>
                             <th scope="col" class="sortable" data-sort="regdate">
-                                <i class="fas fa-calendar-alt me-1 text-muted small"></i>تاريخ انتهاء السجل
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-calendar-alt me-1 text-muted small"></i>
+                                    <span>تاريخ انتهاء السجل</span>
+                                    <i class="fas fa-sort ms-1 text-muted small"></i>
+                                </div>
                             </th>
-                    <th scope="col">حالة السجل</th>
+                            <th scope="col">حالة السجل</th>
                             <th scope="col" class="sortable" data-sort="licnum">
-                                <i class="fas fa-certificate me-1 text-muted small"></i>رقم الترخيص
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-certificate me-1 text-muted small"></i>
+                                    <span>رقم الترخيص</span>
+                                    <i class="fas fa-sort ms-1 text-muted small"></i>
+                                </div>
                             </th>
-                    <th scope="col">حالة الترخيص</th>
+                            <th scope="col">حالة الترخيص</th>
                             <th scope="col" class="sortable" data-sort="owner">
-                                <i class="fas fa-user me-1 text-muted small"></i>اسم المالك
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user me-1 text-muted small"></i>
+                                    <span>اسم المالك</span>
+                                    <i class="fas fa-sort ms-1 text-muted small"></i>
+                                </div>
                             </th>
                             <th scope="col" class="no-sort text-center">إجراءات</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for est in page_obj %}
-                        <tr class="establishment-row">
-                            <td data-title="رقم المنشأة">{{ est.rifd }}</td>
-                            <td data-title="اسم المنشأة" class="fw-bold">{{ est.establishment_name }}</td>
-                            <td data-title="رقم السجل">{{ est.get_register.id }}</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for est in page_obj %}
+                        <tr class="establishment-row" data-id="{{ est.rifd }}">
+                            <td data-title="رقم المنشأة">
+                                <span class="badge bg-light text-dark border">{{ est.rifd }}</span>
+                            </td>
+                            <td data-title="اسم المنشأة" class="fw-bold text-primary">
+                                <div class="d-flex align-items-center">
+                                    <div class="establishment-icon me-2">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    {{ est.establishment_name }}
+                                </div>
+                            </td>
+                            <td data-title="رقم السجل">
+                                <span class="text-muted small">#</span>{{ est.get_register.id }}
+                            </td>
                             <td data-title="تاريخ انتهاء السجل">
                                 {% if est.get_register.expiration_date %}
-                                    {{ est.get_register.expiration_date|date:"Y/m/d" }}
+                                    <div class="d-flex align-items-center">
+                                        <i class="far fa-calendar-alt me-1 text-muted"></i>
+                                        {{ est.get_register.expiration_date|date:"Y/m/d" }}
+                                    </div>
                                 {% else %}
-                                    -
+                                    <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
                             <td data-title="حالة السجل">
-                  {% if est.get_register.expiration_date > today %}
-                                    <span class="badge bg-success">ساري المفعول</span>
+                                {% if est.get_register.expiration_date > today %}
+                                    <span class="status-indicator active"></span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">ساري المفعول</span>
                                 {% else %}
-                                    <span class="badge bg-danger">منتهي</span>
+                                    <span class="status-indicator expired"></span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">منتهي</span>
                                 {% endif %}
                             </td>
                             <td data-title="رقم الترخيص">
                                 {% if est.get_license.number %}
-                                    {{ est.get_license.number }}
-                  {% else %}
-                                    -
-                  {% endif %}
-                </td>
+                                    <span class="text-muted small">#</span>{{ est.get_license.number }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                             <td data-title="حالة الترخيص">
-                  {% if est.get_license.expiration_date > today %}
-                                    <span class="badge bg-success">ساري المفعول</span>
+                                {% if est.get_license.expiration_date > today %}
+                                    <span class="status-indicator active"></span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">ساري المفعول</span>
                                 {% elif est.get_license.expiration_date %}
-                                    <span class="badge bg-danger">منتهي</span>
-                  {% else %}
-                                    <span class="badge bg-secondary">غير متوفر</span>
-                  {% endif %}
-                </td>
-                            <td data-title="اسم المالك">{{ est.owner_name }}</td>
+                                    <span class="status-indicator expired"></span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">منتهي</span>
+                                {% else %}
+                                    <span class="status-indicator missing"></span>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">غير متوفر</span>
+                                {% endif %}
+                            </td>
+                            <td data-title="اسم المالك">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-circle me-1 text-muted"></i>
+                                    {{ est.owner_name }}
+                                </div>
+                            </td>
                             <td data-title="إجراءات" class="text-center">
                                 <div class="action-buttons">
                                     <a href="/edit_establishment/{{est.rifd}}" class="btn btn-sm btn-primary mx-1" title="تعديل المنشأة">
@@ -125,14 +245,14 @@
                                     {% if est.get_register and not est.get_license %}
                                     <a href="{% url 'add_licence' %}" class="btn btn-sm btn-info mx-1" title="إضافة ترخيص">
                                         <i class="fas fa-certificate"></i>
-                        </a>
-                              {% endif %}
+                                    </a>
+                                    {% endif %}
                                     
-                                    <button class="btn btn-sm btn-danger mx-1" onclick="confirmDeleteEstablishment('{{est.register_number}}')" title="حذف المنشأة">
+                                    <button class="btn btn-sm btn-danger mx-1" onclick="confirmDeleteEstablishment('{{est.get_register.id}}')" title="حذف المنشأة">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
-                    </td>
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -145,16 +265,16 @@
                                         <i class="fas fa-plus-circle me-1"></i>إضافة منشأة جديدة
                                     </a>
                                 </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             
             <!-- Pagination -->
             <div class="p-3 border-top">
-        {% include "include/pagination.html" %}
+                {% include "include/pagination.html" %}
             </div>
         </div>
     </div>
@@ -162,19 +282,43 @@
 
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteEstablishmentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">تأكيد الحذف</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>تأكيد الحذف
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>هل أنت متأكد من رغبتك في حذف هذه المنشأة؟</p>
-                <p class="text-danger small">تحذير: سيتم حذف جميع البيانات المرتبطة بهذه المنشأة.</p>
+            <div class="modal-body p-4">
+                <div class="text-center mb-3">
+                    <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+                    <h5>هل أنت متأكد من رغبتك في حذف هذه المنشأة؟</h5>
+                    <p class="text-danger small">تحذير: سيتم حذف جميع البيانات المرتبطة بهذه المنشأة.</p>
+                </div>
+                <div class="establishment-details mt-3 p-3 bg-light rounded">
+                    <h6 class="border-bottom pb-2 mb-2">بيانات المنشأة:</h6>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">رقم المنشأة:</span>
+                        <strong id="deleteEstablishmentId"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">اسم المنشأة:</span>
+                        <strong id="deleteEstablishmentName"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">المالك:</span>
+                        <strong id="deleteEstablishmentOwner"></strong>
+                    </div>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                <a id="deleteEstablishmentLink" href="#" class="btn btn-danger">تأكيد الحذف</a>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>إلغاء
+                </button>
+                <a id="deleteEstablishmentLink" href="" class="btn btn-danger">
+                    <i class="fas fa-trash-alt me-1"></i>تأكيد الحذف
+                </a>
             </div>
         </div>
     </div>
@@ -186,6 +330,7 @@
         font-weight: 600;
         border-top: none;
         white-space: nowrap;
+        padding: 0.75rem 1rem;
     }
     
     .sortable {
@@ -198,6 +343,67 @@
     
     .table td {
         vertical-align: middle;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .table tbody tr {
+        transition: all 0.2s;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    /* Stat Cards */
+    .stat-icon-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    /* Status Indicators */
+    .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-left: 6px;
+    }
+    
+    .status-indicator.active {
+        background-color: #28a745;
+        box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+    }
+    
+    .status-indicator.expired {
+        background-color: #dc3545;
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+    }
+    
+    .status-indicator.missing {
+        background-color: #6c757d;
+        box-shadow: 0 0 0 2px rgba(108, 117, 125, 0.2);
+    }
+    
+    /* Establishment Icon */
+    .establishment-icon {
+        width: 28px;
+        height: 28px;
+        background-color: rgba(138, 21, 56, 0.1);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #8A1538;
     }
     
     /* Action Buttons */
@@ -209,6 +415,14 @@
     .action-buttons .btn {
         padding: 0.25rem 0.5rem;
         line-height: 1;
+        border-radius: 4px;
+        box-shadow: none;
+        transition: all 0.2s;
+    }
+    
+    .action-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     
     /* Mobile Responsive Styles */
@@ -221,15 +435,17 @@
             display: block;
             margin-bottom: 1rem;
             border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background-color: white;
         }
         
         .table tbody td {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             border-top: none;
-            border-bottom: 1px solid #dee2e6;
+            border-bottom: 1px solid #f0f0f0;
             padding: 0.75rem 1rem;
         }
         
@@ -241,23 +457,28 @@
             content: attr(data-title);
             font-weight: 600;
             color: #6c757d;
+            flex-shrink: 0;
+            margin-left: 1rem;
         }
         
         .table tbody td.text-center {
-            justify-content: center;
+            flex-direction: column;
+            gap: 0.5rem;
         }
         
         .table tbody td.text-center::before {
-            display: none;
+            align-self: flex-start;
         }
         
         .action-buttons {
             width: 100%;
             flex-wrap: wrap;
+            gap: 0.5rem;
         }
         
         .action-buttons .btn {
-            margin: 0.25rem;
+            margin: 0;
+            flex: 1;
         }
     }
     
@@ -267,12 +488,25 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 2rem;
+        padding: 3rem 1rem;
+    }
+    
+    /* Loading Animation */
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
     }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
         // Search functionality
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('keyup', filterTable);
@@ -281,10 +515,20 @@
         const statusFilter = document.getElementById('statusFilter');
         statusFilter.addEventListener('change', filterTable);
         
+        // Table sorting
+        const sortableHeaders = document.querySelectorAll('.sortable');
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const sortBy = this.getAttribute('data-sort');
+                sortTable(sortBy);
+            });
+        });
+        
         function filterTable() {
             const searchValue = searchInput.value.toLowerCase();
             const statusValue = statusFilter.value;
             const rows = document.querySelectorAll('.establishment-row');
+            let visibleCount = 0;
             
             rows.forEach(row => {
                 const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
@@ -293,8 +537,11 @@
                 const licenseNum = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
                 const ownerName = row.querySelector('td:nth-child(8)').textContent.toLowerCase();
                 
-                const statusEl = row.querySelector('td:nth-child(5) .badge');
-                const status = statusEl ? statusEl.textContent.trim() : '';
+                const regStatusEl = row.querySelector('td:nth-child(5) .badge');
+                const regStatus = regStatusEl ? regStatusEl.textContent.trim() : '';
+                
+                const licStatusEl = row.querySelector('td:nth-child(7) .badge');
+                const licStatus = licStatusEl ? licStatusEl.textContent.trim() : '';
                 
                 // Search filter
                 const matchesSearch = name.includes(searchValue) || 
@@ -306,22 +553,165 @@
                 // Status filter
                 let matchesStatus = true;
                 if (statusValue === 'active') {
-                    matchesStatus = status === 'ساري المفعول';
+                    matchesStatus = regStatus === 'ساري المفعول' || licStatus === 'ساري المفعول';
                 } else if (statusValue === 'expired') {
-                    matchesStatus = status === 'منتهي';
+                    matchesStatus = regStatus === 'منتهي' || licStatus === 'منتهي';
+                } else if (statusValue === 'missing') {
+                    matchesStatus = licStatus === 'غير متوفر';
                 }
                 
                 if (matchesSearch && matchesStatus) {
                     row.style.display = '';
+                    visibleCount++;
                 } else {
                     row.style.display = 'none';
                 }
             });
+            
+            // Show or hide no results message
+            let noResultsRow = document.querySelector('.no-results-row');
+            if (visibleCount === 0) {
+                if (!noResultsRow) {
+                    const tbody = document.querySelector('tbody');
+                    noResultsRow = document.createElement('tr');
+                    noResultsRow.className = 'no-results-row';
+                    noResultsRow.innerHTML = `
+                        <td colspan="9" class="text-center py-4">
+                            <i class="fas fa-search fa-2x text-muted mb-2"></i>
+                            <h6>لا توجد نتائج مطابقة</h6>
+                            <p class="text-muted small">حاول تغيير معايير البحث</p>
+                        </td>
+                    `;
+                    tbody.appendChild(noResultsRow);
+                }
+                noResultsRow.style.display = '';
+            } else if (noResultsRow) {
+                noResultsRow.style.display = 'none';
+            }
+        }
+        
+        function sortTable(column) {
+            const table = document.getElementById('establishmentTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr.establishment-row'));
+            
+            // Determine column index based on column name
+            let columnIndex;
+            switch(column) {
+                case 'id': columnIndex = 0; break;
+                case 'name': columnIndex = 1; break;
+                case 'regid': columnIndex = 2; break;
+                case 'regdate': columnIndex = 3; break;
+                case 'licnum': columnIndex = 5; break;
+                case 'owner': columnIndex = 7; break;
+                default: return;
+            }
+            
+            // Toggle sort direction
+            const currentDir = tbody.getAttribute('data-sort-dir') || 'asc';
+            const newDir = currentDir === 'asc' ? 'desc' : 'asc';
+            tbody.setAttribute('data-sort-dir', newDir);
+            tbody.setAttribute('data-sort-by', column);
+            
+            // Update header icons
+            document.querySelectorAll('.sortable i.fas.fa-sort').forEach(icon => {
+                icon.className = 'fas fa-sort ms-1 text-muted small';
+            });
+            
+            const header = document.querySelector(`.sortable[data-sort="${column}"] i.fas.fa-sort`);
+            if (header) {
+                header.className = `fas fa-sort-${newDir === 'asc' ? 'up' : 'down'} ms-1 small text-primary`;
+            }
+            
+            // Sort the rows
+            rows.sort((a, b) => {
+                let aValue = a.cells[columnIndex].textContent.trim();
+                let bValue = b.cells[columnIndex].textContent.trim();
+                
+                // Handle date sorting
+                if (column === 'regdate') {
+                    aValue = a.cells[columnIndex].textContent.includes('-') ? '0000-00-00' : a.cells[columnIndex].textContent;
+                    bValue = b.cells[columnIndex].textContent.includes('-') ? '0000-00-00' : b.cells[columnIndex].textContent;
+                }
+                
+                // Compare values
+                if (aValue < bValue) return newDir === 'asc' ? -1 : 1;
+                if (aValue > bValue) return newDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            // Reorder the rows
+            rows.forEach(row => tbody.appendChild(row));
+            
+            // Keep any empty state rows at the end
+            const emptyRow = tbody.querySelector('tr:not(.establishment-row)');
+            if (emptyRow) tbody.appendChild(emptyRow);
+        }
+        
+        // Export functionality
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            exportTableToCSV('منشآت.csv');
+        });
+        
+        function exportTableToCSV(filename) {
+            const rows = document.querySelectorAll('.establishment-row:not([style*="display: none"])');
+            if (rows.length === 0) {
+                alert('لا توجد بيانات للتصدير');
+                return;
+            }
+            
+            let csvContent = "رقم المنشأة,اسم المنشأة,رقم السجل,تاريخ انتهاء السجل,حالة السجل,رقم الترخيص,حالة الترخيص,اسم المالك\n";
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                let rowData = [];
+                
+                // Get data from each cell, handling the badge texts
+                rowData.push(cells[0].textContent.trim());
+                rowData.push('"' + cells[1].textContent.trim() + '"');
+                rowData.push(cells[2].textContent.trim());
+                rowData.push(cells[3].textContent.trim());
+                rowData.push(cells[4].querySelector('.badge') ? cells[4].querySelector('.badge').textContent.trim() : '');
+                rowData.push(cells[5].textContent.trim());
+                rowData.push(cells[6].querySelector('.badge') ? cells[6].querySelector('.badge').textContent.trim() : '');
+                rowData.push('"' + cells[7].textContent.trim() + '"');
+                
+                csvContent += rowData.join(',') + '\n';
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     });
     
     // Delete confirmation
     function confirmDeleteEstablishment(id) {
+        // Find the establishment row
+        const row = document.querySelector(`tr[data-id="${id}"]`) || 
+                   Array.from(document.querySelectorAll('.establishment-row')).find(row => 
+                       row.querySelector('td:first-child').textContent.trim().includes(id));
+        
+        if (row) {
+            // Get establishment details
+            const establishmentId = row.querySelector('td:nth-child(1)').textContent.trim();
+            const establishmentName = row.querySelector('td:nth-child(2)').textContent.trim();
+            const ownerName = row.querySelector('td:nth-child(8)').textContent.trim();
+            
+            // Populate the modal
+            document.getElementById('deleteEstablishmentId').textContent = establishmentId;
+            document.getElementById('deleteEstablishmentName').textContent = establishmentName;
+            document.getElementById('deleteEstablishmentOwner').textContent = ownerName;
+        }
+
         const modal = new bootstrap.Modal(document.getElementById('deleteEstablishmentModal'));
         document.getElementById('deleteEstablishmentLink').href = '/delete_establishment/' + id;
         modal.show();

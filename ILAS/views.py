@@ -165,17 +165,26 @@ def view_establishment(request):
         HttpResponse: Renders the template with paginated establishments.
     """
     establishments = Establishment.objects.all().order_by("-id")
+
     paginator = Paginator(establishments, 5)
     page_obj = paginator.get_page(request.GET.get("page"))
-    
+
     logger.info(f"User {request.user.username} viewed establishments list (page: {request.GET.get('page', 1)})")
-    
+
+    active_registers = EstablishmentRegister.objects.filter(expiration_date__gt=date.today()).count()
+    active_licenses = EstablishmentLicence.objects.filter(expiration_date__gt=date.today()).count()
+    expired_registers = EstablishmentRegister.objects.filter(expiration_date__lte=date.today()).count()
+    expired_licenses = EstablishmentLicence.objects.filter(expiration_date__lte=date.today()).count()
     return render(
         request,
         "licesnsing/view_establishment.html",
         {
             "today": date.today(),
             "page_obj": page_obj,
+            "active_registers": active_registers,
+            "active_licenses": active_licenses,
+            "expired_registers": expired_registers,
+            "expired_licenses": expired_licenses
         },
     )
 
@@ -193,8 +202,8 @@ def delete_establishment(request, register_number):
         HttpResponse: Redirects to the establishment list view.
     """
     try:
-        establishment = Establishment.objects.get(register_number=register_number)
-        establishment_name = establishment.name
+        establishment = get_establishment_obj_by_register(register_number)
+        establishment_name = establishment.establishment_name
         establishment.delete()
         logger.info(f"Establishment deleted: {establishment_name} (Register: {register_number}) by user {request.user.username}")
         messages.success(request, "تم حذف المنشأة بنجاح")

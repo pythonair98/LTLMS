@@ -94,6 +94,146 @@ crossorigin="" />
                 text-decoration: none;
                 background-color: #f8f9fa;
             }
+
+            /* Enhanced Alert Messages */
+            .flash-messages-container {
+                position: fixed;
+                top: 70px;
+                right: 20px;
+                max-width: 90%;
+                width: 400px;
+                z-index: 1060;
+            }
+
+            .flash-message {
+                margin-bottom: 10px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                overflow: hidden;
+                transform: translateX(120%);
+                animation: slide-in 0.5s forwards, fade-out 0.5s 4s forwards;
+                border-right: 4px solid;
+            }
+
+            .flash-message.alert-success {
+                border-right-color: #28a745;
+                background-color: rgba(40, 167, 69, 0.12);
+            }
+
+            .flash-message.alert-danger {
+                border-right-color: #dc3545;
+                background-color: rgba(220, 53, 69, 0.12);
+            }
+
+            .flash-message.alert-warning {
+                border-right-color: #ffc107;
+                background-color: rgba(255, 193, 7, 0.12);
+            }
+
+            .flash-message.alert-info {
+                border-right-color: #17a2b8;
+                background-color: rgba(23, 162, 184, 0.12);
+            }
+
+            .flash-message-content {
+                display: flex;
+                align-items: center;
+                padding: 15px;
+            }
+
+            .flash-message-icon {
+                margin-left: 15px;
+                font-size: 1.5rem;
+            }
+
+            .flash-message.alert-success .flash-message-icon {
+                color: #28a745;
+            }
+
+            .flash-message.alert-danger .flash-message-icon {
+                color: #dc3545;
+            }
+
+            .flash-message.alert-warning .flash-message-icon {
+                color: #ffc107;
+            }
+
+            .flash-message.alert-info .flash-message-icon {
+                color: #17a2b8;
+            }
+
+            .flash-message-text {
+                flex-grow: 1;
+                color: #343a40;
+                font-weight: 500;
+            }
+
+            .flash-message-close {
+                background: transparent;
+                border: none;
+                color: #adb5bd;
+                font-size: 1.2rem;
+                cursor: pointer;
+                margin-right: 5px;
+                transition: color 0.2s;
+            }
+
+            .flash-message-close:hover {
+                color: #495057;
+            }
+
+            .flash-message-progress {
+                height: 4px;
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.1);
+            }
+
+            .flash-message-progress-bar {
+                height: 100%;
+                width: 100%;
+                animation: progress-shrink 4s linear forwards;
+            }
+
+            .flash-message.alert-success .flash-message-progress-bar {
+                background-color: #28a745;
+            }
+
+            .flash-message.alert-danger .flash-message-progress-bar {
+                background-color: #dc3545;
+            }
+
+            .flash-message.alert-warning .flash-message-progress-bar {
+                background-color: #ffc107;
+            }
+
+            .flash-message.alert-info .flash-message-progress-bar {
+                background-color: #17a2b8;
+            }
+
+            @keyframes slide-in {
+                from { transform: translateX(120%); }
+                to { transform: translateX(0); }
+            }
+
+            @keyframes fade-out {
+                from { opacity: 1; transform: translateX(0); }
+                to { opacity: 0; transform: translateX(120%); }
+            }
+
+            @keyframes progress-shrink {
+                from { width: 100%; }
+                to { width: 0%; }
+            }
+
+            @media (max-width: 576px) {
+                .flash-messages-container {
+                    right: 0;
+                    left: 0;
+                    max-width: 100%;
+                    width: 100%;
+                    padding: 0 10px;
+                }
+            }
         </style>
         <!-- Bootstrap 5 Bundle JS (includes Popper) -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -233,11 +373,29 @@ crossorigin="" />
 <div style="padding-top: 45px;"></div>
 
 {% if messages %}
-    <div class="container mt-3">
+    <div class="flash-messages-container">
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show text-center" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="flash-message alert-{{ message.tags }}">
+                <div class="flash-message-content">
+                    <div class="flash-message-icon">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif message.tags == 'error' or message.tags == 'danger' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flash-message-text">{{ message }}</div>
+                    <button type="button" class="flash-message-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="flash-message-progress">
+                    <div class="flash-message-progress-bar"></div>
+                </div>
             </div>
         {% endfor %}
     </div>
@@ -265,6 +423,25 @@ crossorigin="" />
                 e.stopPropagation();
                 bootstrap.Dropdown.getOrCreateInstance(this).toggle();
             });
+        });
+
+        // Enhanced Flash Messages Handling
+        document.querySelectorAll('.flash-message').forEach(function(message, index) {
+            // Stagger the animations for multiple messages
+            message.style.animationDelay = (index * 0.2) + 's, ' + (4 + index * 0.2) + 's';
+            
+            // Also delay the progress bar animation
+            const progressBar = message.querySelector('.flash-message-progress-bar');
+            if (progressBar) {
+                progressBar.style.animationDelay = (index * 0.2) + 's';
+            }
+            
+            // Remove the message after animation completes
+            setTimeout(function() {
+                if (message.parentNode) {
+                    message.parentNode.removeChild(message);
+                }
+            }, 5000 + (index * 200));
         });
     });
 </script>

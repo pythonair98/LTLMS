@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-b5af10c63e**-73bnz^c*+rk5u%-9)!@#5uy5^#^*%r09rm7r1"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 CSRF_TRUSTED_ORIGINS = [
     'https://milahaarabia.com',
     "https://127.0.0.1",
@@ -40,7 +40,13 @@ CSRF_TRUSTED_ORIGINS = [
     "http://*.localhost",
 ]
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['https://milahaarabia.com',
+    "https://127.0.0.1",
+    "http://localhost",
+    'https://*.milahaarabia.com',
+    "https://*.127.0.0.1",
+    "http://*.localhost",
+                 "127.0.0.1"]
 
 EMAIL_BACKEND = 'zoho_zeptomail.backend.zeptomail_backend.ZohoZeptoMailEmailBackend'
 DEFAULT_FROM_EMAIL = 'info@milahaarabia.com'
