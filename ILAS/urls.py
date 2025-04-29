@@ -27,6 +27,8 @@ from .views import (
     inspect_establishment,
     inspection_delete,
     view_inspection_data,
+    permission_denied,
+    user_home,
 )
 
 # URL patterns for routing different views in the Django application
@@ -80,4 +82,7 @@ urlpatterns = [
     # Inspector-specific URLs
     path("get_inspector_assignments", get_inspector_assignments, name="get_inspector_assignments"),
     path("get_inspector_inspections", get_inspector_inspections, name="get_inspector_inspections"),
+    path("no-access", permission_denied, name="permission_denied"),
+
+    path("user/home", user_home, name="user_home"),
 ]

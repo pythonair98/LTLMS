@@ -165,7 +165,10 @@ def login_view(request):
                 messages.info(request, f"يوجد لديك تكليفات عدد: {assignment_count}")
 
             messages.success(request, f"مرحباً, {user.username}!")
-            return redirect(next_url)
+            if user.profiles.occupation.power ==6:
+                return redirect("user_home")
+            else:   
+                return redirect(next_url)
 
         logger.warning(f"Failed login attempt for username: {request.POST.get('username')}")
         messages.error(request, "Invalid username or password.")

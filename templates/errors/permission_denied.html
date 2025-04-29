@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  <title>تم رفض الإذن</title>
+{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+  <div class="card shadow-lg border-0 rounded-4 overflow-hidden w-100" style="max-width: 420px;">
+    <div class="card-header text-center py-5" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white;">
+      <i class="fas fa-ban fa-4x mb-3" style="color: #fff; opacity: 0.85;"></i>
+      <h2 class="fw-bold mb-2">تم رفض الإذن</h2>
+      <p class="mb-0">عذراً، ليس لديك الصلاحية للوصول إلى هذه الصفحة أو تنفيذ هذا الإجراء.</p>
+    </div>
+    <div class="card-body text-center py-4 bg-light">
+      <p class="text-muted mb-4">
+        إذا كنت تعتقد أن هذا خطأ، يرجى التواصل مع مسؤول النظام أو العودة إلى الصفحة الرئيسية.
+      </p>
+      <a href="{% if user.profiles.occupation.power == 6 %}{% url 'user_home' %}{% else %}/{% endif %}" class="btn btn-lg btn-primary px-5 shadow-sm" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); border: none;">
+        <i class="fas fa-home me-2"></i>العودة للصفحة الرئيسية
+      </a>
+    </div>
+  </div>
+</div>
+<style>
+  .min-vh-100 { min-height: 100vh; }
+  @media (max-width: 576px) {
+    .card-header { padding: 2rem 0.5rem !important; }
+    .card-body { padding: 1.5rem 0.5rem !important; }
+    .card { border-radius: 1.2rem !important; }
+  }
+</style>
+{% endblock %} 

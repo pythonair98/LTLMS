@@ -7,70 +7,128 @@
 {% endblock %}
 
 {% block content %}
-<body dir="rtl">
-    <div class="container mt-5">
-        <h2 class="text-center mb-4">قائمة المهام والتكليفات الموكلة إليك كمفتش لتفتيش المؤسسات والشركات</h2>
-        <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>المنشأة</th>
-                <th>وجهت في</th>
-                <th>اخر موعد</th>
-                <th>الملاحظات</th>
-                <th>إجراءات</th>
-            </tr>
+<div class="container mt-5">
+  <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+    <div class="card-header py-4 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white; border-bottom: none;">
+      <h3 class="mb-2 mb-md-0 fw-bold d-flex align-items-center">
+        <i class="fas fa-tasks me-2"></i>قائمة المهام والتكليفات الموكلة إليك كمفتش لتفتيش المؤسسات والشركات
+      </h3>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" id="rfidAssignmentsTable">
+        <thead style="background-color: #f8f9fa;">
+          <tr>
+            <th>#</th>
+            <th>المنشأة</th>
+            <th>وجهت في</th>
+            <th>اخر موعد</th>
+            <th>الملاحظات</th>
+            <th>إجراءات</th>
+          </tr>
         </thead>
         <tbody>
-            {% for assignment in establishments %}
-            <tr class="assignment-row" data-status="{{ assignment.status }}">
-                <td>{{ forloop.counter }}</td>
-                <td>{{ assignment.establishment.establishment_name }}</td>
-                <td>{{ assignment.assigned_at|date:"Y-m-d H:i" }}</td>
-                <td>{{ assignment.due_date|default:"-" }}</td>
-                <td>{{ assignment.notes|default:"لا يوجد ملاحظات!" }}</td>
-                <td>
-                    <a href="{% url 'inspect_establishment' assignment.establishment_id %}" style="background-color:#8A1538; color:white;" class="btn btn-sm">فتح نموذج التفتيش</a>
-
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="text-center text-muted">لا يوجد تكليفات</td>
-            </tr>
-            {% endfor %}
+          {% for assignment in establishments %}
+          <tr class="assignment-row" data-status="{{ assignment.status }}">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ assignment.establishment.establishment_name|default:'غير متوفر' }}</td>
+            <td>{{ assignment.assigned_at|date:"Y-m-d H:i"|default:'-' }}</td>
+            <td>{{ assignment.due_date|default:"-" }}</td>
+            <td>{{ assignment.notes|default:"لا يوجد ملاحظات!" }}</td>
+            <td>
+              <a href="{% url 'inspect_establishment' assignment.establishment_id %}" class="btn btn-sm btn-outline-primary" style="background-color:#8A1538; color:white;" data-bs-toggle="tooltip" data-bs-placement="top" title="فتح نموذج التفتيش">
+                <i class="fas fa-clipboard-check"></i> فتح نموذج التفتيش
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center py-5">
+              <div class="empty-state">
+                <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                <h5>لا يوجد تكليفات</h5>
+                <p class="text-muted">لم يتم العثور على أي تكليفات في النظام</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
         </tbody>
-    </table>
-        <!-- Dropdown List -->
-{#        <div class="d-flex justify-content-center">#}
-{#            <div class="col-md-6">#}
-{#                <select id="establishment-dropdown" class="form-select form-select-lg">#}
-{#                    <option value="" selected disabled>-- اختر المنشأة --</option>#}
-{#                    {% for establishment in establishments %}#}
-{#                        <option value="{{ establishment.id }}">{{ establishment.establishment_name }}</option>#}
-{#                    {% endfor %}#}
-{#                </select>#}
-{#            </div>#}
-{#        </div>#}
-
-        <!-- Display Selected Establishment -->
-        <div id="dataholder">
-        </div>
+      </table>
     </div>
+    <div id="dataholder"></div>
+  </div>
+</div>
 
-{#    <script>#}
-{#        document.getElementById("establishment-dropdown").addEventListener("change", function () {#}
-{#            let establishmentId = this.value;#}
-{#            if (!establishmentId) return;#}
-{##}
-{#            // Fetch establishment data#}
-{#            fetch(`/inspect_establishment/${establishmentId}`)#}
-{#                .then(response => response.json())#}
-{#                .then(data => {#}
-{#                    document.getElementById("dataholder").innerHTML = data.template;#}
-{#                })#}
-{#                .catch(error => console.error("Error fetching data:", error));#}
-{#        });#}
-{#    </script>#}
-</body>
+<style>
+  .action-buttons .btn {
+    padding: 0.4rem 0.7rem;
+    line-height: 1.2;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+  }
+  .action-buttons .btn-outline-primary:hover, .action-buttons .btn-outline-primary:focus {
+    background: #8A1538;
+    color: #fff;
+    border-color: #8A1538;
+  }
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  @media (max-width: 992px) {
+    .table thead {
+      display: none;
+    }
+    .table tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #dee2e6;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(138,21,56,0.07);
+      background: #fff;
+      padding: 0.5rem 0.75rem;
+    }
+    .table tbody td {
+      display: flex;
+      justify-content: space-between;
+      border-top: none;
+      border-bottom: 1px solid #dee2e6;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+    }
+    .table tbody td:last-child {
+      border-bottom: none;
+    }
+    .table tbody td::before {
+      content: attr(data-title);
+      font-weight: 600;
+      color: #8A1538;
+    }
+    .table tbody td.text-center {
+      justify-content: center;
+    }
+    .table tbody td.text-center::before {
+      display: none;
+    }
+    .action-buttons {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+    .action-buttons .btn {
+      margin: 0.25rem;
+    }
+  }
+</style>
+<script>
+  // Enable tooltips
+  document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
 {% endblock %}

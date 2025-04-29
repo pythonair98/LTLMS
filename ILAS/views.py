@@ -5,7 +5,7 @@ from datetime import date, datetime
 logger = logging.getLogger(__name__)
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.http import JsonResponse
@@ -61,7 +61,9 @@ def add_establishment(request):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def dashboard(request):
+    print("=====================================User Power {} =========================================".format(request.user.profiles.occupation.power))
     """
     Renders a dashboard with key statistics and latest records.
     
@@ -154,6 +156,7 @@ def dashboard(request):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def view_establishment(request):
     """
     Displays a paginated list of all registered establishments.
@@ -188,8 +191,8 @@ def view_establishment(request):
         },
     )
 
-
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def delete_establishment(request, register_number):
     """
     Deletes an establishment based on the provided register number.
@@ -215,6 +218,7 @@ def delete_establishment(request, register_number):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def edit_establishment(request, rifd):
     """
     Edits an existing establishment's details.
@@ -239,6 +243,7 @@ def edit_establishment(request, rifd):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 @require_http_methods(["GET", "POST"])
 def query(request):
     """
@@ -395,6 +400,7 @@ def inspect_establishment(request, id):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def inspection_delete(request, id):
     """
     Deletes an inspection record.
@@ -419,6 +425,7 @@ def inspection_delete(request, id):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def register_list_create(request):
     """
     Displays a list of all EstablishmentRegister records and provides a form
@@ -453,6 +460,7 @@ def register_list_create(request):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def register_delete(request, pk):
     """
     Deletes a specific EstablishmentRegister record.
@@ -477,6 +485,7 @@ def register_delete(request, pk):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def licence_list_create(request):
     """
     Displays a list of all EstablishmentLicence records and provides a form
@@ -510,6 +519,7 @@ def licence_list_create(request):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def licence_delete(request, pk):
     """
     Deletes a specific EstablishmentLicence record.
@@ -549,6 +559,7 @@ def view_inspection_assignments(request):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def edit_assignment(request, pk):
     """
     Placeholder for editing an InspectionAssignment.
@@ -566,6 +577,7 @@ def edit_assignment(request, pk):
 
 
 @login_required(login_url="login")
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def delete_assignment(request, pk):
     """
     Deletes an InspectionAssignment.
@@ -590,6 +602,7 @@ def delete_assignment(request, pk):
 
 
 @login_required
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 @require_POST
 def update_assignment_status(request, pk):
     """
@@ -619,6 +632,7 @@ def update_assignment_status(request, pk):
 
 
 @login_required
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def assign_establishment(request):
     """
     Handles assigning an establishment for inspection.
@@ -778,6 +792,7 @@ def view_archive(request):
 
 
 @login_required
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def add_establishment_register(request):
     """
     Adds a new EstablishmentRegister record.
@@ -820,6 +835,7 @@ def add_establishment_register(request):
 
 
 @login_required
+@user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def add_establishment_licence(request):
     """
     Adds a new EstablishmentLicence record.
@@ -916,3 +932,28 @@ def internal_server_error(request):
         HttpResponse: Renders the 500 error template.
     """
     return render(request, "errors/500.html", status=500)
+
+def permission_denied(request):
+    """
+    Handles 403 Forbidden errors.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        exception: The exception that was raised.
+
+    Returns:
+        HttpResponse: Renders the 403 error template.
+    """
+    return render(request, "errors/permission_denied.html", status=403)
+
+@login_required(login_url="login")
+def user_home(request):
+    """
+    Renders the user home page with current assignments and completed inspections for the logged-in user.
+    """
+    assignments = InspectionAssignment.objects.filter(inspector=request.user)
+    inspections = Inspection.objects.filter(inspector=request.user)
+    return render(request, "users/home.html", {
+        "assignments": assignments,
+        "inspections": inspections,
+    })
