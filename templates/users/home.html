@@ -18,7 +18,7 @@
           {% endif %}
           <h2 class="fw-bold mb-1">مرحباً {{ user.get_full_name|default:user.username }}</h2>
           <p class="mb-0">{{ user.email }}</p>
-          <span class="badge bg-light text-dark mt-2">{{ user.profile.role_display|default:'مستخدم' }}</span>
+          <span class="badge bg-light text-dark mt-2">{{ user.profiles.occupation.ar_name|default:'مستخدم' }}</span>
         </div>
         <div class="card-body bg-light">
           <div class="row g-4">
