@@ -8,47 +8,41 @@
 
 {% block content %}
 <div class="container mt-4">
-  <div class="card shadow-sm border-0">
-    <div class="card-header py-3" style="background-color: #8A1538; color: white;">
-      <div class="d-flex justify-content-between align-items-center">
-        <h4 class="mb-0 fw-bold">
-          <i class="fas fa-clipboard-list me-2"></i>بيانات السجلات
-        </h4>
-        <a href="{% url 'add_register' %}" class="btn btn-light btn-sm">
-          <i class="fas fa-plus-circle me-1"></i>إضافة سجل جديد
-        </a>
-      </div>
+  <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+    <div class="card-header py-4 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white; border-bottom: none;">
+      <h4 class="mb-2 mb-md-0 fw-bold d-flex align-items-center">
+        <i class="fas fa-clipboard-list me-2"></i>بيانات السجلات
+      </h4>
+      <a href="{% url 'add_register' %}" class="btn btn-light btn-sm shadow-sm fw-bold">
+        <i class="fas fa-plus-circle me-1"></i>إضافة سجل جديد
+      </a>
     </div>
-
     <!-- Search and Filter Section -->
-    <div class="p-3 bg-light border-bottom">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <div class="input-group">
-            <span class="input-group-text bg-white border-end-0">
-              <i class="fas fa-search text-muted"></i>
-            </span>
+    <div class="p-4 bg-light border-bottom">
+      <div class="row g-3 align-items-center">
+        <div class="col-12 col-md-6">
+          <div class="input-group shadow-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
             <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن سجل...">
           </div>
         </div>
-        <div class="col-md-3">
-          <select id="statusFilter" class="form-select">
+        <div class="col-6 col-md-3">
+          <select id="statusFilter" class="form-select shadow-sm">
             <option value="all">جميع الحالات</option>
             <option value="active">ساري المفعول</option>
             <option value="expired">منتهي</option>
           </select>
         </div>
-        <div class="col-md-3 text-md-end">
-          <span class="badge bg-secondary p-2">
+        <div class="col-6 col-md-3 text-end">
+          <span class="badge bg-info text-white fs-6 p-3 shadow-sm">
             <i class="fas fa-clipboard-list me-1"></i> إجمالي السجلات: <span class="fw-bold">{{ page_obj.paginator.count }}</span>
           </span>
         </div>
       </div>
     </div>
-
     <!-- Table Section -->
     <div class="table-responsive">
-      <table class="table table-hover mb-0" id="registerTable">
+      <table class="table table-hover align-middle mb-0" id="registerTable">
         <thead style="background-color: #f8f9fa;">
           <tr>
             <th scope="col" class="sortable" data-sort="id">
@@ -72,23 +66,23 @@
         <tbody>
           {% for reg in page_obj %}
           <tr class="register-row">
-            <td data-title="الرقم">{{ reg.rfid }}</td>
-            <td data-title="اسم المنشأة" class="fw-bold">{{ reg.establishment.establishment_name }}</td>
-            <td data-title="رقم السجل">{{ reg.id }}</td>
-            <td data-title="تاريخ انتهاء السجل">{{ reg.expiration_date|date:"Y/m/d" }}</td>
+            <td data-title="الرقم">{{ reg.rfid|default:'-' }}</td>
+            <td data-title="اسم المنشأة" class="fw-bold">{{ reg.establishment.establishment_name|default:'غير متوفر' }}</td>
+            <td data-title="رقم السجل">{{ reg.id|default:'-' }}</td>
+            <td data-title="تاريخ انتهاء السجل">{{ reg.expiration_date|date:"Y/m/d"|default:'-' }}</td>
             <td data-title="حالة السجل">
                   {% if reg.expiration_date > today %}
-                <span class="badge bg-success">ساري المفعول</span>
+                <span class="badge rounded-pill px-3 py-2 fs-6 bg-success">ساري المفعول</span>
                   {% else %}
-                <span class="badge bg-danger">منتهي</span>
+                <span class="badge rounded-pill px-3 py-2 fs-6 bg-danger">منتهي</span>
                   {% endif %}
             </td>
             <td data-title="إجراءات" class="text-center">
               <div class="action-buttons">
-                <a href="{% url 'register-list' %}" class="btn btn-sm btn-primary mx-1" title="تعديل السجل">
+                <a href="{% url 'register-list' %}" class="btn btn-sm btn-outline-primary mx-1" title="تعديل السجل" data-bs-toggle="tooltip" data-bs-placement="top" title="تعديل">
                   <i class="fas fa-edit"></i>
                 </a>
-                <button class="btn btn-sm btn-danger mx-1" onclick="confirmRegisterDelete('{{ reg.id }}')" title="حذف السجل">
+                <button class="btn btn-sm btn-outline-danger mx-1" onclick="confirmRegisterDelete('{{ reg.id }}')" title="حذف السجل" data-bs-toggle="tooltip" data-bs-placement="top" title="حذف">
                   <i class="fas fa-trash-alt"></i>
               </button>
               </div>
@@ -101,7 +95,7 @@
                 <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
                 <h5>لا توجد سجلات</h5>
                 <p class="text-muted">لم يتم العثور على أي سجلات في النظام</p>
-                <a href="{% url 'add_register' %}" class="btn btn-sm" style="background-color: #8A1538; color: white;">
+                <a href="{% url 'add_register' %}" class="btn btn-lg btn-primary mt-2">
                   <i class="fas fa-plus-circle me-1"></i>إضافة سجل جديد
                 </a>
               </div>
@@ -111,10 +105,11 @@
         </tbody>
       </table>
     </div>
-    
     <!-- Pagination -->
-    <div class="p-3 border-top">
-    {% include "include/pagination.html" %}
+    <div class="p-4 border-top bg-light">
+      <nav aria-label="صفحات السجلات">
+        {% include "include/pagination.html" %}
+      </nav>
     </div>
   </div>
 </div>
@@ -144,13 +139,25 @@
   .action-buttons {
     display: flex;
     justify-content: center;
+    flex-wrap: nowrap;
   }
-  
   .action-buttons .btn {
-    padding: 0.25rem 0.5rem;
-    line-height: 1;
+    padding: 0.4rem 0.7rem;
+    line-height: 1.2;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    transition: background 0.2s, color 0.2s, border 0.2s;
   }
-  
+  .action-buttons .btn-outline-primary:hover, .action-buttons .btn-outline-primary:focus {
+    background: #8A1538;
+    color: #fff;
+    border-color: #8A1538;
+  }
+  .action-buttons .btn-outline-danger:hover, .action-buttons .btn-outline-danger:focus {
+    background: #b93a5b;
+    color: #fff;
+    border-color: #b93a5b;
+  }
   /* Empty State */
   .empty-state {
     display: flex;
@@ -159,52 +166,65 @@
     justify-content: center;
     padding: 2rem;
   }
-  
+  /* Pagination Styling */
+  .pagination {
+    justify-content: center;
+    margin-bottom: 0;
+    gap: 0.5rem;
+  }
+  .pagination .page-item .page-link {
+    border-radius: 0.5rem;
+    color: #8A1538;
+    font-weight: 600;
+    border: 1px solid #e0bfc9;
+    background: #fff;
+    transition: background 0.2s, color 0.2s;
+  }
+  .pagination .page-item.active .page-link, .pagination .page-item .page-link:focus, .pagination .page-item .page-link:hover {
+    background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%);
+    color: #fff;
+    border-color: #8A1538;
+  }
   /* Mobile Responsive */
   @media (max-width: 992px) {
     .table thead {
       display: none;
     }
-    
     .table tbody tr {
       display: block;
       margin-bottom: 1rem;
       border: 1px solid #dee2e6;
-      border-radius: 0.25rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(138,21,56,0.07);
+      background: #fff;
+      padding: 0.5rem 0.75rem;
     }
-    
     .table tbody td {
       display: flex;
       justify-content: space-between;
       border-top: none;
       border-bottom: 1px solid #dee2e6;
       padding: 0.75rem 1rem;
+      font-size: 1rem;
     }
-    
     .table tbody td:last-child {
       border-bottom: none;
     }
-    
     .table tbody td::before {
       content: attr(data-title);
       font-weight: 600;
-      color: #6c757d;
+      color: #8A1538;
     }
-    
     .table tbody td.text-center {
       justify-content: center;
     }
-    
     .table tbody td.text-center::before {
       display: none;
     }
-    
     .action-buttons {
       width: 100%;
       flex-wrap: wrap;
     }
-    
     .action-buttons .btn {
       margin: 0.25rem;
     }
@@ -213,29 +233,28 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Enable tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
     // Search functionality
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('keyup', filterTable);
-    
     // Status filter
     const statusFilter = document.getElementById('statusFilter');
     statusFilter.addEventListener('change', filterTable);
-    
     function filterTable() {
       const searchValue = searchInput.value.toLowerCase();
       const statusValue = statusFilter.value;
       const rows = document.querySelectorAll('.register-row');
-      
       rows.forEach(row => {
         const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
         const regId = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-        
         const statusEl = row.querySelector('td:nth-child(5) .badge');
         const status = statusEl ? statusEl.textContent.trim() : '';
-        
         // Search filter
         const matchesSearch = name.includes(searchValue) || regId.includes(searchValue);
-        
         // Status filter
         let matchesStatus = true;
         if (statusValue === 'active') {
@@ -243,7 +262,6 @@
         } else if (statusValue === 'expired') {
           matchesStatus = status === 'منتهي';
         }
-        
         if (matchesSearch && matchesStatus) {
           row.style.display = '';
         } else {

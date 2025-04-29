@@ -2,88 +2,182 @@
 {% block content %}
 
 <div class="container mt-4">
-    <h2 class="mb-3">🔍 المعاينات الخاصة بي</h2>
-
-    <!-- Status Filter -->
-    <div class="mb-3">
-        <label for="statusFilter" class="form-label">فرز حسب الحالة:</label>
-        <select id="statusFilter" class="form-select" onchange="filterInspections()">
-            <option value="">الجميع</option>
-            <option value="True">مستوفي الشروط</option>
-            <option value="False">غير مستوفي الشروط</option>
-        </select>
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header py-4 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white; border-bottom: none;">
+            <h3 class="mb-2 mb-md-0 fw-bold d-flex align-items-center">
+                <i class="fas fa-search me-2"></i>المعاينات الخاصة بي
+            </h3>
+        </div>
+        <div class="p-4 bg-light border-bottom">
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-4">
+                    <label for="statusFilter" class="form-label fw-bold">فرز حسب الحالة:</label>
+                    <select id="statusFilter" class="form-select shadow-sm" onchange="filterInspections()">
+                        <option value="">الجميع</option>
+                        <option value="True">مستوفي الشروط</option>
+                        <option value="False">غير مستوفي الشروط</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="inspectorInspectionsTable">
+                <thead style="background-color: #f8f9fa;">
+                    <tr>
+                        <th>#</th>
+                        <th>رقم السجل</th>
+                        <th>تاريخ المعاينة</th>
+                        <th>الموقع الجغرافي</th>
+                        <th>حالة القبول</th>
+                        <th>المرفقات</th>
+                        <th class="text-center">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inspection in inspections %}
+                    <tr class="inspection-row" data-status="{{ inspection.status }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ inspection.get_register|default:'-' }}</td>
+                        <td>{{ inspection.created_at|date:"Y-m-d H:i"|default:'-' }}</td>
+                        <td>
+                            <a href="https://www.google.com/maps?q={{ inspection.latitude }},{{ inspection.longitude }}" target="_blank" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" data-bs-placement="top" title="عرض على الخريطة">
+                                <i class="fas fa-map-marker-alt"></i> عرض
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill px-3 py-2 fs-6 bg-{% if inspection.status %}success{% else %}danger{% endif %}">
+                                {{ inspection.get_status_display|default:'-' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% if inspection.register_photo %}
+                                    <a href="/static{{ inspection.register_photo.url }}" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="صورة السجل">
+                                        <img src="/static{{ inspection.register_photo.url }}" width="50" class="rounded shadow-sm border">
+                                    </a>
+                                {% endif %}
+                                {% if inspection.license_photo %}
+                                    <a href="/static{{ inspection.license_photo.url }}" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="صورة الرخصة">
+                                        <img src="/static{{ inspection.license_photo.url }}" width="50" class="rounded shadow-sm border">
+                                    </a>
+                                {% endif %}
+                                {% if inspection.establishment_photo %}
+                                    <a href="/static{{ inspection.establishment_photo.url }}" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="صورة المنشأة">
+                                        <img src="/static{{ inspection.establishment_photo.url }}" width="50" class="rounded shadow-sm border">
+                                    </a>
+                                {% endif %}
+                                {% if inspection.cars_building_photo %}
+                                    <a href="/static{{ inspection.cars_building_photo.url }}" target="_blank" data-bs-toggle="tooltip" data-bs-placement="top" title="صورة المبنى">
+                                        <img src="/static{{ inspection.cars_building_photo.url }}" width="50" class="rounded shadow-sm border">
+                                    </a>
+                                {% endif %}
+                                {% if not inspection.register_photo and not inspection.license_photo and not inspection.establishment_photo and not inspection.cars_building_photo %}
+                                    <span class="text-muted small">لا يوجد مرفقات</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="action-buttons d-flex justify-content-center gap-2">
+                                <a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="تعديل">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="حذف">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="empty-state">
+                                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                <h5>لا يوجد معايانات</h5>
+                                <p class="text-muted">لم يتم العثور على أي معايانات في النظام</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th> رقم السجل</th>
-                <th> تاريخ المعاينة</th>
-                <th> الموقع الجغرافي</th>
-                <th> حالة القبول</th>
-                <th> المرفقات</th>
-                <th> إجراءات</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for inspection in inspections %}
-            <tr class="inspection-row" data-status="{{ inspection.status }}">
-                <td>{{ forloop.counter }}</td>
-                <td>{{ inspection.get_register }}</td>
-                <td>{{ inspection.created_at|date:"Y-m-d H:i" }}</td>
-                <td>
-                    <a href="https://www.google.com/maps?q={{ inspection.latitude }},{{ inspection.longitude }}"
-                       target="_blank" class="btn btn-sm btn-secondary">
-                        View on Map
-                    </a>
-                </td>
-                <td>
-                    <span class="badge bg-{% if inspection.status %}success{% else %}danger{% endif %}">
-                        {{ inspection.get_status_display }}
-                    </span>
-                </td>
-                <td>
-                    {% if inspection.register_photo %}
-                        <a href="/static{{ inspection.register_photo.url }}" target="_blank">
-                            <img src="/static{{ inspection.register_photo.url }}" width="50">
-                        </a>
-                    {% endif %}
-                    {% if inspection.license_photo %}
-                        <a href="/static{{ inspection.license_photo.url }}" target="_blank">
-                            <img src="/static{{ inspection.license_photo.url }}" width="50">
-                        </a>
-                    {% endif %}
-                    {% if inspection.establishment_photo %}
-                        <a href="/static{{ inspection.establishment_photo.url }}" target="_blank">
-                            <img src="/static{{ inspection.establishment_photo.url }}" width="50">
-                        </a>
-                    {% endif %}
-                    {% if inspection.cars_building_photo %}
-                        <a href="/static{{ inspection.cars_building_photo.url }}" target="_blank">
-                            <img src="/static{{ inspection.cars_building_photo.url }}" width="50">
-                        </a>
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="#" class="btn btn-sm btn-primary">تعديل</a>
-                    <a href="#" class="btn btn-sm btn-danger">حذف</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="text-center text-muted">لا يوجد معايانات</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
+
+<style>
+    .action-buttons .btn {
+        padding: 0.4rem 0.7rem;
+        line-height: 1.2;
+        border-radius: 0.5rem;
+        font-size: 1.1rem;
+        transition: background 0.2s, color 0.2s, border 0.2s;
+    }
+    .action-buttons .btn-outline-primary:hover, .action-buttons .btn-outline-primary:focus {
+        background: #8A1538;
+        color: #fff;
+        border-color: #8A1538;
+    }
+    .action-buttons .btn-outline-danger:hover, .action-buttons .btn-outline-danger:focus {
+        background: #b93a5b;
+        color: #fff;
+        border-color: #b93a5b;
+    }
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    @media (max-width: 992px) {
+        .table thead {
+            display: none;
+        }
+        .table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(138,21,56,0.07);
+            background: #fff;
+            padding: 0.5rem 0.75rem;
+        }
+        .table tbody td {
+            display: flex;
+            justify-content: space-between;
+            border-top: none;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+        }
+        .table tbody td:last-child {
+            border-bottom: none;
+        }
+        .table tbody td::before {
+            content: attr(data-title);
+            font-weight: 600;
+            color: #8A1538;
+        }
+        .table tbody td.text-center {
+            justify-content: center;
+        }
+        .table tbody td.text-center::before {
+            display: none;
+        }
+        .action-buttons {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+        .action-buttons .btn {
+            margin: 0.25rem;
+        }
+    }
+</style>
 
 <script>
     function filterInspections() {
         var selectedStatus = document.getElementById("statusFilter").value;
         var rows = document.querySelectorAll(".inspection-row");
-
         rows.forEach(row => {
             if (selectedStatus === "" || row.dataset.status === selectedStatus) {
                 row.style.display = "";
@@ -92,6 +186,13 @@
             }
         });
     }
+    // Enable tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
 </script>
 
 {% endblock %}

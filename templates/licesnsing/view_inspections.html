@@ -7,47 +7,41 @@
 
 {% block content %}
 <div class="container mt-4">
-  <div class="card shadow-sm border-0">
-    <div class="card-header py-3" style="background-color: #8A1538; color: white;">
-      <div class="d-flex justify-content-between align-items-center">
-        <h4 class="mb-0 fw-bold">
-          <i class="fas fa-search me-2"></i>بيانات المعاينات
-        </h4>
-        <a href="{% url 'reader' %}" class="btn btn-light btn-sm">
-          <i class="fas fa-plus-circle me-1"></i>إضافة معاينة جديدة
-        </a>
-      </div>
+  <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+    <div class="card-header py-4 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white; border-bottom: none;">
+      <h4 class="mb-2 mb-md-0 fw-bold d-flex align-items-center">
+        <i class="fas fa-search me-2"></i>بيانات المعاينات
+      </h4>
+      <a href="{% url 'reader' %}" class="btn btn-light btn-sm shadow-sm fw-bold">
+        <i class="fas fa-plus-circle me-1"></i>إضافة معاينة جديدة
+      </a>
     </div>
-
     <!-- Search and Filter Section -->
-    <div class="p-3 bg-light border-bottom">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <div class="input-group">
-            <span class="input-group-text bg-white border-end-0">
-              <i class="fas fa-search text-muted"></i>
-            </span>
+    <div class="p-4 bg-light border-bottom">
+      <div class="row g-3 align-items-center">
+        <div class="col-12 col-md-6">
+          <div class="input-group shadow-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
             <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن معاينة...">
           </div>
         </div>
-        <div class="col-md-3">
-          <select id="statusFilter" class="form-select">
+        <div class="col-6 col-md-3">
+          <select id="statusFilter" class="form-select shadow-sm">
             <option value="all">جميع الحالات</option>
             <option value="accepted">مقبول</option>
             <option value="rejected">مرفوض</option>
           </select>
         </div>
-        <div class="col-md-3 text-md-end">
-          <span class="badge bg-secondary p-2">
+        <div class="col-6 col-md-3 text-end">
+          <span class="badge bg-info text-white fs-6 p-3 shadow-sm">
             <i class="fas fa-clipboard-list me-1"></i> إجمالي المعاينات: <span class="fw-bold">{{ page_obj.paginator.count }}</span>
           </span>
         </div>
       </div>
     </div>
-
     <!-- Table Section -->
     <div class="table-responsive">
-      <table class="table table-hover mb-0" id="inspectionsTable">
+      <table class="table table-hover align-middle mb-0" id="inspectionsTable">
         <thead style="background-color: #f8f9fa;">
           <tr>
             <th scope="col" class="sortable" data-sort="id">
@@ -81,14 +75,14 @@
           {% for inspection in page_obj %}
           <tr class="inspection-row">
             <td data-title="#">{{ forloop.counter }}</td>
-            <td data-title="المنشأة" class="fw-bold">{{ inspection.get_register.establishment.establishment_name }}</td>
-            <td data-title="رقم السجل">{{ inspection.register_number }}</td>
-            <td data-title="المفتش">{{ inspection.inspector.get_full_name }}</td>
+            <td data-title="المنشأة" class="fw-bold">{{ inspection.get_register.establishment.establishment_name|default:'غير متوفر' }}</td>
+            <td data-title="رقم السجل">{{ inspection.register_number|default:'-' }}</td>
+            <td data-title="المفتش">{{ inspection.inspector.get_full_name|default:'غير متوفر' }}</td>
             <td data-title="الحالة">
                 {% if inspection.status %}
-                    <span class="badge bg-success">مقبول</span>
+                    <span class="badge rounded-pill px-3 py-2 fs-6 bg-success">مقبول</span>
                 {% else %}
-                    <span class="badge bg-danger">مرفوض</span>
+                    <span class="badge rounded-pill px-3 py-2 fs-6 bg-danger">مرفوض</span>
                 {% endif %}
             </td>
             <td data-title="الملاحظات" class="text-truncate" style="max-width: 200px;">{{ inspection.notes|default:"--" }}</td>
@@ -97,20 +91,20 @@
                     <i class="fas fa-map-marker-alt me-1"></i>عرض الموقع
                 </button>
             </td>
-            <td data-title="التاريخ">{{ inspection.created_at|date:"Y-m-d H:i" }}</td>
+            <td data-title="التاريخ">{{ inspection.created_at|date:"Y-m-d H:i"|default:'-' }}</td>
             <td data-title="الإجراءات" class="text-center">
               <div class="action-buttons">
-                <a href="{% url 'view_inspection_data' inspection.id %}" class="btn btn-sm btn-primary mx-1" title="عرض تفاصيل المعاينة">
+                <a href="{% url 'view_inspection_data' inspection.id %}" class="btn btn-sm btn-outline-primary mx-1" title="عرض تفاصيل المعاينة" data-bs-toggle="tooltip" data-bs-placement="top" title="عرض التفاصيل">
                   <i class="fas fa-eye"></i>
                 </a>
-                <a href="{% url 'inspection_report' inspection.id %}" target="_blank" class="btn btn-sm btn-success mx-1" title="طباعة تقرير المعاينة">
+                <a href="{% url 'inspection_report' inspection.id %}" target="_blank" class="btn btn-sm btn-outline-success mx-1" title="طباعة تقرير المعاينة" data-bs-toggle="tooltip" data-bs-placement="top" title="تقرير">
                   <i class="fas fa-print"></i>
                 </a>
-                <button class="btn btn-sm btn-danger mx-1" onclick="confirmDelete('{{ inspection.id }}')" title="حذف المعاينة">
+                <button class="btn btn-sm btn-outline-danger mx-1" onclick="confirmDelete('{{ inspection.id }}')" title="حذف المعاينة" data-bs-toggle="tooltip" data-bs-placement="top" title="حذف">
                   <i class="fas fa-trash-alt"></i>
                 </button>
                 {% if not inspection.is_archived %}
-                <a href="{% url 'archive_inspection' inspection.id %}" class="btn btn-sm btn-warning mx-1" title="أرشفة المعاينة">
+                <a href="{% url 'archive_inspection' inspection.id %}" class="btn btn-sm btn-outline-warning mx-1" title="أرشفة المعاينة" data-bs-toggle="tooltip" data-bs-placement="top" title="أرشفة">
                   <i class="fas fa-archive"></i>
                 </a>
                 {% endif %}
@@ -124,7 +118,7 @@
                 <i class="fas fa-search fa-3x text-muted mb-3"></i>
                 <h5>لا توجد معاينات</h5>
                 <p class="text-muted">لم يتم العثور على أي معاينات في النظام</p>
-                <a href="{% url 'create_inspection' %}" class="btn btn-sm" style="background-color: #8A1538; color: white;">
+                <a href="{% url 'create_inspection' %}" class="btn btn-lg btn-primary mt-2">
                   <i class="fas fa-plus-circle me-1"></i>إضافة معاينة جديدة
                 </a>
               </div>
@@ -134,10 +128,11 @@
         </tbody>
       </table>
     </div>
-    
     <!-- Pagination -->
-    <div class="p-3 border-top">
-      {% include "include/pagination.html" %}
+    <div class="p-4 border-top bg-light">
+      <nav aria-label="صفحات المعاينات">
+        {% include "include/pagination.html" %}
+      </nav>
     </div>
   </div>
 </div>
@@ -186,12 +181,33 @@
     justify-content: center;
     flex-wrap: nowrap;
   }
-  
   .action-buttons .btn {
-    padding: 0.25rem 0.5rem;
-    line-height: 1;
+    padding: 0.4rem 0.7rem;
+    line-height: 1.2;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    transition: background 0.2s, color 0.2s, border 0.2s;
   }
-  
+  .action-buttons .btn-outline-primary:hover, .action-buttons .btn-outline-primary:focus {
+    background: #8A1538;
+    color: #fff;
+    border-color: #8A1538;
+  }
+  .action-buttons .btn-outline-danger:hover, .action-buttons .btn-outline-danger:focus {
+    background: #b93a5b;
+    color: #fff;
+    border-color: #b93a5b;
+  }
+  .action-buttons .btn-outline-success:hover, .action-buttons .btn-outline-success:focus {
+    background: #d4edda;
+    color: #155724;
+    border-color: #28a745;
+  }
+  .action-buttons .btn-outline-warning:hover, .action-buttons .btn-outline-warning:focus {
+    background: #ffe5b4;
+    color: #8A1538;
+    border-color: #ffc107;
+  }
   /* Empty State */
   .empty-state {
     display: flex;
@@ -200,52 +216,65 @@
     justify-content: center;
     padding: 2rem;
   }
-  
+  /* Pagination Styling */
+  .pagination {
+    justify-content: center;
+    margin-bottom: 0;
+    gap: 0.5rem;
+  }
+  .pagination .page-item .page-link {
+    border-radius: 0.5rem;
+    color: #8A1538;
+    font-weight: 600;
+    border: 1px solid #e0bfc9;
+    background: #fff;
+    transition: background 0.2s, color 0.2s;
+  }
+  .pagination .page-item.active .page-link, .pagination .page-item .page-link:focus, .pagination .page-item .page-link:hover {
+    background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%);
+    color: #fff;
+    border-color: #8A1538;
+  }
   /* Mobile Responsive */
   @media (max-width: 992px) {
     .table thead {
       display: none;
     }
-    
     .table tbody tr {
       display: block;
       margin-bottom: 1rem;
       border: 1px solid #dee2e6;
-      border-radius: 0.25rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(138,21,56,0.07);
+      background: #fff;
+      padding: 0.5rem 0.75rem;
     }
-    
     .table tbody td {
       display: flex;
       justify-content: space-between;
       border-top: none;
       border-bottom: 1px solid #dee2e6;
       padding: 0.75rem 1rem;
+      font-size: 1rem;
     }
-    
     .table tbody td:last-child {
       border-bottom: none;
     }
-    
     .table tbody td::before {
       content: attr(data-title);
       font-weight: 600;
-      color: #6c757d;
+      color: #8A1538;
     }
-    
     .table tbody td.text-center {
       justify-content: center;
     }
-    
     .table tbody td.text-center::before {
       display: none;
     }
-    
     .action-buttons {
       width: 100%;
       flex-wrap: wrap;
     }
-    
     .action-buttons .btn {
       margin: 0.25rem;
     }
@@ -254,32 +283,31 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Enable tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
     // Search functionality
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('keyup', filterTable);
-    
     // Status filter
     const statusFilter = document.getElementById('statusFilter');
     statusFilter.addEventListener('change', filterTable);
-    
     function filterTable() {
       const searchValue = searchInput.value.toLowerCase();
       const statusValue = statusFilter.value;
       const rows = document.querySelectorAll('.inspection-row');
-      
       rows.forEach(row => {
         const establishment = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
         const register = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
         const inspector = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-        
         const statusEl = row.querySelector('td:nth-child(5) .badge');
         const status = statusEl ? statusEl.textContent.trim() : '';
-        
         // Search filter
         const matchesSearch = establishment.includes(searchValue) || 
                              register.includes(searchValue) || 
                              inspector.includes(searchValue);
-        
         // Status filter
         let matchesStatus = true;
         if (statusValue === 'accepted') {
@@ -287,7 +315,6 @@
         } else if (statusValue === 'rejected') {
           matchesStatus = status === 'مرفوض';
         }
-        
         if (matchesSearch && matchesStatus) {
           row.style.display = '';
         } else {

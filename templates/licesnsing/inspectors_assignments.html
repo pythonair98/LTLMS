@@ -7,31 +7,26 @@
 
 {% block content %}
 <div class="container mt-4">
-  <div class="card shadow-sm border-0">
-    <div class="card-header py-3" style="background-color: #8A1538; color: white;">
-      <div class="d-flex justify-content-between align-items-center">
-        <h4 class="mb-0 fw-bold">
-          <i class="fas fa-tasks me-2"></i>تكليفات المفتشين
-        </h4>
-        <a href="{% url 'assign_establishment' %}" class="btn btn-light btn-sm">
-          <i class="fas fa-plus-circle me-1"></i>تكليف جديد
-        </a>
-      </div>
+  <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+    <div class="card-header py-4 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white; border-bottom: none;">
+      <h4 class="mb-2 mb-md-0 fw-bold d-flex align-items-center">
+        <i class="fas fa-tasks me-2"></i>تكليفات المفتشين
+      </h4>
+      <a href="{% url 'assign_establishment' %}" class="btn btn-light btn-sm shadow-sm fw-bold">
+        <i class="fas fa-plus-circle me-1"></i>تكليف جديد
+      </a>
     </div>
-
     <!-- Search and Filter Section -->
-    <div class="p-3 bg-light border-bottom">
-      <div class="row g-3">
-        <div class="col-md-4">
-          <div class="input-group">
-            <span class="input-group-text bg-white border-end-0">
-              <i class="fas fa-search text-muted"></i>
-            </span>
+    <div class="p-4 bg-light border-bottom">
+      <div class="row g-3 align-items-center">
+        <div class="col-12 col-md-4">
+          <div class="input-group shadow-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
             <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن تكليف...">
           </div>
         </div>
-        <div class="col-md-3">
-          <select id="statusFilter" class="form-select">
+        <div class="col-6 col-md-3">
+          <select id="statusFilter" class="form-select shadow-sm">
             <option value="all">جميع الحالات</option>
             <option value="pending">أنتظار</option>
             <option value="accepted">مقبولة</option>
@@ -40,25 +35,24 @@
             <option value="cancelled">ملغاة</option>
           </select>
         </div>
-        <div class="col-md-3">
-          <select id="inspectorFilter" class="form-select">
+        <div class="col-6 col-md-3">
+          <select id="inspectorFilter" class="form-select shadow-sm">
             <option value="all">جميع المفتشين</option>
             {% for inspector in inspectors %}
               <option value="{{ inspector.id }}">{{ inspector.get_full_name }}</option>
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-2 text-md-end">
-          <span class="badge bg-secondary p-2">
+        <div class="col-12 col-md-2 text-end">
+          <span class="badge bg-info text-white fs-6 p-3 shadow-sm">
             <i class="fas fa-clipboard-list me-1"></i> الإجمالي: <span class="fw-bold">{{ assignments|length }}</span>
           </span>
         </div>
       </div>
     </div>
-
     <!-- Table Section -->
     <div class="table-responsive">
-      <table class="table table-hover mb-0" id="assignmentsTable">
+      <table class="table table-hover align-middle mb-0" id="assignmentsTable">
         <thead style="background-color: #f8f9fa;">
           <tr>
             <th scope="col" class="sortable" data-sort="id">
@@ -86,67 +80,68 @@
             {% for assignment in assignments %}
           <tr class="assignment-row" data-status="{{ assignment.status }}" data-inspector="{{ assignment.inspector.id }}">
             <td data-title="#">{{ forloop.counter }}</td>
-            <td data-title="المنشأة" class="fw-bold">{{ assignment.establishment }}</td>
-            <td data-title="المفتش">{{ assignment.inspector.get_full_name }}</td>
+            <td data-title="المنشأة" class="fw-bold">{{ assignment.establishment|default:'غير متوفر' }}</td>
+            <td data-title="المفتش">{{ assignment.inspector.get_full_name|default:'غير متوفر' }}</td>
             <td data-title="الحالة">
               <div class="d-flex align-items-center">
-                <span class="badge bg-{% if assignment.status == 'pending' %}warning
+                <span class="badge rounded-pill px-3 py-2 fs-6 bg-{% if assignment.status == 'pending' %}warning text-dark
                               {% elif assignment.status == 'accepted' %}primary
-                              {% elif assignment.status == 'in_progress' %}info
+                              {% elif assignment.status == 'in_progress' %}info text-dark
                               {% elif assignment.status == 'completed' %}success
                               {% else %}danger{% endif %} me-2">
-                  {{ assignment.get_status_display }}
+                  {{ assignment.get_status_display|default:'-' }}
                 </span>
                 <form method="post" action="{% url 'update_assignment_status' assignment.id %}" class="d-inline status-form">
-                            {% csrf_token %}
+                  {% csrf_token %}
                   <select name="status" class="form-select form-select-sm status-select" style="width: auto; display: inline-block;">
                     <option value="pending" {% if assignment.status == 'pending' %}selected{% endif %}>أنتظار</option>
                     <option value="accepted" {% if assignment.status == 'accepted' %}selected{% endif %}>مقبولة</option>
                     <option value="in_progress" {% if assignment.status == 'in_progress' %}selected{% endif %}>قيد المعاينة</option>
                     <option value="completed" {% if assignment.status == 'completed' %}selected{% endif %}>مكتلمة</option>
                     <option value="cancelled" {% if assignment.status == 'cancelled' %}selected{% endif %}>ملغاة</option>
-                            </select>
+                  </select>
                   <button type="submit" class="btn btn-sm btn-outline-secondary ms-1">تحديث</button>
-                        </form>
+                </form>
               </div>
-                    </td>
-            <td data-title="تاريخ التكليف">{{ assignment.assigned_at|date:"Y-m-d" }}</td>
-            <td data-title="الموعد النهائي">{{ assignment.due_date|date:"Y-m-d"|default:"-" }}</td>
+            </td>
+            <td data-title="تاريخ التكليف">{{ assignment.assigned_at|date:"Y-m-d"|default:'-' }}</td>
+            <td data-title="الموعد النهائي">{{ assignment.due_date|date:"Y-m-d"|default:'-' }}</td>
             <td data-title="إجراءات" class="text-center">
               <div class="action-buttons">
-                <a href="{% url 'edit_assignment' assignment.id %}" class="btn btn-sm btn-primary mx-1" title="تعديل التكليف">
+                <a href="{% url 'edit_assignment' assignment.id %}" class="btn btn-sm btn-outline-primary mx-1" title="تعديل التكليف" data-bs-toggle="tooltip" data-bs-placement="top" title="تعديل">
                   <i class="fas fa-edit"></i>
                 </a>
-                <button class="btn btn-sm btn-danger mx-1" onclick="confirmDelete('{{ assignment.id }}')" title="حذف التكليف">
+                <button class="btn btn-sm btn-outline-danger mx-1" onclick="confirmDelete('{{ assignment.id }}')" title="حذف التكليف" data-bs-toggle="tooltip" data-bs-placement="top" title="حذف">
                   <i class="fas fa-trash-alt"></i>
                 </button>
-                <button class="btn btn-sm btn-secondary mx-1" onclick="viewDetails('{{ assignment.id }}')" title="عرض التفاصيل">
+                <button class="btn btn-sm btn-outline-secondary mx-1" onclick="viewDetails('{{ assignment.id }}')" title="عرض التفاصيل" data-bs-toggle="tooltip" data-bs-placement="top" title="عرض التفاصيل">
                   <i class="fas fa-eye"></i>
                 </button>
               </div>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-            <td colspan="7" class="text-center py-5">
-              <div class="empty-state">
-                <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
-                <h5>لا يوجد تكليفات</h5>
-                <p class="text-muted">لم يتم إنشاء أي تكليفات للمفتشين بعد</p>
-                <a href="{% url 'assign_establishment' %}" class="btn btn-sm" style="background-color: #8A1538; color: white;">
-                  <i class="fas fa-plus-circle me-1"></i>إنشاء تكليف جديد
-                </a>
-              </div>
             </td>
-                </tr>
+          </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center py-5">
+                <div class="empty-state">
+                  <i class="fas fa-tasks fa-3x text-muted mb-3"></i>
+                  <h5>لا يوجد تكليفات</h5>
+                  <p class="text-muted">لم يتم إنشاء أي تكليفات للمفتشين بعد</p>
+                  <a href="{% url 'assign_establishment' %}" class="btn btn-lg btn-primary mt-2">
+                    <i class="fas fa-plus-circle me-1"></i>إنشاء تكليف جديد
+                  </a>
+                </div>
+              </td>
+            </tr>
             {% endfor %}
         </tbody>
-    </table>
-</div>
-    
+      </table>
+    </div>
     <!-- Pagination -->
-    <div class="p-3 border-top">
-      {% include "include/pagination.html" %}
+    <div class="p-4 border-top bg-light">
+      <nav aria-label="صفحات التكليفات">
+        {% include "include/pagination.html" %}
+      </nav>
     </div>
   </div>
 </div>
@@ -195,17 +190,33 @@
     justify-content: center;
     flex-wrap: nowrap;
   }
-  
   .action-buttons .btn {
-    padding: 0.25rem 0.5rem;
-    line-height: 1;
+    padding: 0.4rem 0.7rem;
+    line-height: 1.2;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    transition: background 0.2s, color 0.2s, border 0.2s;
   }
-  
+  .action-buttons .btn-outline-primary:hover, .action-buttons .btn-outline-primary:focus {
+    background: #8A1538;
+    color: #fff;
+    border-color: #8A1538;
+  }
+  .action-buttons .btn-outline-danger:hover, .action-buttons .btn-outline-danger:focus {
+    background: #b93a5b;
+    color: #fff;
+    border-color: #b93a5b;
+  }
+  .action-buttons .btn-outline-secondary:hover, .action-buttons .btn-outline-secondary:focus {
+    background: #f3dbe3;
+    color: #8A1538;
+    border-color: #8A1538;
+  }
   /* Status Select */
   .status-select {
     max-width: 120px;
+    border-radius: 0.5rem;
   }
-  
   /* Empty State */
   .empty-state {
     display: flex;
@@ -214,63 +225,74 @@
     justify-content: center;
     padding: 2rem;
   }
-  
+  /* Pagination Styling */
+  .pagination {
+    justify-content: center;
+    margin-bottom: 0;
+    gap: 0.5rem;
+  }
+  .pagination .page-item .page-link {
+    border-radius: 0.5rem;
+    color: #8A1538;
+    font-weight: 600;
+    border: 1px solid #e0bfc9;
+    background: #fff;
+    transition: background 0.2s, color 0.2s;
+  }
+  .pagination .page-item.active .page-link, .pagination .page-item .page-link:focus, .pagination .page-item .page-link:hover {
+    background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%);
+    color: #fff;
+    border-color: #8A1538;
+  }
   /* Mobile Responsive */
   @media (max-width: 992px) {
     .table thead {
       display: none;
     }
-    
     .table tbody tr {
       display: block;
       margin-bottom: 1rem;
       border: 1px solid #dee2e6;
-      border-radius: 0.25rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(138,21,56,0.07);
+      background: #fff;
+      padding: 0.5rem 0.75rem;
     }
-    
     .table tbody td {
       display: flex;
       justify-content: space-between;
       border-top: none;
       border-bottom: 1px solid #dee2e6;
       padding: 0.75rem 1rem;
+      font-size: 1rem;
     }
-    
     .table tbody td:last-child {
       border-bottom: none;
     }
-    
     .table tbody td::before {
       content: attr(data-title);
       font-weight: 600;
-      color: #6c757d;
+      color: #8A1538;
     }
-    
     .table tbody td.text-center {
       justify-content: center;
     }
-    
     .table tbody td.text-center::before {
       display: none;
     }
-    
     .action-buttons {
       width: 100%;
       flex-wrap: wrap;
     }
-    
     .action-buttons .btn {
       margin: 0.25rem;
     }
-    
     .status-form {
       display: flex;
       flex-direction: column;
       width: 100%;
       margin-top: 0.5rem;
     }
-    
     .status-select {
       max-width: 100%;
       margin-bottom: 0.5rem;
@@ -280,40 +302,37 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Enable tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
     // Search functionality
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('keyup', filterTable);
-    
     // Status filter
     const statusFilter = document.getElementById('statusFilter');
     statusFilter.addEventListener('change', filterTable);
-    
     // Inspector filter
     const inspectorFilter = document.getElementById('inspectorFilter');
     inspectorFilter.addEventListener('change', filterTable);
-    
     function filterTable() {
       const searchValue = searchInput.value.toLowerCase();
       const statusValue = statusFilter.value;
       const inspectorValue = inspectorFilter.value;
       const rows = document.querySelectorAll('.assignment-row');
-      
       rows.forEach(row => {
         const establishment = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
         const inspector = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
         const rowStatus = row.dataset.status;
         const rowInspector = row.dataset.inspector;
-        
         // Search filter
         const matchesSearch = establishment.includes(searchValue) || 
                               inspector.includes(searchValue);
-        
         // Status filter
         const matchesStatus = statusValue === 'all' || rowStatus === statusValue;
-        
         // Inspector filter
         const matchesInspector = inspectorValue === 'all' || rowInspector === inspectorValue;
-        
         if (matchesSearch && matchesStatus && matchesInspector) {
           row.style.display = '';
         } else {

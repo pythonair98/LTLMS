@@ -6,44 +6,39 @@
 {% endblock %}
 
 {% block content %}
-<body dir="rtl">
-  <div class="container">
-    <br />
-    <div class="card shadow-sm">
-      <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
-        <h3 class="m-0 font-weight-bold" style="color: #8A1538;">قائمة المستخدمين</h3>
-        <a href="{% url 'register' %}" class="btn" style="background-color:#8A1538; color:white;">
+<body dir="rtl" style="background: #f6f7fb;">
+  <div class="container py-4">
+    <div class="card shadow-lg border-0 rounded-4">
+      <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center bg-white py-4 border-0 rounded-top-4" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white;">
+        <h3 class="m-0 font-weight-bold"><i class="fas fa-users me-2"></i>قائمة المستخدمين</h3>
+        <a href="{% url 'register' %}" class="btn btn-lg btn-light shadow-sm mt-3 mt-md-0" style="color:#8A1538; font-weight:600;">
           <i class="fas fa-plus-circle me-1"></i> إضافة مستخدم جديد
         </a>
       </div>
-      
-      <div class="card-body">
+      <div class="card-body bg-white rounded-bottom-4">
         <!-- Search and Filter Section -->
-        <div class="row mb-3">
-          <div class="col-md-6 mb-2 mb-md-0">
-            <div class="input-group">
-              <input type="text" id="searchInput" class="form-control" placeholder="البحث عن مستخدم...">
-              <div class="input-group-append">
-                <span class="input-group-text"><i class="fas fa-search"></i></span>
-              </div>
+        <div class="row g-2 mb-4 align-items-center">
+          <div class="col-12 col-md-5">
+            <div class="input-group shadow-sm">
+              <span class="input-group-text bg-white border-end-0"><i class="fas fa-search"></i></span>
+              <input type="text" id="searchInput" class="form-control border-start-0" placeholder="البحث عن مستخدم...">
             </div>
           </div>
-          <div class="col-md-3 mb-2 mb-md-0">
-            <select id="statusFilter" class="form-control">
+          <div class="col-6 col-md-3">
+            <select id="statusFilter" class="form-select shadow-sm">
               <option value="all">جميع المستخدمين</option>
               <option value="active">المستخدمين النشطين</option>
               <option value="inactive">المستخدمين غير النشطين</option>
             </select>
           </div>
-          <div class="col-md-3 text-md-end">
-            <span class="badge bg-info text-white p-2">
-              إجمالي المستخدمين: <span id="userCount">{{ profiles|length }}</span>
+          <div class="col-6 col-md-4 text-end">
+            <span class="badge bg-info text-white fs-6 p-3 shadow-sm">
+              <i class="fas fa-user-friends me-1"></i> إجمالي المستخدمين: <span id="userCount">{{ profiles|length }}</span>
             </span>
           </div>
         </div>
-        
         <div class="table-responsive">
-          <table class="table table-hover" id="usersTable">
+          <table class="table table-hover align-middle mb-0" id="usersTable">
             <thead class="table-light">
               <tr>
                 <th scope="col" class="sortable" data-sort="counter">#</th>
@@ -60,40 +55,60 @@
               {% for profile in profiles %}
               <tr class="user-row" data-status="{% if profile.is_active %}active{% else %}inactive{% endif %}">
                 <th scope="row">{{ forloop.counter }}</th>
-                <td>{{ profile.get_full_name }}</td>
-                <td>{{ profile.email }}</td>
-                <td>{{ profile.profiles.occupation.ar_name }} / {{ profile.profiles.occupation.en_name }}</td>
+                <td><i class="fas fa-user-circle text-secondary me-1"></i> {{ profile.get_full_name|default:'غير متوفر' }}</td>
                 <td>
-                  {{ profile.profiles.team.ar_name }} / {{ profile.profiles.team.en_name }}
+                  {% if profile.email %}
+                    <a href="mailto:{{ profile.email }}" class="text-decoration-none text-dark"><i class="fas fa-envelope text-muted me-1"></i> {{ profile.email }}</a>
+                  {% else %}
+                    <span class="text-muted">غير متوفر</span>
+                  {% endif %}
                 </td>
-                <td>{{ profile.date_joined|date:"Y-m-d" }}</td>
+                <td>
+                  {% if profile.profiles.occupation.ar_name or profile.profiles.occupation.en_name %}
+                    {{ profile.profiles.occupation.ar_name|default:'-' }} / {{ profile.profiles.occupation.en_name|default:'-' }}
+                  {% else %}
+                    <span class="text-muted">غير متوفر</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if profile.profiles.team.ar_name or profile.profiles.team.en_name %}
+                    {{ profile.profiles.team.ar_name|default:'-' }} / {{ profile.profiles.team.en_name|default:'-' }}
+                  {% else %}
+                    <span class="text-muted">غير متوفر</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if profile.date_joined %}
+                    <span class="badge bg-light text-dark border">{{ profile.date_joined|date:"Y-m-d" }}</span>
+                  {% else %}
+                    <span class="text-muted">غير متوفر</span>
+                  {% endif %}
+                </td>
                 <td>
                   {% if profile.is_active %}
-                    <span class="badge bg-success">نشط</span>
+                    <span class="badge bg-success px-3 py-2 fs-6"><i class="fas fa-check-circle me-1"></i>نشط</span>
                   {% else %}
-                    <span class="badge bg-secondary">غير نشط</span>
+                    <span class="badge bg-secondary px-3 py-2 fs-6"><i class="fas fa-times-circle me-1"></i>غير نشط</span>
                   {% endif %}
                 </td>
                 <td class="action-buttons">
-                  <div class="d-flex flex-wrap gap-1">
+                  <div class="d-flex flex-wrap gap-2 justify-content-center">
                     <!-- Edit Button -->
-                    <a href="{% url 'user_edit' profile.id %}" class="btn btn-primary btn-sm" title="تعديل">
+                    <a href="{% url 'user_edit' profile.id %}" class="btn btn-outline-primary btn-sm shadow-sm" title="تعديل">
                       <i class="fas fa-edit"></i>
                     </a>
-
                     <!-- Deactivate/Activate Button -->
                     {% if profile.is_active %}
-                      <a href="{% url 'user_deactivate' profile.id %}" class="btn btn-warning btn-sm" title="تعطيل">
+                      <a href="{% url 'user_deactivate' profile.id %}" class="btn btn-outline-warning btn-sm shadow-sm" title="تعطيل">
                         <i class="fas fa-user-slash"></i>
                       </a>
                     {% else %}
-                      <a href="{% url 'user_activate' profile.id %}" class="btn btn-success btn-sm" title="تفعيل">
+                      <a href="{% url 'user_activate' profile.id %}" class="btn btn-outline-success btn-sm shadow-sm" title="تفعيل">
                         <i class="fas fa-user-check"></i>
                       </a>
                     {% endif %}
-
                     <!-- Delete Button -->
-                    <button type="button" class="btn btn-danger btn-sm" title="حذف" 
+                    <button type="button" class="btn btn-outline-danger btn-sm shadow-sm" title="حذف" 
                             data-bs-toggle="modal" data-bs-target="#deleteModal" 
                             data-user-id="{{ profile.id }}" 
                             data-user-name="{{ profile.get_full_name }}">
@@ -109,7 +124,7 @@
                     <i class="fas fa-users fa-3x mb-3 text-muted"></i>
                     <h5>لا توجد سجلات مستخدمين.</h5>
                     <p class="text-muted">قم بإضافة مستخدمين جدد للنظام</p>
-                    <a href="{% url 'register' %}" class="btn btn-sm" style="background-color:#8A1538; color:white;">
+                    <a href="{% url 'register' %}" class="btn btn-lg btn-primary mt-2">
                       <i class="fas fa-plus-circle"></i> إضافة مستخدم جديد
                     </a>
                   </div>
@@ -122,26 +137,24 @@
       </div>
     </div>
   </div>
-  
   <!-- Delete Confirmation Modal -->
   <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="deleteModalLabel">تأكيد الحذف</h5>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4">
+        <div class="modal-header border-0 bg-danger bg-opacity-10 rounded-top-4">
+          <h5 class="modal-title text-danger" id="deleteModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>تأكيد الحذف</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          هل أنت متأكد من رغبتك في حذف المستخدم <span id="userName"></span>؟
+        <div class="modal-body text-center">
+          <p class="fs-5">هل أنت متأكد من رغبتك في حذف المستخدم <span id="userName" class="fw-bold text-danger"></span>؟</p>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-          <a href="#" id="confirmDelete" class="btn btn-danger">حذف</a>
+        <div class="modal-footer border-0 justify-content-center pb-4">
+          <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">إلغاء</button>
+          <a href="#" id="confirmDelete" class="btn btn-danger px-4">حذف</a>
         </div>
       </div>
     </div>
   </div>
-  
   <!-- CSS Styles -->
   <style>
     .empty-state {
@@ -150,76 +163,98 @@
       align-items: center;
       justify-content: center;
     }
-    
     .sortable {
       cursor: pointer;
       position: relative;
+      user-select: none;
     }
-    
     .sortable:after {
-      content: "↕";
+      content: "\2195";
       position: absolute;
       right: 8px;
       color: #999;
       font-size: 12px;
     }
-    
     .action-buttons {
       min-width: 120px;
     }
-    
-    /* Mobile responsiveness */
+    .table-hover tbody tr:hover {
+      background-color: #f8e9ef;
+      transition: background 0.2s;
+    }
+    /* Card-based table for mobile */
     @media (max-width: 767.98px) {
       table.table {
         display: block;
       }
-      
       table.table thead {
         display: none;
       }
-      
       table.table tbody {
         display: block;
       }
-      
       table.table tr {
         display: block;
-        margin-bottom: 1rem;
+        margin-bottom: 1.2rem;
         border: 1px solid #dee2e6;
-        border-radius: 0.25rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 8px rgba(138,21,56,0.07);
+        background: #fff;
         position: relative;
+        padding: 0.5rem 0.75rem;
       }
-      
       table.table td, table.table th {
         display: flex;
         justify-content: space-between;
         border: none;
         border-bottom: 1px solid #dee2e6;
-        padding: 0.75rem;
+        padding: 0.75rem 0.5rem;
         text-align: right;
+        font-size: 1rem;
       }
-      
       table.table td:before {
         content: attr(data-label);
         font-weight: bold;
         margin-left: 1rem;
+        color: #8A1538;
       }
-      
       table.table th:first-child {
         background-color: #f8f9fa;
         color: #8A1538;
       }
-      
       table.table td:last-child, table.table th:last-child {
         border-bottom: none;
       }
-      
       .action-buttons {
         justify-content: center;
       }
     }
+    /* Add subtle shadow to card */
+    .card {
+      box-shadow: 0 4px 24px rgba(138,21,56,0.10);
+    }
+    /* Button hover/focus */
+    .btn-outline-primary:hover, .btn-outline-primary:focus {
+      background: #8A1538;
+      color: #fff;
+      border-color: #8A1538;
+    }
+    .btn-outline-danger:hover, .btn-outline-danger:focus {
+      background: #b93a5b;
+      color: #fff;
+      border-color: #b93a5b;
+    }
+    .btn-outline-warning:hover, .btn-outline-warning:focus {
+      background: #ffe5b4;
+      color: #8A1538;
+      border-color: #ffc107;
+    }
+    .btn-outline-success:hover, .btn-outline-success:focus {
+      background: #d4edda;
+      color: #155724;
+      border-color: #28a745;
+    }
   </style>
-  
   <!-- JavaScript for Search, Filter, and Modal -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -228,7 +263,6 @@
       const userRows = document.querySelectorAll('.user-row');
       const userCount = document.getElementById('userCount');
       const emptyRow = document.getElementById('emptyRow');
-      
       // Initialize data attributes for mobile view
       userRows.forEach(row => {
         const cells = row.querySelectorAll('td');
@@ -237,19 +271,16 @@
           cell.setAttribute('data-label', headerText);
         });
       });
-      
       // Search functionality
       function applyFilters() {
         const searchTerm = searchInput.value.toLowerCase();
         const statusValue = statusFilter.value;
         let visibleCount = 0;
-        
         userRows.forEach(row => {
           const status = row.getAttribute('data-status');
           const rowText = row.textContent.toLowerCase();
           const statusMatch = statusValue === 'all' || status === statusValue;
           const searchMatch = rowText.includes(searchTerm);
-          
           if (statusMatch && searchMatch) {
             row.style.display = '';
             visibleCount++;
@@ -257,18 +288,14 @@
             row.style.display = 'none';
           }
         });
-        
         userCount.textContent = visibleCount;
-        
         // Show/hide empty state message
         if (emptyRow) {
           emptyRow.style.display = visibleCount === 0 ? '' : 'none';
         }
       }
-      
       searchInput.addEventListener('input', applyFilters);
       statusFilter.addEventListener('change', applyFilters);
-      
       // Delete confirmation modal
       const deleteModal = document.getElementById('deleteModal');
       if (deleteModal) {
@@ -276,7 +303,6 @@
           const button = event.relatedTarget;
           const userId = button.getAttribute('data-user-id');
           const userName = button.getAttribute('data-user-name');
-          
           document.getElementById('userName').textContent = userName;
           document.getElementById('confirmDelete').href = "{% url 'user_delete' 0 %}".replace('0', userId);
         });

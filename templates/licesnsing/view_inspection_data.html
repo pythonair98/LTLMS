@@ -7,62 +7,69 @@
         max-width: 1000px;
         margin: 30px auto;
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(138,21,56,0.10);
         overflow: hidden;
     }
     
     .inspection-header {
-        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        background: linear-gradient(135deg, #8A1538 0%, #b93a5b 100%);
         color: white;
-        padding: 25px 20px;
+        padding: 32px 20px 24px 20px;
         position: relative;
+        border-bottom-left-radius: 32px 16px;
+        border-bottom-right-radius: 32px 16px;
+        box-shadow: 0 4px 16px rgba(138,21,56,0.07);
     }
     
     .inspection-body {
-        padding: 25px;
+        padding: 32px 32px 24px 32px;
     }
     
     .status-badge {
-        font-size: 0.9rem;
-        padding: 6px 12px;
+        font-size: 1rem;
+        padding: 8px 18px;
         border-radius: 50px;
-        font-weight: 500;
+        font-weight: 600;
         display: inline-block;
-        margin-top: 8px;
+        margin-top: 10px;
+        box-shadow: 0 2px 8px rgba(138,21,56,0.07);
     }
     
     .info-card {
         background: #f8f9fa;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-left: 4px solid #2575fc;
+        border-radius: 14px;
+        padding: 20px 18px;
+        margin-bottom: 24px;
+        border-left: 5px solid #8A1538;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(138,21,56,0.07);
     }
     
     .info-card:hover {
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(138,21,56,0.10);
+        transform: translateY(-2px) scale(1.01);
     }
     
     .info-card h5 {
-        color: #2575fc;
+        color: #8A1538;
         margin-bottom: 10px;
-        font-size: 1.1rem;
+        font-size: 1.15rem;
     }
     
     .photos-container img {
         width: 100%;
         height: 220px;
         object-fit: cover;
-        border-radius: 8px;
-        transition: transform 0.3s ease;
+        border-radius: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s;
         cursor: pointer;
+        box-shadow: 0 2px 8px rgba(138,21,56,0.07);
     }
     
     .photos-container img:hover {
-        transform: scale(1.02);
+        transform: scale(1.04);
+        box-shadow: 0 8px 24px rgba(138,21,56,0.10);
     }
     
     .photo-caption {
@@ -74,8 +81,8 @@
         right: 0;
         padding: 8px;
         text-align: center;
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
         opacity: 0;
         transition: opacity 0.3s ease;
     }
@@ -84,8 +91,9 @@
         position: relative;
         margin-bottom: 20px;
         overflow: hidden;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(138,21,56,0.07);
+        background: #fff;
     }
     
     .photo-wrapper:hover .photo-caption {
@@ -93,30 +101,34 @@
     }
     
     .map-container {
-        border-radius: 10px;
+        border-radius: 14px;
         overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(138,21,56,0.07);
+        margin-bottom: 8px;
+        border: 1.5px solid #e0bfc9;
     }
     
     .back-button {
         position: absolute;
-        top: 20px;
-        left: 20px;
+        top: 24px;
+        left: 24px;
         color: white;
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.18);
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
         transition: all 0.3s ease;
+        font-size: 1.3rem;
+        box-shadow: 0 2px 8px rgba(138,21,56,0.07);
     }
     
     .back-button:hover {
-        background: rgba(255,255,255,0.3);
-        transform: translateX(-3px);
+        background: rgba(255,255,255,0.32);
+        transform: translateX(-3px) scale(1.05);
     }
     
     .section-title {
@@ -124,11 +136,14 @@
         align-items: center;
         margin-bottom: 15px;
         color: #333;
+        font-size: 1.1rem;
+        font-weight: 600;
     }
     
     .section-title i {
         margin-right: 10px;
-        color: #2575fc;
+        color: #8A1538;
+        font-size: 1.2rem;
     }
     
     .timeline {
@@ -144,7 +159,7 @@
         top: 5px;
         height: 100%;
         width: 3px;
-        background: #e0e0e0;
+        background: #e0bfc9;
     }
     
     .timeline-item {
@@ -160,23 +175,68 @@
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: #2575fc;
+        background: #8A1538;
         border: 3px solid white;
-        box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.2);
+        box-shadow: 0 0 0 3px rgba(138,21,56,0.13);
+    }
+    
+    .btn, .btn:focus {
+        box-shadow: 0 2px 8px rgba(138,21,56,0.07);
+        transition: background 0.2s, color 0.2s, border 0.2s;
+    }
+    
+    .btn-outline-secondary:hover, .btn-outline-secondary:focus {
+        background: #f3dbe3;
+        color: #8A1538;
+        border-color: #8A1538;
+    }
+    
+    .btn-warning:hover, .btn-warning:focus {
+        background: #ffe5b4;
+        color: #8A1538;
+        border-color: #ffc107;
+    }
+    
+    .btn-primary:hover, .btn-primary:focus {
+        background: #8A1538;
+        color: #fff;
+        border-color: #8A1538;
+    }
+    
+    .btn-outline-primary:hover, .btn-outline-primary:focus {
+        background: #8A1538;
+        color: #fff;
+        border-color: #8A1538;
+    }
+    
+    .btn-outline-danger:hover, .btn-outline-danger:focus {
+        background: #b93a5b;
+        color: #fff;
+        border-color: #b93a5b;
     }
     
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .inspection-header {
-            padding: 20px 15px;
+            padding: 18px 8px 16px 8px;
+            border-bottom-left-radius: 18px 8px;
+            border-bottom-right-radius: 18px 8px;
         }
         
         .inspection-body {
-            padding: 15px;
+            padding: 12px 6px 8px 6px;
         }
         
         .info-card {
-            padding: 12px;
+            padding: 10px 6px;
+        }
+        
+        .back-button {
+            top: 10px;
+            left: 10px;
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
         }
     }
 </style>
@@ -338,16 +398,16 @@
             </div>
             
             <div class="d-flex justify-content-between mt-5">
-                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="العودة">
                     <i class="fas fa-arrow-left me-1"></i> العودة
                 </a>
                 <div>
                     {% if not inspection.is_archived %}
-                    <a href="{% url 'archive_inspection' inspection.id %}" class="btn btn-warning me-2">
+                    <a href="{% url 'archive_inspection' inspection.id %}" class="btn btn-warning me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="أرشفة">
                         <i class="fas fa-archive me-1"></i> أرشفة
                     </a>
                     {% endif %}
-                    <a href="{% url 'inspection_report' inspection.id %}" class="btn btn-primary">
+                    <a href="{% url 'inspection_report' inspection.id %}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="طباعة التقرير">
                         <i class="fas fa-print me-1"></i> طباعة التقرير
                     </a>
                 </div>
@@ -357,10 +417,16 @@
 </div>
 
 <script>
+    // Enable tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
     // Enlarge photos when clicked
     document.addEventListener('DOMContentLoaded', function() {
         const photos = document.querySelectorAll('.photos-container img');
-        
         photos.forEach(photo => {
             photo.addEventListener('click', function() {
                 // Simple lightbox implementation
@@ -376,16 +442,13 @@
                 overlay.style.justifyContent = 'center';
                 overlay.style.zIndex = '9999';
                 overlay.style.cursor = 'pointer';
-                
                 const img = document.createElement('img');
                 img.src = this.src;
                 img.style.maxHeight = '90%';
                 img.style.maxWidth = '90%';
                 img.style.objectFit = 'contain';
-                
                 overlay.appendChild(img);
                 document.body.appendChild(overlay);
-                
                 overlay.addEventListener('click', function() {
                     document.body.removeChild(overlay);
                 });

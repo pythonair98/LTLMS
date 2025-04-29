@@ -8,47 +8,41 @@
 
 {% block content %}
 <div class="container mt-4">
-  <div class="card shadow-sm border-0">
-    <div class="card-header py-3" style="background-color: #8A1538; color: white;">
-      <div class="d-flex justify-content-between align-items-center">
-        <h4 class="mb-0 fw-bold">
-          <i class="fas fa-certificate me-2"></i>بيانات التراخيص
-        </h4>
-        <a href="{% url 'add_licence' %}" class="btn btn-light btn-sm">
-          <i class="fas fa-plus-circle me-1"></i>إضافة ترخيص جديد
-        </a>
-      </div>
+  <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+    <div class="card-header py-4 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white; border-bottom: none;">
+      <h4 class="mb-2 mb-md-0 fw-bold d-flex align-items-center">
+        <i class="fas fa-certificate me-2"></i>بيانات التراخيص
+      </h4>
+      <a href="{% url 'add_licence' %}" class="btn btn-light btn-sm shadow-sm fw-bold">
+        <i class="fas fa-plus-circle me-1"></i>إضافة ترخيص جديد
+      </a>
     </div>
-
     <!-- Search and Filter Section -->
-    <div class="p-3 bg-light border-bottom">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <div class="input-group">
-            <span class="input-group-text bg-white border-end-0">
-              <i class="fas fa-search text-muted"></i>
-            </span>
+    <div class="p-4 bg-light border-bottom">
+      <div class="row g-3 align-items-center">
+        <div class="col-12 col-md-6">
+          <div class="input-group shadow-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
             <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن ترخيص...">
           </div>
         </div>
-        <div class="col-md-3">
-          <select id="statusFilter" class="form-select">
+        <div class="col-6 col-md-3">
+          <select id="statusFilter" class="form-select shadow-sm">
             <option value="all">جميع الحالات</option>
             <option value="active">ساري المفعول</option>
             <option value="expired">منتهي</option>
           </select>
         </div>
-        <div class="col-md-3 text-md-end">
-          <span class="badge bg-secondary p-2">
+        <div class="col-6 col-md-3 text-end">
+          <span class="badge bg-info text-white fs-6 p-3 shadow-sm">
             <i class="fas fa-certificate me-1"></i> إجمالي التراخيص: <span class="fw-bold">{{ page_obj.paginator.count }}</span>
           </span>
         </div>
       </div>
     </div>
-
     <!-- Table Section -->
     <div class="table-responsive">
-      <table class="table table-hover mb-0" id="licenseTable">
+      <table class="table table-hover align-middle mb-0" id="licenseTable">
         <thead style="background-color: #f8f9fa;">
           <tr>
             <th scope="col" class="sortable" data-sort="id">
@@ -81,23 +75,23 @@
         <tbody>
           {% for lic in page_obj %}
           <tr class="license-row">
-            <td data-title="الرقم">{{ lic.counter }}</td>
-            <td data-title="رقم الترخيص" class="fw-bold">{{ lic }}</td>
-            <td data-title="رقم السجل">{{ lic.register }}</td>
-            <td data-title="تاريخ الإنشاء">{{ lic.creation_date|date:"Y/m/d" }}</td>
-            <td data-title="تاريخ الانتهاء">{{ lic.expiration_date|date:"Y/m/d" }}</td>
-            <td data-title="الفئة الرئيسية">{{ lic.main_category.ar_name }}</td>
-            <td data-title="النشاط">{{ lic.activity.ar_name }}</td>
-            <td data-title="الفئة الفرعية">{{ lic.sub_category.ar_name }}</td>
+            <td data-title="الرقم">{{ lic.counter|default:'-' }}</td>
+            <td data-title="رقم الترخيص" class="fw-bold">{{ lic|default:'-' }}</td>
+            <td data-title="رقم السجل">{{ lic.register|default:'-' }}</td>
+            <td data-title="تاريخ الإنشاء">{{ lic.creation_date|date:"Y/m/d"|default:'-' }}</td>
+            <td data-title="تاريخ الانتهاء">{{ lic.expiration_date|date:"Y/m/d"|default:'-' }}</td>
+            <td data-title="الفئة الرئيسية">{{ lic.main_category.ar_name|default:'-' }}</td>
+            <td data-title="النشاط">{{ lic.activity.ar_name|default:'-' }}</td>
+            <td data-title="الفئة الفرعية">{{ lic.sub_category.ar_name|default:'-' }}</td>
             <td data-title="إجراءات" class="text-center">
               <div class="action-buttons">
-                <a href="{% url 'licence-list' %}" class="btn btn-sm btn-primary mx-1" title="تعديل الترخيص">
+                <a href="{% url 'licence-list' %}" class="btn btn-sm btn-outline-primary mx-1" title="تعديل الترخيص" data-bs-toggle="tooltip" data-bs-placement="top" title="تعديل">
                   <i class="fas fa-edit"></i>
                 </a>
-                <a href="{% url 'license_report' lic.number %}" target="_blank" class="btn btn-sm btn-success mx-1" title="طباعة الترخيص">
+                <a href="{% url 'license_report' lic.number %}" target="_blank" class="btn btn-sm btn-outline-success mx-1" title="طباعة الترخيص" data-bs-toggle="tooltip" data-bs-placement="top" title="تقرير">
                   <i class="fas fa-print"></i>
                 </a>
-                <button class="btn btn-sm btn-danger mx-1" onclick="confirmLicenseDelete('{{ lic.number }}')" title="حذف الترخيص">
+                <button class="btn btn-sm btn-outline-danger mx-1" onclick="confirmLicenseDelete('{{ lic.number }}')" title="حذف الترخيص" data-bs-toggle="tooltip" data-bs-placement="top" title="حذف">
                   <i class="fas fa-trash-alt"></i>
               </button>
               </div>
@@ -110,7 +104,7 @@
                 <i class="fas fa-certificate fa-3x text-muted mb-3"></i>
                 <h5>لا توجد تراخيص</h5>
                 <p class="text-muted">لم يتم العثور على أي تراخيص في النظام</p>
-                <a href="{% url 'add_licence' %}" class="btn btn-sm" style="background-color: #8A1538; color: white;">
+                <a href="{% url 'add_licence' %}" class="btn btn-lg btn-primary mt-2">
                   <i class="fas fa-plus-circle me-1"></i>إضافة ترخيص جديد
                 </a>
               </div>
@@ -120,10 +114,11 @@
         </tbody>
       </table>
     </div>
-    
     <!-- Pagination -->
-    <div class="p-3 border-top">
-    {% include 'include/pagination.html' %}
+    <div class="p-4 border-top bg-light">
+      <nav aria-label="صفحات التراخيص">
+        {% include 'include/pagination.html' %}
+      </nav>
     </div>
   </div>
 </div>
@@ -155,12 +150,28 @@
     justify-content: center;
     flex-wrap: nowrap;
   }
-  
   .action-buttons .btn {
-    padding: 0.25rem 0.5rem;
-    line-height: 1;
+    padding: 0.4rem 0.7rem;
+    line-height: 1.2;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    transition: background 0.2s, color 0.2s, border 0.2s;
   }
-  
+  .action-buttons .btn-outline-primary:hover, .action-buttons .btn-outline-primary:focus {
+    background: #8A1538;
+    color: #fff;
+    border-color: #8A1538;
+  }
+  .action-buttons .btn-outline-danger:hover, .action-buttons .btn-outline-danger:focus {
+    background: #b93a5b;
+    color: #fff;
+    border-color: #b93a5b;
+  }
+  .action-buttons .btn-outline-success:hover, .action-buttons .btn-outline-success:focus {
+    background: #d4edda;
+    color: #155724;
+    border-color: #28a745;
+  }
   /* Empty State */
   .empty-state {
     display: flex;
@@ -169,52 +180,65 @@
     justify-content: center;
     padding: 2rem;
   }
-  
+  /* Pagination Styling */
+  .pagination {
+    justify-content: center;
+    margin-bottom: 0;
+    gap: 0.5rem;
+  }
+  .pagination .page-item .page-link {
+    border-radius: 0.5rem;
+    color: #8A1538;
+    font-weight: 600;
+    border: 1px solid #e0bfc9;
+    background: #fff;
+    transition: background 0.2s, color 0.2s;
+  }
+  .pagination .page-item.active .page-link, .pagination .page-item .page-link:focus, .pagination .page-item .page-link:hover {
+    background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%);
+    color: #fff;
+    border-color: #8A1538;
+  }
   /* Mobile Responsive */
   @media (max-width: 992px) {
     .table thead {
       display: none;
     }
-    
     .table tbody tr {
       display: block;
       margin-bottom: 1rem;
       border: 1px solid #dee2e6;
-      border-radius: 0.25rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(138,21,56,0.07);
+      background: #fff;
+      padding: 0.5rem 0.75rem;
     }
-    
     .table tbody td {
       display: flex;
       justify-content: space-between;
       border-top: none;
       border-bottom: 1px solid #dee2e6;
       padding: 0.75rem 1rem;
+      font-size: 1rem;
     }
-    
     .table tbody td:last-child {
       border-bottom: none;
     }
-    
     .table tbody td::before {
       content: attr(data-title);
       font-weight: 600;
-      color: #6c757d;
+      color: #8A1538;
     }
-    
     .table tbody td.text-center {
       justify-content: center;
     }
-    
     .table tbody td.text-center::before {
       display: none;
     }
-    
     .action-buttons {
       width: 100%;
       flex-wrap: wrap;
     }
-    
     .action-buttons .btn {
       margin: 0.25rem;
     }
@@ -223,36 +247,35 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Enable tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
     // Search functionality
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('keyup', filterTable);
-    
     // Status filter
     const statusFilter = document.getElementById('statusFilter');
     statusFilter.addEventListener('change', filterTable);
-    
     function filterTable() {
       const searchValue = searchInput.value.toLowerCase();
       const statusValue = statusFilter.value;
       const rows = document.querySelectorAll('.license-row');
-      
       rows.forEach(row => {
         const licNum = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
         const regNum = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
         const category = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
         const activity = row.querySelector('td:nth-child(7)').textContent.toLowerCase();
-        
         // Calculate status based on expiration date
         const expDate = new Date(row.querySelector('td:nth-child(5)').textContent);
         const today = new Date();
         const status = expDate > today ? 'ساري المفعول' : 'منتهي';
-        
         // Search filter
         const matchesSearch = licNum.includes(searchValue) || 
                              regNum.includes(searchValue) || 
                              category.includes(searchValue) || 
                              activity.includes(searchValue);
-        
         // Status filter
         let matchesStatus = true;
         if (statusValue === 'active') {
@@ -260,7 +283,6 @@
         } else if (statusValue === 'expired') {
           matchesStatus = status === 'منتهي';
         }
-        
         if (matchesSearch && matchesStatus) {
           row.style.display = '';
         } else {

@@ -7,31 +7,26 @@
 
 {% block content %}
 <div class="container mt-4">
-  <div class="card shadow-sm border-0">
-    <div class="card-header py-3" style="background-color: #8A1538; color: white;">
-      <div class="d-flex justify-content-between align-items-center">
-        <h4 class="mb-0 fw-bold">
-          <i class="fas fa-tasks me-2"></i>تكليفاتي
-        </h4>
-        <a href="#" class="btn btn-light btn-sm">
-          <i class="fas fa-sync-alt me-1"></i>تحديث
-        </a>
-      </div>
+  <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+    <div class="card-header py-4 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white; border-bottom: none;">
+      <h4 class="mb-2 mb-md-0 fw-bold d-flex align-items-center">
+        <i class="fas fa-tasks me-2"></i>تكليفاتي
+      </h4>
+      <a href="#" class="btn btn-light btn-sm shadow-sm fw-bold">
+        <i class="fas fa-sync-alt me-1"></i>تحديث
+      </a>
     </div>
-
     <!-- Search and Filter Section -->
-    <div class="p-3 bg-light border-bottom">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <div class="input-group">
-            <span class="input-group-text bg-white border-end-0">
-              <i class="fas fa-search text-muted"></i>
-            </span>
+    <div class="p-4 bg-light border-bottom">
+      <div class="row g-3 align-items-center">
+        <div class="col-12 col-md-6">
+          <div class="input-group shadow-sm">
+            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
             <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث عن تكليف...">
           </div>
         </div>
-        <div class="col-md-3">
-          <select id="statusFilter" class="form-select">
+        <div class="col-6 col-md-3">
+          <select id="statusFilter" class="form-select shadow-sm">
             <option value="">جميع الحالات</option>
             <option value="pending">أنتظار</option>
             <option value="accepted">مقبولة</option>
@@ -40,17 +35,16 @@
             <option value="cancelled">ملغاة</option>
         </select>
         </div>
-        <div class="col-md-3 text-md-end">
-          <span class="badge bg-secondary p-2">
+        <div class="col-6 col-md-3 text-end">
+          <span class="badge bg-info text-white fs-6 p-3 shadow-sm">
             <i class="fas fa-tasks me-1"></i> إجمالي التكليفات: <span class="fw-bold">{{ assignments|length }}</span>
           </span>
         </div>
       </div>
     </div>
-
     <!-- Table Section -->
     <div class="table-responsive">
-      <table class="table table-hover mb-0" id="assignmentsTable">
+      <table class="table table-hover align-middle mb-0" id="assignmentsTable">
         <thead style="background-color: #f8f9fa;">
           <tr>
             <th scope="col" class="sortable" data-sort="id">
@@ -78,39 +72,38 @@
             {% for assignment in assignments %}
           <tr class="assignment-row" data-status="{{ assignment.status }}" data-id="{{ assignment.id }}">
             <td data-title="#">{{ forloop.counter }}</td>
-            <td data-title="المنشأة" class="fw-bold">{{ assignment.establishment }}</td>
-            <td data-title="وجهت في">{{ assignment.assigned_at|date:"Y-m-d H:i" }}</td>
+            <td data-title="المنشأة" class="fw-bold">{{ assignment.establishment|default:'غير متوفر' }}</td>
+            <td data-title="وجهت في">{{ assignment.assigned_at|date:"Y-m-d H:i"|default:'-' }}</td>
             <td data-title="اخر موعد">{{ assignment.due_date|default:"-" }}</td>
             <td data-title="الحالة">
-                    <span class="badge bg-{% if assignment.status == 'pending' %}warning
+                    <span class="badge rounded-pill px-3 py-2 fs-6 bg-{% if assignment.status == 'pending' %}warning text-dark
                                       {% elif assignment.status == 'accepted' %}primary
-                                      {% elif assignment.status == 'in_progress' %}info
+                                      {% elif assignment.status == 'in_progress' %}info text-dark
                                       {% elif assignment.status == 'completed' %}success
                                       {% else %}danger{% endif %}">
-                        {{ assignment.get_status_display }}
+                        {{ assignment.get_status_display|default:'-' }}
                     </span>
                 </td>
             <td data-title="الملاحظات" class="text-truncate" style="max-width: 200px;">{{ assignment.notes|default:"لا يوجد ملاحظات" }}</td>
             <td data-title="إجراءات" class="text-center">
-              <div class="action-buttons">
+              <div class="action-buttons d-flex justify-content-center gap-2">
                 {% if assignment.status == 'pending' %}
-                  <a href="#" onclick="changeStatus('{{ assignment.id }}', 'accepted'); return false;" class="btn btn-sm btn-primary mx-1" title="قبول التكليف">
+                  <a href="#" onclick="changeStatus('{{ assignment.id }}', 'accepted'); return false;" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" data-bs-placement="top" title="قبول التكليف">
                     <i class="fas fa-check"></i>
                   </a>
-                  <a href="#" onclick="changeStatus('{{ assignment.id }}', 'cancelled'); return false;" class="btn btn-sm btn-danger mx-1" title="رفض التكليف">
+                  <a href="#" onclick="changeStatus('{{ assignment.id }}', 'cancelled'); return false;" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="رفض التكليف">
                     <i class="fas fa-times"></i>
                   </a>
                 {% elif assignment.status == 'accepted' %}
-                  <a href="#" onclick="changeStatus('{{ assignment.id }}', 'in_progress'); return false;" class="btn btn-sm btn-info mx-1" title="بدء المعاينة">
+                  <a href="#" onclick="changeStatus('{{ assignment.id }}', 'in_progress'); return false;" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" data-bs-placement="top" title="بدء المعاينة">
                     <i class="fas fa-play"></i>
                   </a>
                 {% elif assignment.status == 'in_progress' %}
-                  <a href="{% url 'reader' %}" class="btn btn-sm btn-success mx-1" title="اضافة معاينة">
+                  <a href="{% url 'reader' %}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" data-bs-placement="top" title="اضافة معاينة">
                     <i class="fas fa-clipboard-check"></i>
                   </a>
                 {% endif %}
-                
-                <a href="#" onclick="viewDetails('{{ assignment.id }}'); return false;" class="btn btn-sm btn-secondary mx-1" title="عرض التفاصيل">
+                <a href="#" onclick="viewDetails('{{ assignment.id }}'); return false;" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="عرض التفاصيل">
                   <i class="fas fa-eye"></i>
                 </a>
               </div>
@@ -130,10 +123,11 @@
         </tbody>
     </table>
 </div>
-    
     <!-- Pagination -->
-    <div class="p-3 border-top">
-      {% include "include/pagination.html" %}
+    <div class="p-4 border-top bg-light">
+      <nav aria-label="صفحات التكليفات">
+        {% include "include/pagination.html" %}
+      </nav>
     </div>
   </div>
 </div>
@@ -176,19 +170,38 @@
 </div>
 
 <style>
-  /* Action Buttons */
-  .action-buttons {
-    display: flex;
-    justify-content: center;
-    flex-wrap: nowrap;
-  }
-  
   .action-buttons .btn {
-    padding: 0.25rem 0.5rem;
-    line-height: 1;
+    padding: 0.4rem 0.7rem;
+    line-height: 1.2;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    transition: background 0.2s, color 0.2s, border 0.2s;
   }
-  
-  /* Empty State */
+  .action-buttons .btn-outline-primary:hover, .action-buttons .btn-outline-primary:focus {
+    background: #8A1538;
+    color: #fff;
+    border-color: #8A1538;
+  }
+  .action-buttons .btn-outline-danger:hover, .action-buttons .btn-outline-danger:focus {
+    background: #b93a5b;
+    color: #fff;
+    border-color: #b93a5b;
+  }
+  .action-buttons .btn-outline-success:hover, .action-buttons .btn-outline-success:focus {
+    background: #d4edda;
+    color: #155724;
+    border-color: #28a745;
+  }
+  .action-buttons .btn-outline-info:hover, .action-buttons .btn-outline-info:focus {
+    background: #e0f7fa;
+    color: #155774;
+    border-color: #17a2b8;
+  }
+  .action-buttons .btn-outline-secondary:hover, .action-buttons .btn-outline-secondary:focus {
+    background: #f3dbe3;
+    color: #8A1538;
+    border-color: #8A1538;
+  }
   .empty-state {
     display: flex;
     flex-direction: column;
@@ -196,52 +209,63 @@
     justify-content: center;
     padding: 2rem;
   }
-  
-  /* Mobile Responsive */
+  .pagination {
+    justify-content: center;
+    margin-bottom: 0;
+    gap: 0.5rem;
+  }
+  .pagination .page-item .page-link {
+    border-radius: 0.5rem;
+    color: #8A1538;
+    font-weight: 600;
+    border: 1px solid #e0bfc9;
+    background: #fff;
+    transition: background 0.2s, color 0.2s;
+  }
+  .pagination .page-item.active .page-link, .pagination .page-item .page-link:focus, .pagination .page-item .page-link:hover {
+    background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%);
+    color: #fff;
+    border-color: #8A1538;
+  }
   @media (max-width: 992px) {
     .table thead {
       display: none;
     }
-    
     .table tbody tr {
       display: block;
       margin-bottom: 1rem;
       border: 1px solid #dee2e6;
-      border-radius: 0.25rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(138,21,56,0.07);
+      background: #fff;
+      padding: 0.5rem 0.75rem;
     }
-    
     .table tbody td {
       display: flex;
       justify-content: space-between;
       border-top: none;
       border-bottom: 1px solid #dee2e6;
       padding: 0.75rem 1rem;
+      font-size: 1rem;
     }
-    
     .table tbody td:last-child {
       border-bottom: none;
     }
-    
     .table tbody td::before {
       content: attr(data-title);
       font-weight: 600;
-      color: #6c757d;
+      color: #8A1538;
     }
-    
     .table tbody td.text-center {
       justify-content: center;
     }
-    
     .table tbody td.text-center::before {
       display: none;
     }
-    
     .action-buttons {
       width: 100%;
       flex-wrap: wrap;
     }
-    
     .action-buttons .btn {
       margin: 0.25rem;
     }
@@ -250,31 +274,30 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Enable tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
     // Search functionality
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('keyup', filterTable);
-    
     // Status filter
     const statusFilter = document.getElementById('statusFilter');
     statusFilter.addEventListener('change', filterTable);
-    
     function filterTable() {
       const searchValue = searchInput.value.toLowerCase();
       const statusValue = statusFilter.value;
       const rows = document.querySelectorAll('.assignment-row');
-
         rows.forEach(row => {
         const establishment = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
         const notes = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
         const rowStatus = row.dataset.status;
-        
         // Search filter
         const matchesSearch = establishment.includes(searchValue) || 
                               notes.includes(searchValue);
-        
         // Status filter
         const matchesStatus = statusValue === '' || rowStatus === statusValue;
-        
         if (matchesSearch && matchesStatus) {
           row.style.display = '';
             } else {

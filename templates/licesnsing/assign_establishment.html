@@ -10,26 +10,22 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <!-- Form Card -->
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
                 <!-- Card Header -->
-                <div class="card-header py-3" style="background-color: #8A1538; color: white;">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0 fw-bold">
-                            <i class="fas fa-clipboard-list me-2"></i>تعيين منشأة للتفتيش
-                        </h4>
-                        <a href="{% url 'assign_establishment' %}" class="btn btn-light btn-sm">
-                            <i class="fas fa-arrow-right me-1"></i>العودة إلى قائمة التكليفات
-                        </a>
-                    </div>
+                <div class="card-header py-4 px-4 d-flex flex-column flex-md-row justify-content-between align-items-center" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white; border-bottom: none;">
+                    <h4 class="mb-2 mb-md-0 fw-bold d-flex align-items-center">
+                        <i class="fas fa-clipboard-list me-2"></i>تعيين منشأة للتفتيش
+                    </h4>
+                    <a href="{% url 'assign_establishment' %}" class="btn btn-light btn-sm shadow-sm fw-bold">
+                        <i class="fas fa-arrow-right me-1"></i>العودة إلى قائمة التكليفات
+                    </a>
                 </div>
-                
                 <!-- Progress Indicator -->
-                <div class="progress" style="height: 4px; border-radius: 0;">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: 0%;" id="form-progress"></div>
+                <div class="progress" style="height: 6px; border-radius: 0; background: #f3dbe3;">
+                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%; transition: width 0.5s;" id="form-progress"></div>
                 </div>
-                
                 <!-- Card Body -->
-                <div class="card-body p-4">
+                <div class="card-body p-4 bg-light">
                     {% if messages %}
                         <div class="mb-4">
                             {% for message in messages %}
@@ -40,115 +36,102 @@
                             {% endfor %}
                         </div>
                     {% endif %}
-                    
                     <!-- Form -->
-                    <form method="post" class="assignment-form" novalidate>
-            {% csrf_token %}
-
-                        <div class="form-section mb-4">
-                            <h5 class="section-title">
+                    <form method="post" class="assignment-form" novalidate autocomplete="off">
+                        {% csrf_token %}
+                        <div class="form-section mb-4 p-3 p-md-4 bg-white rounded-3 shadow-sm border-0">
+                            <h5 class="section-title mb-3">
                                 <i class="fas fa-user-tie me-2"></i>اختيار المفتش
                                 <div class="section-line"></div>
                             </h5>
-                            
                             <div class="row g-3">
                                 <!-- Inspector Field -->
-                                <div class="col-md-12 form-field-wrapper">
-                                    <div class="form-group">
-                                        <label for="id_inspector" class="form-label">
-                                            المفتش <span class="text-danger">*</span>
-                                        </label>
-                                        <select name="inspector" class="form-select" id="id_inspector" required>
+                                <div class="col-12 form-field-wrapper position-relative">
+                                    <div class="form-floating">
+                                        <select name="inspector" class="form-select ps-5" id="id_inspector" required aria-label="اختر المفتش">
                                             <option value="">-- اختر المفتش --</option>
-                {% for inspector in inspectors %}
+                                            {% for inspector in inspectors %}
                                                 <option value="{{ inspector.user.id }}">{{ inspector.user.first_name }}</option>
-                {% endfor %}
+                                            {% endfor %}
                                         </select>
-                                        <small class="form-text text-muted">اختر المفتش الذي سيقوم بالمعاينة</small>
+                                        <label for="id_inspector"><i class="fas fa-user-tie me-2 text-muted"></i> المفتش <span class="text-danger">*</span></label>
                                     </div>
+                                    <small class="form-text text-muted ms-2">اختر المفتش الذي سيقوم بالمعاينة</small>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="form-section mb-4">
-                            <h5 class="section-title">
+                        <div class="form-section mb-4 p-3 p-md-4 bg-white rounded-3 shadow-sm border-0">
+                            <h5 class="section-title mb-3">
                                 <i class="fas fa-building me-2"></i>اختيار المنشأة
                                 <div class="section-line"></div>
                             </h5>
-                            
                             <div class="row g-3">
                                 <!-- Establishment Field -->
-                                <div class="col-md-12 form-field-wrapper">
-                                    <div class="form-group">
-                                        <label for="id_establishment" class="form-label">
-                                            المنشأة <span class="text-danger">*</span>
-                                        </label>
-                                        <select name="establishment" class="form-select" id="id_establishment" required>
+                                <div class="col-12 form-field-wrapper position-relative">
+                                    <div class="form-floating">
+                                        <select name="establishment" class="form-select ps-5" id="id_establishment" required aria-label="اختر المنشأة">
                                             <option value="">-- اختر المنشأة --</option>
                                             {% for unassigned_establishment in unassigned_establishments %}
                                                 <option value="{{ unassigned_establishment.id }}">{{ unassigned_establishment.establishment_name }}</option>
                                             {% endfor %}
                                         </select>
-                                        <small class="form-text text-muted">اختر المنشأة التي سيتم معاينتها</small>
+                                        <label for="id_establishment"><i class="fas fa-building me-2 text-muted"></i> المنشأة <span class="text-danger">*</span></label>
                                     </div>
+                                    <small class="form-text text-muted ms-2">اختر المنشأة التي سيتم معاينتها</small>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="form-section mb-4">
-                            <h5 class="section-title">
+                        <div class="form-section mb-4 p-3 p-md-4 bg-white rounded-3 shadow-sm border-0">
+                            <h5 class="section-title mb-3">
                                 <i class="fas fa-calendar-alt me-2"></i>تفاصيل التكليف
                                 <div class="section-line"></div>
                             </h5>
-                            
                             <div class="row g-3">
                                 <!-- Due Date Field -->
-                                <div class="col-md-12 form-field-wrapper">
-                                    <div class="form-group">
-                                        <label for="id_due_date" class="form-label">
-                                            الموعد النهائي
-                                        </label>
-                                        <input type="datetime-local" name="due_date" class="form-control" id="id_due_date">
-                                        <small class="form-text text-muted">آخر موعد لإكمال المعاينة (اختياري)</small>
+                                <div class="col-12 col-md-6 form-field-wrapper position-relative">
+                                    <div class="form-floating">
+                                        <input type="datetime-local" name="due_date" class="form-control ps-5" id="id_due_date" placeholder=" ">
+                                        <label for="id_due_date"><i class="fas fa-calendar-alt me-2 text-muted"></i> الموعد النهائي</label>
                                     </div>
-            </div>
-                                
+                                    <small class="form-text text-muted ms-2">آخر موعد لإكمال المعاينة (اختياري)</small>
+                                </div>
                                 <!-- Notes Field -->
-                                <div class="col-md-12 form-field-wrapper">
-                                    <div class="form-group">
-                                        <label for="id_notes" class="form-label">
-                                            ملاحظات التكليف
-                                        </label>
-                                        <textarea name="notes" rows="3" class="form-control" id="id_notes" placeholder="أدخل أي ملاحظات أو تعليمات للمفتش..."></textarea>
-                                        <small class="form-text text-muted">إضافة ملاحظات أو تعليمات إضافية للمفتش (اختياري)</small>
+                                <div class="col-12 col-md-6 form-field-wrapper position-relative">
+                                    <div class="form-floating">
+                                        <textarea name="notes" rows="3" class="form-control ps-5" id="id_notes" placeholder=" "></textarea>
+                                        <label for="id_notes"><i class="fas fa-sticky-note me-2 text-muted"></i> ملاحظات التكليف</label>
                                     </div>
+                                    <small class="form-text text-muted ms-2">إضافة ملاحظات أو تعليمات إضافية للمفتش (اختياري)</small>
                                 </div>
                             </div>
                         </div>
-                        
                         <!-- Form Actions -->
-                        <div class="form-actions mt-4 d-flex justify-content-between align-items-center">
-                            <a href="{% url "view_assignments" %}" class="btn btn-outline-secondary">
+                        <div class="form-actions mt-4 d-flex flex-column flex-md-row justify-content-between align-items-stretch gap-2 gap-md-0">
+                            <a href="{% url 'view_assignments' %}" class="btn btn-outline-secondary btn-lg flex-fill">
                                 <i class="fas fa-times me-1"></i>إلغاء
                             </a>
-                            <button type="submit" class="btn btn-lg px-5" style="background-color:#8A1538; color:white;">
+                            <button type="submit" class="btn btn-lg flex-fill" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color:white; font-weight:600;">
                                 <i class="fas fa-check me-1"></i>تعيين المفتش
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
-            
             <!-- Help Section -->
             <div class="card mt-4 border-0 shadow-sm">
                 <div class="card-body">
-                    <h5><i class="fas fa-question-circle text-primary me-2"></i>مساعدة</h5>
-                    <ul class="mb-0 text-muted small">
-                        <li>يجب اختيار المفتش والمنشأة لإكمال التكليف</li>
-                        <li>يمكنك إضافة موعد نهائي اختياري للمعاينة</li>
-                        <li>أضف ملاحظات لمساعدة المفتش في فهم متطلبات المعاينة</li>
-                        <li>سيتم إعلام المفتش بالتكليف الجديد فور إرساله</li>
-                    </ul>
+                    <h5 class="d-flex align-items-center"><i class="fas fa-question-circle text-primary me-2"></i>مساعدة</h5>
+                    <button class="btn btn-link d-md-none p-0 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#helpCollapse" aria-expanded="false" aria-controls="helpCollapse">
+                        <span class="text-primary small">عرض/إخفاء التعليمات</span>
+                    </button>
+                    <div class="collapse d-md-block" id="helpCollapse">
+                        <ul class="mb-0 text-muted small ps-3">
+                            <li>يجب اختيار المفتش والمنشأة لإكمال التكليف</li>
+                            <li>يمكنك إضافة موعد نهائي اختياري للمعاينة</li>
+                            <li>أضف ملاحظات لمساعدة المفتش في فهم متطلبات المعاينة</li>
+                            <li>سيتم إعلام المفتش بالتكليف الجديد فور إرساله</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -156,13 +139,13 @@
 </div>
 
 <style>
-    /* Form Styling */
     .form-section {
         position: relative;
         border-radius: 0.5rem;
         overflow: hidden;
+        background: #fff;
+        margin-bottom: 1.5rem;
     }
-    
     .section-title {
         font-size: 1.1rem;
         color: #8A1538;
@@ -171,59 +154,107 @@
         display: flex;
         align-items: center;
     }
-    
     .section-line {
         flex: 1;
         height: 1px;
         background: linear-gradient(to right, rgba(138, 21, 56, 0.5), rgba(138, 21, 56, 0.1));
         margin-right: 1rem;
     }
-    
     .form-label {
         font-weight: 500;
         margin-bottom: 0.5rem;
     }
-    
     .form-control, .form-select {
-        padding: 0.6rem 0.75rem;
+        padding: 0.8rem 0.75rem 0.8rem 2.5rem;
         border-radius: 0.375rem;
         border: 1px solid #ced4da;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        background-clip: padding-box;
+        font-size: 1.05rem;
     }
-    
     .form-control:focus, .form-select:focus {
-        border-color: rgba(138, 21, 56, 0.4);
-        box-shadow: 0 0 0 0.25rem rgba(138, 21, 56, 0.15);
+        border-color: #8A1538;
+        box-shadow: 0 0 0 0.25rem rgba(138, 21, 56, 0.10);
     }
-    
+    .form-floating > label {
+        left: auto;
+        right: 1.5rem;
+        color: #8A1538;
+        font-weight: 500;
+        opacity: 0.85;
+    }
+    .form-floating > .form-control, .form-floating > .form-select {
+        direction: rtl;
+    }
     .form-field-wrapper {
         transition: all 0.3s ease;
     }
-    
     .form-field-wrapper.highlight {
         transform: translateY(-3px);
+        box-shadow: 0 2px 8px rgba(138,21,56,0.07);
     }
-    
+    .form-field-wrapper.is-valid .form-control, .form-field-wrapper.is-valid .form-select {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.15rem rgba(40, 167, 69, 0.10);
+    }
+    .form-field-wrapper .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.95rem;
+        margin-top: 0.25rem;
+    }
+    .form-actions .btn {
+        min-width: 140px;
+        font-size: 1.1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(138,21,56,0.07);
+    }
+    .form-actions .btn-outline-secondary {
+        background: #fff;
+        color: #8A1538;
+        border-color: #8A1538;
+    }
+    .form-actions .btn-outline-secondary:hover, .form-actions .btn-outline-secondary:focus {
+        background: #f3dbe3;
+        color: #8A1538;
+        border-color: #8A1538;
+    }
+    .form-actions .btn-lg {
+        font-weight: 600;
+    }
+    .progress-bar {
+        transition: width 0.5s;
+    }
     /* Responsive styles */
     @media (max-width: 767.98px) {
         .form-actions {
             flex-direction: column-reverse;
             gap: 1rem;
         }
-        
         .form-actions .btn {
             width: 100%;
         }
-    }
-    
-    @media (max-width: 576px) {
+        .form-section {
+            padding: 1.25rem 0.5rem;
+        }
         .card-header {
             flex-direction: column;
             align-items: flex-start !important;
+            padding: 1.5rem 1rem;
         }
-        
         .card-header a {
             margin-top: 0.5rem;
+        }
+        .card-body {
+            padding: 1.25rem 0.5rem;
+        }
+    }
+    @media (max-width: 576px) {
+        .section-title {
+            font-size: 1rem;
+        }
+        .form-actions .btn {
+            font-size: 1rem;
         }
     }
 </style>
