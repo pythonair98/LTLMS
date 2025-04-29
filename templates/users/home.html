@@ -11,7 +11,11 @@
     <div class="col-lg-8">
       <div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-4">
         <div class="card-header text-center py-5" style="background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%); color: white;">
-          <img src="{% static 'img/user-profile.png' %}" alt="صورة المستخدم" class="rounded-circle mb-3" style="width: 90px; height: 90px; object-fit: cover; border: 4px solid #fff;">
+          {% if user.profile.profile_image %}
+            <img src="{{ user.profile.profile_image.url }}" alt="صورة المستخدم" class="rounded-circle mb-3" style="width: 90px; height: 90px; object-fit: cover; border: 4px solid #fff;">
+          {% else %}
+            <img src="{% static 'files/profile_images/default.jpg' %}" alt="صورة المستخدم" class="rounded-circle mb-3" style="width: 90px; height: 90px; object-fit: cover; border: 4px solid #fff;">
+          {% endif %}
           <h2 class="fw-bold mb-1">مرحباً {{ user.get_full_name|default:user.username }}</h2>
           <p class="mb-0">{{ user.email }}</p>
           <span class="badge bg-light text-dark mt-2">{{ user.profile.role_display|default:'مستخدم' }}</span>
