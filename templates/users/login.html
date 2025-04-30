@@ -7,33 +7,104 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6">
-      <div class="card shadow-sm">
-        <div class="card-header text-white" style="background-color: #8A1538;">
-          <h3 class="mb-0 text-center">Login</h3>
+<style>
+  body.login-bg {
+    background: linear-gradient(135deg, #f8f9fa 0%, #fbeaec 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-card {
+    animation: fadeInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(138,21,56,0.10);
+    overflow: hidden;
+    max-width: 420px;
+    margin: auto;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .login-header {
+    background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%);
+    color: white;
+    text-align: center;
+    padding: 2.5rem 1rem 1.5rem 1rem;
+    border-bottom: none;
+  }
+  .login-header img {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    margin-bottom: 1rem;
+    background: #fff;
+  }
+  .login-form .form-control:focus {
+    border-color: #8A1538;
+    box-shadow: 0 0 0 0.2rem rgba(138,21,56,0.10);
+  }
+  .login-form .input-group-text {
+    background: #f8f9fa;
+    border-left: 0;
+    border-radius: 0 0.5rem 0.5rem 0;
+    color: #8A1538;
+    font-size: 1.2rem;
+  }
+  .login-form .form-control {
+    border-radius: 0.5rem 0 0 0.5rem;
+    text-align: right;
+  }
+  .login-btn {
+    background: linear-gradient(90deg, #8A1538 0%, #b93a5b 100%);
+    border: none;
+    font-weight: bold;
+    padding: 0.75rem 0;
+    border-radius: 0.5rem;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .login-btn:hover {
+    background: linear-gradient(90deg, #b93a5b 0%, #8A1538 100%);
+  }
+  @media (max-width: 576px) {
+    .login-card { border-radius: 1.2rem; }
+    .login-header { padding: 2rem 0.5rem 1rem 0.5rem; }
+    .card-body { padding: 1.5rem 0.5rem !important; }
+  }
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.body.classList.add('login-bg');
+  });
+</script>
+<div class="container py-5">
+  <div class="login-card card shadow-lg border-0">
+    <div class="login-header">
+      <img src="{% static 'files/profile_images/default.jpg' %}" alt="Logo" />
+      <h3 class="fw-bold mb-0">تسجيل الدخول</h3>
+    </div>
+    <div class="card-body bg-light">
+      <form method="post" class="login-form">
+        {% csrf_token %}
+        <div class="mb-3 input-group">
+          <span class="input-group-text"><i class="fas fa-user"></i></span>
+          <input type="text" name="username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" class="form-control" required id="id_username" placeholder="اسم المستخدم">
         </div>
-        <div class="card-body">
-          <form method="post">
-           {% csrf_token %}
-
-
-        <div id="div_id_username" class="mb-3"> <label
-                for="id_username" class="form-label requiredField">
-                اسم المستخدم<span class="asteriskField">*</span> </label> <input type="text" name="username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" class="textinput form-control" required id="id_username"> </div> <div id="div_id_password" class="mb-3"> <label
-                for="id_password" class="form-label requiredField">
-                كلمة المرور<span class="asteriskField">*</span> </label> <input type="password" name="password" autocomplete="current-password" class="passwordinput form-control" required id="id_password"> </div>
-
-            <div class="text-center mt-3">
-              <button type="submit" class="btn btn-primary" style="background-color: #8A1538;">Login</button>
-            </div>
-          </form>
+        <div class="mb-3 input-group">
+          <span class="input-group-text"><i class="fas fa-lock"></i></span>
+          <input type="password" name="password" autocomplete="current-password" class="form-control" required id="id_password" placeholder="كلمة المرور">
         </div>
-      </div>
-      <div class="text-center mt-3">
-        <p>نسيت كلمة المرور؟ <a href="/new_user">تواصل مع الادارة من هنا</a>.</p>
-      </div>
+        <div class="text-center mt-3">
+          <button type="submit" class="btn login-btn">تسجيل الدخول</button>
+        </div>
+      </form>
+    </div>
+    <div class="text-center py-3 bg-white">
+      <p class="mb-0">نسيت كلمة المرور؟ <a href="/new_user" class="fw-bold" style="color:#8A1538;">تواصل مع الادارة من هنا</a>.</p>
     </div>
   </div>
 </div>

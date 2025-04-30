@@ -63,7 +63,6 @@ def add_establishment(request):
 @login_required(login_url="login")
 @user_passes_test(lambda user: user.profiles.occupation.power < 4,login_url='/no-access',redirect_field_name=None)
 def dashboard(request):
-    print("=====================================User Power {} =========================================".format(request.user.profiles.occupation.power))
     """
     Renders a dashboard with key statistics and latest records.
     
