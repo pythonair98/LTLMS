@@ -25,6 +25,7 @@ services:
       sh -c "sleep 15 &&
              python manage.py migrate --settings=LTLMS.settings_docker_simple &&
              python manage.py collectstatic --noinput --settings=LTLMS.settings_docker_simple &&
+             python create_superuser.py &&
              python manage.py runserver 0.0.0.0:8000 --settings=LTLMS.settings_docker_simple"
 
   # MySQL Database

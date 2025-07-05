@@ -23,6 +23,7 @@ COPY reports/ ./reports/
 COPY static/ ./static/
 COPY templates/ ./templates/
 COPY wait-for-db.sh .
+COPY create_superuser.py .
 
 # Create logs directory with proper permissions
 RUN mkdir -p logs && chmod 777 logs
