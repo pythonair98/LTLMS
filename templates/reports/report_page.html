@@ -2,28 +2,637 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-5">
-  <h1 class="text-center mb-4">أستخراج تقارير</h1>
-  <div class="row row-cols-1 row-cols-md-5 g-4">
-    {% for report in reports %}
-    <div class="col">
-      <div class="card h-100 border-0 shadow-sm">
-        <div class="card-body d-flex flex-column text-center">
-          <h5 class="card-title">{{ report.name }}</h5>
-          <p class="card-text flex-grow-1">{{ report.description }}</p>
-           <a href="" class="btn btn-lg" style="background-color:#8A1538; color:white;">
-            <i class="fas fa-cogs"></i>أستخراج التقرير
-          </a>
+<div class="container-fluid py-5">
+    <!-- Header Section with Quick Stats -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold text-primary mb-3">نظام التقارير</h1>
+            <p class="lead text-muted">اختر نوع التقرير المطلوب للحصول على المعلومات التفصيلية</p>
         </div>
-      </div>
+        <div class="col-12 mt-4">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm stat-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-file-alt fa-2x text-primary mb-2"></i>
+                            <h3 class="mb-0">{{ reports|length }}</h3>
+                            <p class="text-muted mb-0">إجمالي التقارير</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm stat-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                            <h3 class="mb-0">24</h3>
+                            <p class="text-muted mb-0">ساعة التحديث</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm stat-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-download fa-2x text-primary mb-2"></i>
+                            <h3 class="mb-0">PDF</h3>
+                            <p class="text-muted mb-0">صيغة التقرير</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 shadow-sm stat-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-history fa-2x text-primary mb-2"></i>
+                            <h3 class="mb-0">7</h3>
+                            <p class="text-muted mb-0">أيام الأرشيف</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    {% empty %}
-    <div class="col-12">
-      <div class="alert alert-warning text-center">
-        No report types available.
-      </div>
+
+    <!-- Advanced Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-10 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0" placeholder="ابحث عن تقرير..." id="reportSearch">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="reportFilter">
+                                <option value="">جميع التقارير</option>
+                                <option value="recent">الأحدث</option>
+                                <option value="popular">الأكثر تحميلاً</option>
+                                <option value="favorite">المفضلة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="dateFilter">
+                                <option value="">كل الفترات</option>
+                                <option value="today">اليوم</option>
+                                <option value="week">هذا الأسبوع</option>
+                                <option value="month">هذا الشهر</option>
+                                <option value="year">هذا العام</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-primary w-100" id="advancedFilterBtn">
+                                <i class="fas fa-sliders-h me-2"></i>خيارات متقدمة
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Filter Options -->
+                    <div class="row mt-3 d-none" id="advancedFilters">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label">نوع التقرير</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="pdf" id="typePdf">
+                                                <label class="form-check-label" for="typePdf">PDF</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="excel" id="typeExcel">
+                                                <label class="form-check-label" for="typeExcel">Excel</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">الحالة</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="new" id="statusNew">
+                                                <label class="form-check-label" for="statusNew">جديد</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="updated" id="statusUpdated">
+                                                <label class="form-check-label" for="statusUpdated">محدث</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">الترتيب</label>
+                                            <select class="form-select" id="sortOrder">
+                                                <option value="name">الاسم</option>
+                                                <option value="date">التاريخ</option>
+                                                <option value="downloads">التحميلات</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">عدد النتائج</label>
+                                            <select class="form-select" id="resultsCount">
+                                                <option value="10">10</option>
+                                                <option value="20">20</option>
+                                                <option value="50">50</option>
+                                                <option value="100">100</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    {% endfor %}
-  </div>
+
+    <!-- View Toggle -->
+    <div class="row mb-4">
+        <div class="col-12 text-end">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary active" id="gridView">
+                    <i class="fas fa-th-large"></i>
+                </button>
+                <button type="button" class="btn btn-outline-primary" id="listView">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Grid/List -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="reportsContainer">
+        {% for report in reports %}
+        <div class="col">
+            <div class="card h-100 border-0 shadow-lg hover-card">
+                <div class="card-header bg-white border-0 pt-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-bold">{{ report.name }}</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#" data-action="favorite">
+                                    <i class="far fa-star me-2"></i>إضافة للمفضلة
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" data-action="share">
+                                    <i class="fas fa-share-alt me-2"></i>مشاركة
+                                </a></li>
+                                <li><a class="dropdown-item" href="#" data-action="print">
+                                    <i class="fas fa-print me-2"></i>طباعة
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text text-muted mb-4">{{ report.description }}</p>
+                    <div class="mt-auto">
+                        <div class="d-grid gap-2">
+                            <a href="" class="btn btn-lg btn-primary download-btn" data-report-id="{{ report.id }}">
+                                <i class="fas fa-download me-2"></i>تحميل التقرير
+                                <div class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                                    <span class="visually-hidden">جاري التحميل...</span>
+                                </div>
+                            </a>
+                            <button class="btn btn-outline-secondary btn-sm preview-btn" data-bs-toggle="modal" data-bs-target="#previewModal{{ forloop.counter }}">
+                                <i class="fas fa-eye me-2"></i>معاينة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            آخر تحديث: {{ report.last_updated|default:"غير متوفر" }}
+                        </small>
+                        <small class="text-muted">
+                            <i class="fas fa-download me-1"></i>
+                            {{ report.downloads|default:"0" }} تحميل
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center p-5">
+                <i class="fas fa-info-circle fa-3x mb-3"></i>
+                <h4>لا توجد تقارير متاحة</h4>
+                <p class="mb-0">سيتم إضافة التقارير قريباً</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">السابق</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">التالي</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
 </div>
+
+<!-- Preview Modals -->
+{% for report in reports %}
+<div class="modal fade" id="previewModal{{ forloop.counter }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ report.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-tabs">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#preview{{ forloop.counter }}">
+                                <i class="fas fa-eye me-2"></i>معاينة
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#details{{ forloop.counter }}">
+                                <i class="fas fa-info-circle me-2"></i>التفاصيل
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#history{{ forloop.counter }}">
+                                <i class="fas fa-history me-2"></i>السجل
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content p-3">
+                        <div class="tab-pane fade show active" id="preview{{ forloop.counter }}">
+                            <div class="preview-placeholder text-center p-5">
+                                <i class="fas fa-file-pdf fa-4x text-muted mb-3"></i>
+                                <p>معاينة التقرير ستكون متاحة قريباً</p>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="details{{ forloop.counter }}">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <th>اسم التقرير</th>
+                                            <td>{{ report.name }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>تاريخ الإنشاء</th>
+                                            <td>{{ report.created_at|default:"غير متوفر" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>آخر تحديث</th>
+                                            <td>{{ report.last_updated|default:"غير متوفر" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>عدد التحميلات</th>
+                                            <td>{{ report.downloads|default:"0" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>الحجم</th>
+                                            <td>{{ report.size|default:"غير متوفر" }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="history{{ forloop.counter }}">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-content">
+                                        <h6>تم إنشاء التقرير</h6>
+                                        <p class="text-muted">{{ report.created_at|default:"غير متوفر" }}</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-content">
+                                        <h6>آخر تحديث</h6>
+                                        <p class="text-muted">{{ report.last_updated|default:"غير متوفر" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <a href="" class="btn btn-primary download-btn" data-report-id="{{ report.id }}">
+                    <i class="fas fa-download me-2"></i>تحميل التقرير
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Toast Notifications -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="downloadToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fas fa-check-circle text-success me-2"></i>
+            <strong class="me-auto">تم التحميل</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            تم بدء تحميل التقرير بنجاح
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">مشاركة التقرير</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">رابط المشاركة</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="https://example.com/report/123" readonly>
+                        <button class="btn btn-outline-secondary" type="button" id="copyLink">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center gap-2">
+                    <button class="btn btn-outline-primary">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>
+                    <button class="btn btn-outline-primary">
+                        <i class="fab fa-telegram"></i>
+                    </button>
+                    <button class="btn btn-outline-primary">
+                        <i class="fab fa-twitter"></i>
+                    </button>
+                    <button class="btn btn-outline-primary">
+                        <i class="fas fa-envelope"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .hover-card {
+        transition: all 0.3s ease-in-out;
+    }
+    
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+    }
+    
+    .btn-primary {
+        background-color: #8A1538;
+        border-color: #8A1538;
+    }
+    
+    .btn-primary:hover {
+        background-color: #6a102c;
+        border-color: #6a102c;
+    }
+    
+    .text-primary {
+        color: #8A1538 !important;
+    }
+    
+    .badge.bg-primary {
+        background-color: #8A1538 !important;
+    }
+
+    .input-group-text {
+        border-right: none;
+    }
+
+    .form-control:focus {
+        border-color: #8A1538;
+        box-shadow: 0 0 0 0.25rem rgba(138, 21, 56, 0.25);
+    }
+
+    .form-select:focus {
+        border-color: #8A1538;
+        box-shadow: 0 0 0 0.25rem rgba(138, 21, 56, 0.25);
+    }
+
+    .toast {
+        background-color: white;
+        border: none;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card {
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 30px;
+        margin-bottom: 20px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #8A1538;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px #8A1538;
+    }
+
+    .timeline-item:before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 12px;
+        height: calc(100% + 8px);
+        width: 2px;
+        background: #e9ecef;
+    }
+
+    .timeline-item:last-child:before {
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+        
+        .btn-group {
+            width: 100%;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+        }
+    }
+</style>
+
+<!-- Custom JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Search and Filter functionality
+        const searchInput = document.getElementById('reportSearch');
+        const reportFilter = document.getElementById('reportFilter');
+        const dateFilter = document.getElementById('dateFilter');
+        const reportCards = document.querySelectorAll('.col');
+        
+        function filterReports() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterValue = reportFilter.value;
+            const dateValue = dateFilter.value;
+            
+            reportCards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const description = card.querySelector('.card-text').textContent.toLowerCase();
+                const downloads = parseInt(card.querySelector('.text-muted:last-child').textContent) || 0;
+                
+                let showCard = title.includes(searchTerm) || description.includes(searchTerm);
+                
+                if (filterValue === 'popular' && downloads < 10) {
+                    showCard = false;
+                }
+                
+                card.style.display = showCard ? '' : 'none';
+            });
+        }
+        
+        searchInput.addEventListener('input', filterReports);
+        reportFilter.addEventListener('change', filterReports);
+        dateFilter.addEventListener('change', filterReports);
+
+        // Advanced Filter Toggle
+        const advancedFilterBtn = document.getElementById('advancedFilterBtn');
+        const advancedFilters = document.getElementById('advancedFilters');
+        
+        advancedFilterBtn.addEventListener('click', function() {
+            advancedFilters.classList.toggle('d-none');
+            this.classList.toggle('active');
+        });
+
+        // View Toggle
+        const gridView = document.getElementById('gridView');
+        const listView = document.getElementById('listView');
+        const reportsContainer = document.getElementById('reportsContainer');
+        
+        gridView.addEventListener('click', function() {
+            this.classList.add('active');
+            listView.classList.remove('active');
+            reportsContainer.classList.remove('list-view');
+        });
+        
+        listView.addEventListener('click', function() {
+            this.classList.add('active');
+            gridView.classList.remove('active');
+            reportsContainer.classList.add('list-view');
+        });
+
+        // Download functionality
+        const downloadButtons = document.querySelectorAll('.download-btn');
+        const toast = new bootstrap.Toast(document.getElementById('downloadToast'));
+        
+        downloadButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const spinner = this.querySelector('.spinner-border');
+                if (spinner) {
+                    spinner.classList.remove('d-none');
+                }
+                
+                // Simulate download delay
+                setTimeout(() => {
+                    if (spinner) {
+                        spinner.classList.add('d-none');
+                    }
+                    toast.show();
+                }, 1500);
+            });
+        });
+
+        // Share functionality
+        const shareButtons = document.querySelectorAll('[data-action="share"]');
+        const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+        const copyLink = document.getElementById('copyLink');
+        
+        shareButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                shareModal.show();
+            });
+        });
+        
+        copyLink.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            input.select();
+            document.execCommand('copy');
+            this.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-copy"></i>';
+            }, 2000);
+        });
+
+        // Favorite functionality
+        const favoriteButtons = document.querySelectorAll('[data-action="favorite"]');
+        
+        favoriteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const icon = this.querySelector('i');
+                icon.classList.toggle('far');
+                icon.classList.toggle('fas');
+                icon.classList.toggle('text-warning');
+            });
+        });
+
+        // Print functionality
+        const printButtons = document.querySelectorAll('[data-action="print"]');
+        
+        printButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.print();
+            });
+        });
+
+        // Mobile menu toggle
+        const menuToggle = document.querySelector('.navbar-toggler');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function() {
+                document.body.classList.toggle('menu-open');
+            });
+        }
+    });
+</script>
 {% endblock %}

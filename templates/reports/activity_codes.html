@@ -1,0 +1,509 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}تقرير رموز الأنشطة{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #2c3e50, #3498db);
+        color: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    .code-table {
+        width: 100%;
+        margin-bottom: 0;
+    }
+    
+    .code-table thead th {
+        background: #f8f9fa;
+        color: #2c3e50;
+        font-weight: 600;
+        padding: 1rem;
+        border: none;
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .code-table tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .code-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .code-table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .code-badge {
+        background-color: #2c3e50;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    
+    .usage-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .usage-high {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .usage-medium {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .usage-low {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .filter-container {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .filter-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sort-icon {
+        margin-left: 0.5rem;
+    }
+    
+    .sort-icon.active {
+        color: #2c3e50;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        height: 400px;
+        position: relative;
+    }
+    
+    .chart-container canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    @media (max-width: 768px) {
+        .code-table thead {
+            display: none;
+        }
+        
+        .code-table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        
+        .code-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .code-table td:last-child {
+            border-bottom: none;
+        }
+        
+        .code-table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #2c3e50;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="card-title mb-2">تقرير رموز الأنشطة</h2>
+                            <p class="text-muted mb-0">تحليل مفصل لرموز الأنشطة وإحصائيات استخدامها</p>
+                        </div>
+                        <div class="export-buttons">
+                            <button class="btn btn-success" onclick="exportToExcel()">
+                                <i class="fas fa-file-excel"></i> تصدير إلى Excel
+                            </button>
+                            <button class="btn btn-danger ms-2" onclick="exportToPDF()">
+                                <i class="fas fa-file-pdf"></i> تصدير إلى PDF
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-number">{{ total_activities }}</div>
+                                <div class="stats-label">إجمالي الأنشطة</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-number">{{ active_activities }}</div>
+                                <div class="stats-label">الأنشطة النشطة</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-number">{{ total_establishments }}</div>
+                                <div class="stats-label">إجمالي المؤسسات</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-number">{{ avg_establishments }}</div>
+                                <div class="stats-label">متوسط المؤسسات لكل نشاط</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-container">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="filter-label">بحث:</label>
+                                    <input type="text" id="searchInput" class="form-control" 
+                                           placeholder="البحث بالرمز أو الاسم...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="filter-group">
+                                    <div>
+                                        <label class="filter-label">تصفية حسب الاستخدام:</label>
+                                        <select class="form-select" id="usageFilter">
+                                            <option value="all">جميع الاستخدامات</option>
+                                            <option value="high">استخدام مرتفع</option>
+                                            <option value="medium">استخدام متوسط</option>
+                                            <option value="low">استخدام منخفض</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="mb-3">توزيع استخدام الأنشطة</h5>
+                <canvas id="usageChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="mb-3">أعلى الأنشطة استخداماً</h5>
+                <canvas id="topActivitiesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-container">
+        <div class="table-responsive">
+            <table class="table code-table">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('code')">
+                            رمز النشاط
+                            <i class="fas fa-sort sort-icon" id="sort-code"></i>
+                        </th>
+                        <th onclick="sortTable('ar_name')">
+                            الاسم بالعربية
+                            <i class="fas fa-sort sort-icon" id="sort-ar_name"></i>
+                        </th>
+                        <th onclick="sortTable('en_name')">
+                            الاسم بالإنجليزية
+                            <i class="fas fa-sort sort-icon" id="sort-en_name"></i>
+                        </th>
+                        <th onclick="sortTable('establishments')">
+                            عدد المؤسسات
+                            <i class="fas fa-sort sort-icon" id="sort-establishments"></i>
+                        </th>
+                        <th onclick="sortTable('usage')">
+                            مستوى الاستخدام
+                            <i class="fas fa-sort sort-icon" id="sort-usage"></i>
+                        </th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="activitiesContainer">
+                    {% for activity in activities %}
+                    <tr class="activity-item" 
+                        data-code="{{ activity.id }}"
+                        data-ar-name="{{ activity.ar_name }}"
+                        data-en-name="{{ activity.en_name }}"
+                        data-establishments="{{ activity.establishment_set.count }}"
+                        data-usage="{{ activity.usage_level }}">
+                        <td data-label="رمز النشاط">
+                            <span class="code-badge">{{ activity.id }}</span>
+                        </td>
+                        <td data-label="الاسم بالعربية">{{ activity.ar_name }}</td>
+                        <td data-label="الاسم بالإنجليزية">{{ activity.en_name }}</td>
+                        <td data-label="عدد المؤسسات">
+                            <span class="badge bg-info">{{ activity.establishment_set.count }}</span>
+                        </td>
+                        <td data-label="مستوى الاستخدام">
+                            <span class="usage-badge usage-{{ activity.usage_level }}">
+                                {% if activity.usage_level == 'high' %}
+                                    استخدام مرتفع
+                                {% elif activity.usage_level == 'medium' %}
+                                    استخدام متوسط
+                                {% else %}
+                                    استخدام منخفض
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td data-label="الإجراءات">
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewDetails('{{ activity.id }}')">
+                                    <i class="fas fa-eye"></i> عرض
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="text-center py-4">
+                                <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+                                <h4>لم يتم العثور على أنشطة</h4>
+                                <p class="text-muted">حاول تعديل معايير البحث</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let currentSort = {
+        column: 'code',
+        direction: 'asc'
+    };
+
+    // Initialize charts
+    document.addEventListener('DOMContentLoaded', function() {
+        // Usage Distribution Chart
+        const usageCtx = document.getElementById('usageChart').getContext('2d');
+        const usageData = [
+            {{ usage_distribution.high }},
+            {{ usage_distribution.medium }},
+            {{ usage_distribution.low }}
+        ];
+        
+        new Chart(usageCtx, {
+            type: 'pie',
+            data: {
+                labels: ['استخدام مرتفع', 'استخدام متوسط', 'استخدام منخفض'],
+                datasets: [{
+                    data: usageData,
+                    backgroundColor: ['#d4edda', '#fff3cd', '#f8d7da'],
+                    borderColor: ['#155724', '#856404', '#721c24'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'توزيع استخدام الأنشطة',
+                        font: {
+                            size: 16
+                        }
+                    }
+                }
+            }
+        });
+
+        // Top Activities Chart
+        const topActivitiesCtx = document.getElementById('topActivitiesChart').getContext('2d');
+        const labels = JSON.parse('{{ top_activities_labels|safe }}');
+        const data = JSON.parse('{{ top_activities_data|safe }}');
+        
+        new Chart(topActivitiesCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'عدد المؤسسات',
+                    data: data,
+                    backgroundColor: '#3498db',
+                    borderColor: '#2c3e50',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'أعلى الأنشطة استخداماً',
+                        font: {
+                            size: 16
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    function sortTable(column) {
+        const container = document.getElementById('activitiesContainer');
+        const activities = Array.from(container.getElementsByClassName('activity-item'));
+        
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+        
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            icon.className = 'fas fa-sort sort-icon';
+        });
+        const activeIcon = document.getElementById(`sort-${column}`);
+        activeIcon.className = `fas fa-sort-${currentSort.direction === 'asc' ? 'up' : 'down'} sort-icon active`;
+        
+        activities.sort((a, b) => {
+            let valueA = a.dataset[column];
+            let valueB = b.dataset[column];
+            
+            if (column === 'code' || column === 'establishments') {
+                valueA = parseInt(valueA);
+                valueB = parseInt(valueB);
+            }
+            
+            if (currentSort.direction === 'desc') {
+                return valueB > valueA ? 1 : -1;
+            }
+            return valueA > valueB ? 1 : -1;
+        });
+        
+        activities.forEach(activity => {
+            container.appendChild(activity);
+        });
+    }
+
+    document.getElementById('usageFilter').addEventListener('change', function() {
+        const filter = this.value;
+        const activities = document.getElementsByClassName('activity-item');
+        
+        Array.from(activities).forEach(activity => {
+            const usage = activity.dataset.usage;
+            const isVisible = filter === 'all' || usage === filter;
+            activity.style.display = isVisible ? '' : 'none';
+        });
+    });
+
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchText = this.value.toLowerCase();
+        const activities = document.getElementsByClassName('activity-item');
+        
+        Array.from(activities).forEach(activity => {
+            const text = activity.textContent.toLowerCase();
+            const isVisible = text.includes(searchText);
+            activity.style.display = isVisible ? '' : 'none';
+        });
+    });
+
+    function viewDetails(activityId) {
+        // Implement view details functionality
+        alert(`عرض تفاصيل النشاط ${activityId}`);
+    }
+
+    function exportToExcel() {
+        alert('سيتم تنفيذ وظيفة التصدير إلى Excel هنا');
+    }
+
+    function exportToPDF() {
+        alert('سيتم تنفيذ وظيفة التصدير إلى PDF هنا');
+    }
+</script>
+{% endblock %} 

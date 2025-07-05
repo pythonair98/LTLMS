@@ -1,6 +1,8 @@
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.contrib import admin
+from django.urls import reverse
+from django.utils import timezone
 
 from .models import (
     Activity,
@@ -46,6 +48,7 @@ class EstablishmentAdmin(admin.ModelAdmin):
         "main_category",
         "sub_category",
         "created_at",
+        "get_status_badge",
     )
     
     search_fields = (
@@ -108,41 +111,111 @@ class EstablishmentAdmin(admin.ModelAdmin):
     
     ordering = ("-created_at",)
     list_display_links = ("rifd", "establishment_name")
-    readonly_fields = ("created_at",)
+    readonly_fields = ("created_at", "get_status_badge")
     
     def activity_name_display(self, obj):
         """Custom display for the activity field with proper label."""
         return obj.activity.label
     
     activity_name_display.short_description = _("Activity Type")
+    
+    def get_status_badge(self, obj):
+        """Generate a colored badge for the establishment status."""
+        status_colors = {
+            'active': 'success',
+            'inactive': 'danger',
+            'pending': 'warning',
+        }
+        color = status_colors.get(obj.status, 'secondary')
+        return format_html(
+            '<span class="badge bg-{}">{}</span>',
+            color,
+            obj.get_status_display()
+        )
+    get_status_badge.short_description = 'Status'
 
 
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
     """Admin configuration for the Activity model."""
-    list_display = ("id", "ar_name", "en_name")
+    list_display = ("id", "ar_name", "en_name", "get_activity_count")
     search_fields = ("ar_name", "en_name")
+    ordering = ("ar_name",)
+    
+    def get_activity_count(self, obj):
+        """Display count of establishments with this activity."""
+        count = obj.establishment_set.count()
+        return format_html(
+            '<span class="badge bg-info">{}</span>',
+            count
+        )
+    get_activity_count.short_description = 'Establishments Count'
 
 
 @admin.register(MainCategory)
 class MainCategoryAdmin(admin.ModelAdmin):
     """Admin configuration for the MainCategory model."""
-    list_display = ("id", "ar_name", "en_name")
+    list_display = ("id", "ar_name", "en_name", "get_subcategories_count", "get_establishments_count")
     search_fields = ("ar_name", "en_name")
+    ordering = ("ar_name",)
+    
+    def get_subcategories_count(self, obj):
+        """Display count of subcategories."""
+        count = obj.subcategory_set.count()
+        return format_html(
+            '<span class="badge bg-info">{}</span>',
+            count
+        )
+    get_subcategories_count.short_description = 'Subcategories Count'
+    
+    def get_establishments_count(self, obj):
+        """Display count of establishments in this category."""
+        count = obj.establishment_set.count()
+        return format_html(
+            '<span class="badge bg-success">{}</span>',
+            count
+        )
+    get_establishments_count.short_description = 'Establishments Count'
 
 
 @admin.register(EstablishmentRole)
 class EstablishmentRoleAdmin(admin.ModelAdmin):
     """Admin configuration for the EstablishmentRole model."""
-    list_display = ("id", "ar_name", "en_name")
+    list_display = ("id", "ar_name", "en_name", "get_establishments_count")
     search_fields = ("ar_name", "en_name")
+    ordering = ("ar_name",)
+    
+    def get_establishments_count(self, obj):
+        """Display count of establishments with this role."""
+        count = obj.establishment_set.count()
+        return format_html(
+            '<span class="badge bg-info">{}</span>',
+            count
+        )
+    get_establishments_count.short_description = 'Establishments Count'
 
 
 @admin.register(SubCategory)
 class SubCategoryAdmin(admin.ModelAdmin):
-    """Admin configuration for the SubCategory model."""
-    list_display = ("id", "ar_name", "en_name")
-    search_fields = ("ar_name", "en_name")
+    """Enhanced admin interface for SubCategory model."""
+    list_display = (
+        'id',
+        'ar_name',
+        'en_name',
+        'get_establishments_count',
+    )
+    
+    search_fields = ('ar_name', 'en_name')
+    ordering = ('ar_name',)
+    
+    def get_establishments_count(self, obj):
+        """Display count of establishments in this subcategory."""
+        count = obj.establishment_set.count()
+        return format_html(
+            '<span class="badge bg-info">{}</span>',
+            count
+        )
+    get_establishments_count.short_description = 'Establishments Count'
 
 
 @admin.register(EstablishmentRegister)
@@ -154,10 +227,10 @@ class EstablishmentRegisterAdmin(admin.ModelAdmin):
     list_display = (
         "establishment_id",
         "establishment",
+        "get_status_badge",
         "issuance_date",
         "expiration_date",
         "created_at",
-        "updated_at",
     )
     
     list_filter = ("issuance_date", "expiration_date", "created_at")
@@ -176,7 +249,14 @@ class EstablishmentRegisterAdmin(admin.ModelAdmin):
         ),
     )
     
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at", "get_status_badge")
+    
+    def get_status_badge(self, obj):
+        """Generate a colored badge for the registration status."""
+        if obj.expiration_date < timezone.now().date():
+            return format_html('<span class="badge bg-danger">Expired</span>')
+        return format_html('<span class="badge bg-success">Active</span>')
+    get_status_badge.short_description = 'Status'
 
 
 @admin.register(EstablishmentLicence)
@@ -189,13 +269,11 @@ class EstablishmentLicenceAdmin(admin.ModelAdmin):
         "number",
         "register",
         "establishment",
+        "get_status_badge",
         "creation_date",
         "expiration_date",
         "main_category",
         "activity",
-        "sub_category",
-        "created_at",
-        "updated_at",
     )
     
     list_filter = (
@@ -204,7 +282,6 @@ class EstablishmentLicenceAdmin(admin.ModelAdmin):
         "main_category",
         "activity",
         "sub_category",
-        "created_at",
     )
     
     search_fields = (
@@ -212,7 +289,6 @@ class EstablishmentLicenceAdmin(admin.ModelAdmin):
         "register__establishment__owner_name",
         "main_category__ar_name",
         "activity__ar_name",
-        "sub_category__ar_name",
     )
     
     ordering = ("-creation_date",)
@@ -230,13 +306,20 @@ class EstablishmentLicenceAdmin(admin.ModelAdmin):
         ),
     )
     
-    readonly_fields = ("created_at", "updated_at")
+    readonly_fields = ("created_at", "updated_at", "get_status_badge")
     
     def establishment(self, obj):
         """Get the establishment associated with this licence via registration."""
         return obj.register.establishment
     
     establishment.short_description = "Establishment"
+    
+    def get_status_badge(self, obj):
+        """Generate a colored badge for the licence status."""
+        if obj.expiration_date < timezone.now().date():
+            return format_html('<span class="badge bg-danger">Expired</span>')
+        return format_html('<span class="badge bg-success">Active</span>')
+    get_status_badge.short_description = 'Status'
 
 
 # Register the Establishment model with the custom admin configuration
@@ -252,7 +335,7 @@ class InspectionAssignmentAdmin(admin.ModelAdmin):
     list_display = (
         "establishment",
         "inspector",
-        "status",
+        "get_status_badge",
         "assigned_at",
         "due_date",
     )
@@ -290,7 +373,23 @@ class InspectionAssignmentAdmin(admin.ModelAdmin):
         ),
     )
     
-    readonly_fields = ("assigned_at", "updated_at")
+    readonly_fields = ("assigned_at", "updated_at", "get_status_badge")
+    
+    def get_status_badge(self, obj):
+        """Generate a colored badge for the assignment status."""
+        status_colors = {
+            'pending': 'warning',
+            'in_progress': 'info',
+            'completed': 'success',
+            'cancelled': 'danger',
+        }
+        color = status_colors.get(obj.status, 'secondary')
+        return format_html(
+            '<span class="badge bg-{}">{}</span>',
+            color,
+            obj.get_status_display()
+        )
+    get_status_badge.short_description = 'Status'
 
 
 @admin.register(Inspection)
@@ -302,9 +401,8 @@ class InspectionAdmin(admin.ModelAdmin):
     list_display = (
         "register_number",
         "inspector",
+        "get_status_badge",
         "created_at",
-        "notes",
-        "status",
         "is_archived",
         "preview_register_photo",
         "preview_license_photo",
@@ -316,7 +414,7 @@ class InspectionAdmin(admin.ModelAdmin):
     search_fields = ("register_number", "notes")
     ordering = ("-created_at",)
     actions = ["archive_selected"]
-    readonly_fields = ("created_at", "archived_at")
+    readonly_fields = ("created_at", "archived_at", "get_status_badge")
     
     fieldsets = (
         (
@@ -379,6 +477,22 @@ class InspectionAdmin(admin.ModelAdmin):
     preview_license_photo.short_description = "License Photo"
     preview_establishment_photo.short_description = "Establishment Photo"
     preview_cars_building_photo.short_description = "Cars Building Photo"
+    
+    def get_status_badge(self, obj):
+        """Generate a colored badge for the inspection status."""
+        status_colors = {
+            'pending': 'warning',
+            'in_progress': 'info',
+            'completed': 'success',
+            'failed': 'danger',
+        }
+        color = status_colors.get(obj.status, 'secondary')
+        return format_html(
+            '<span class="badge bg-{}">{}</span>',
+            color,
+            obj.get_status_display()
+        )
+    get_status_badge.short_description = 'Status'
     
     def archive_selected(self, request, queryset):
         """Admin action to archive selected inspections."""

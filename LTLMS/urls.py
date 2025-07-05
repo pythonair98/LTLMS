@@ -17,6 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from .admin import admin_site  # Import our custom admin site
 
 from django.conf import settings
 from django.conf.urls import handler404, handler500
@@ -26,7 +27,7 @@ from django.conf.urls.static import static
 handler404 = "ILAS.views.not_found404"
 handler500 = "ILAS.views.internal_server_error"
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', admin_site.urls),  # Use our custom admin site
     path("", include("ILAS.urls")),
     path("", include("user_auth.urls")),
     path("", include("reports.urls")),

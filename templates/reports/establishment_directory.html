@@ -1,0 +1,479 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}دليل المنشآت{% endblock %}
+
+{% block extra_css %}
+<style>
+    .directory-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #2c3e50, #3498db);
+        color: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stats-icon {
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 1rem;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    .directory-table {
+        width: 100%;
+        margin-bottom: 0;
+    }
+    
+    .directory-table thead th {
+        background: #f8f9fa;
+        color: #2c3e50;
+        font-weight: 600;
+        padding: 1rem;
+        border: none;
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .directory-table tbody tr {
+        transition: all 0.3s ease;
+    }
+    
+    .directory-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .directory-table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .filter-container {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .filter-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .sort-icon {
+        margin-left: 0.5rem;
+    }
+    
+    .sort-icon.active {
+        color: #2c3e50;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .contact-icon {
+        color: #6c757d;
+        width: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        .directory-table thead {
+            display: none;
+        }
+        
+        .directory-table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        
+        .directory-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .directory-table td:last-child {
+            border-bottom: none;
+        }
+        
+        .directory-table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #2c3e50;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="card-title mb-2">دليل المنشآت</h2>
+                            <p class="text-muted mb-0">دليل شامل للمنشآت مع تفاصيل الاتصال والموقع</p>
+                        </div>
+                        <div class="export-buttons">
+                            <button class="btn btn-success" onclick="exportToExcel()">
+                                <i class="fas fa-file-excel"></i> تصدير إلى Excel
+                            </button>
+                            <button class="btn btn-danger ms-2" onclick="exportToPDF()">
+                                <i class="fas fa-file-pdf"></i> تصدير إلى PDF
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-building fa-2x mb-3"></i>
+                                </div>
+                                <div class="stats-number">{{ total_establishments }}</div>
+                                <div class="stats-label">إجمالي المنشآت</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-check-circle fa-2x mb-3"></i>
+                                </div>
+                                <div class="stats-number">{{ active_establishments }}</div>
+                                <div class="stats-label">المنشآت النشطة</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-map-marked-alt fa-2x mb-3"></i>
+                                </div>
+                                <div class="stats-number">{{ total_regions }}</div>
+                                <div class="stats-label">عدد المناطق</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-tasks fa-2x mb-3"></i>
+                                </div>
+                                <div class="stats-number">{{ total_activities }}</div>
+                                <div class="stats-label">عدد الأنشطة</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-container">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="filter-label">
+                                        <i class="fas fa-search me-2"></i>بحث:
+                                    </label>
+                                    <input type="text" id="searchInput" class="form-control" 
+                                           placeholder="البحث بالاسم أو رقم السجل...">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="filter-label">
+                                        <i class="fas fa-map-marker-alt me-2"></i>المنطقة:
+                                    </label>
+                                    <select class="form-select" id="regionFilter">
+                                        <option value="all">جميع المناطق</option>
+                                        {% for region in regions %}
+                                        <option value="{{ region.id }}">{{ region.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="filter-label">
+                                        <i class="fas fa-toggle-on me-2"></i>الحالة:
+                                    </label>
+                                    <select class="form-select" id="statusFilter">
+                                        <option value="all">جميع الحالات</option>
+                                        <option value="active">نشط</option>
+                                        <option value="inactive">غير نشط</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="directory-container">
+        <div class="table-responsive">
+            <table class="table directory-table">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('name')">
+                            <i class="fas fa-building me-2"></i>اسم المنشأة
+                            <i class="fas fa-sort sort-icon" id="sort-name"></i>
+                        </th>
+                        <th onclick="sortTable('register_number')">
+                            <i class="fas fa-hashtag me-2"></i>رقم السجل
+                            <i class="fas fa-sort sort-icon" id="sort-register_number"></i>
+                        </th>
+                        <th onclick="sortTable('activity')">
+                            <i class="fas fa-tasks me-2"></i>النشاط
+                            <i class="fas fa-sort sort-icon" id="sort-activity"></i>
+                        </th>
+                        <th onclick="sortTable('region')">
+                            <i class="fas fa-map-marker-alt me-2"></i>المنطقة
+                            <i class="fas fa-sort sort-icon" id="sort-region"></i>
+                        </th>
+                        <th>
+                            <i class="fas fa-address-card me-2"></i>معلومات الاتصال
+                        </th>
+                        <th onclick="sortTable('status')">
+                            <i class="fas fa-toggle-on me-2"></i>الحالة
+                            <i class="fas fa-sort sort-icon" id="sort-status"></i>
+                        </th>
+                        <th>
+                            <i class="fas fa-cogs me-2"></i>الإجراءات
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="establishmentsContainer">
+                    {% for establishment in establishments %}
+                    <tr class="establishment-item" 
+                        data-name="{{ establishment.establishment_name }}"
+                        data-register-number="{{ establishment.id }}"
+                        data-activity="{{ establishment.activity.ar_name }}"
+                        data-region="{{ establishment.region_number }}"
+                        data-status="{{ establishment.status }}">
+                        <td data-label="اسم المنشأة">
+                            <i class="fas fa-building me-2 text-muted"></i>
+                            {{ establishment.establishment_name }}
+                        </td>
+                        <td data-label="رقم السجل">
+                            <i class="fas fa-hashtag me-2 text-muted"></i>
+                            {{ establishment.id }}
+                        </td>
+                        <td data-label="النشاط">
+                            <i class="fas fa-tasks me-2 text-muted"></i>
+                            {{ establishment.activity.ar_name }}
+                        </td>
+                        <td data-label="المنطقة">
+                            <i class="fas fa-map-marker-alt me-2 text-muted"></i>
+                            {{ establishment.region_number }}
+                        </td>
+                        <td data-label="معلومات الاتصال">
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="fas fa-phone contact-icon"></i>
+                                    <span>{{ establishment.phone_number }}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="fas fa-envelope contact-icon"></i>
+                                    <span>{{ establishment.email }}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="fas fa-map-marker-alt contact-icon"></i>
+                                    <span>
+                                        {{ establishment.street_name }}
+                                        {% if establishment.building_number %}
+                                            - مبنى {{ establishment.building_number }}
+                                        {% endif %}
+                                        {% if establishment.block_number %}
+                                            - قطعة {{ establishment.block_number }}
+                                        {% endif %}
+                                        {% if establishment.municipality_name %}
+                                            - {{ establishment.municipality_name }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        <td data-label="الحالة">
+                            <span class="status-badge status-{{ establishment.status }}">
+                                {% if establishment.status == 'active' %}
+                                    <i class="fas fa-check-circle me-1"></i>نشط
+                                {% else %}
+                                    <i class="fas fa-times-circle me-1"></i>غير نشط
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td data-label="الإجراءات">
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewDetails('{{ establishment.id }}')">
+                                    <i class="fas fa-eye"></i> عرض
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" onclick="viewLicense('{{ establishment.id }}')">
+                                    <i class="fas fa-file-alt"></i> الترخيص
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="text-center py-4">
+                                <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+                                <h4>لم يتم العثور على منشآت</h4>
+                                <p class="text-muted">حاول تعديل معايير البحث</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentSort = {
+        column: 'name',
+        direction: 'asc'
+    };
+
+    function sortTable(column) {
+        const container = document.getElementById('establishmentsContainer');
+        const establishments = Array.from(container.getElementsByClassName('establishment-item'));
+        
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+        
+        document.querySelectorAll('.sort-icon').forEach(icon => {
+            icon.className = 'fas fa-sort sort-icon';
+        });
+        const activeIcon = document.getElementById(`sort-${column}`);
+        activeIcon.className = `fas fa-sort-${currentSort.direction === 'asc' ? 'up' : 'down'} sort-icon active`;
+        
+        establishments.sort((a, b) => {
+            let valueA = a.dataset[column];
+            let valueB = b.dataset[column];
+            
+            if (currentSort.direction === 'desc') {
+                return valueB > valueA ? 1 : -1;
+            }
+            return valueA > valueB ? 1 : -1;
+        });
+        
+        establishments.forEach(establishment => {
+            container.appendChild(establishment);
+        });
+    }
+
+    document.getElementById('regionFilter').addEventListener('change', function() {
+        const filter = this.value;
+        const establishments = document.getElementsByClassName('establishment-item');
+        
+        Array.from(establishments).forEach(establishment => {
+            const region = establishment.dataset.region;
+            const isVisible = filter === 'all' || region === filter;
+            establishment.style.display = isVisible ? '' : 'none';
+        });
+    });
+
+    document.getElementById('statusFilter').addEventListener('change', function() {
+        const filter = this.value;
+        const establishments = document.getElementsByClassName('establishment-item');
+        
+        Array.from(establishments).forEach(establishment => {
+            const status = establishment.dataset.status;
+            const isVisible = filter === 'all' || status === filter;
+            establishment.style.display = isVisible ? '' : 'none';
+        });
+    });
+
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchText = this.value.toLowerCase();
+        const establishments = document.getElementsByClassName('establishment-item');
+        
+        Array.from(establishments).forEach(establishment => {
+            const text = establishment.textContent.toLowerCase();
+            const isVisible = text.includes(searchText);
+            establishment.style.display = isVisible ? '' : 'none';
+        });
+    });
+
+    function viewDetails(establishmentId) {
+        // Implement view details functionality
+        window.location.href = `/establishments/${establishmentId}/`;
+    }
+
+    function viewLicense(establishmentId) {
+        // Implement view license functionality
+        window.location.href = `/establishments/${establishmentId}/license/`;
+    }
+
+    function exportToExcel() {
+        // Implement Excel export functionality
+        alert('سيتم تنفيذ وظيفة التصدير إلى Excel هنا');
+    }
+
+    function exportToPDF() {
+        // Implement PDF export functionality
+        alert('سيتم تنفيذ وظيفة التصدير إلى PDF هنا');
+    }
+</script>
+{% endblock %} 

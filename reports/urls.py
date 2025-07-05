@@ -5,6 +5,9 @@ from .views import (
     inspection_report,
     license_report,
     view_exported_report,
+    activity_overview,
+    activity_codes_report,
+    establishment_directory_report,
 )
 
 # Define URL patterns for the reports app
@@ -30,4 +33,7 @@ urlpatterns = [
         view_exported_report,
         name="view_exported_report",
     ),
+    path('activity-overview/', activity_overview, name='activity_overview'),
+    path('activity-codes/', activity_codes_report, name='activity_codes_report'),
+    path('establishment-directory/', establishment_directory_report, name='establishment_directory_report'),
 ]

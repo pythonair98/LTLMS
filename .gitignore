@@ -41,4 +41,13 @@ media
 /static/media/*
 logs
 logs/*
-
+__pycache__
+__pycache__/*
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+*.egg-info
+*.egg
+*.DS_Store
+*.env
