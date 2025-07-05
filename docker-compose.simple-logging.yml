@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Django Application
+  # Django Application (Simple logging)
   web:
     build:
       context: .
@@ -10,10 +10,9 @@ services:
       - "8000:8000"
     volumes:
       - ./logs:/app/logs
-    user: "1000:1000"
     environment:
       - DEBUG=True
-      - DJANGO_SETTINGS_MODULE=LTLMS.settings_docker
+      - DJANGO_SETTINGS_MODULE=LTLMS.settings_docker_simple
       - DATABASE_HOST=db
       - DATABASE_PORT=3306
       - DATABASE_NAME=ltlms
@@ -22,9 +21,9 @@ services:
     depends_on:
       - db
     command: >
-      sh -c "python manage.py migrate --settings=LTLMS.settings_docker &&
-             python manage.py collectstatic --noinput --settings=LTLMS.settings_docker &&
-             python manage.py runserver 0.0.0.0:8000 --settings=LTLMS.settings_docker"
+      sh -c "python manage.py migrate --settings=LTLMS.settings_docker_simple &&
+             python manage.py collectstatic --noinput --settings=LTLMS.settings_docker_simple &&
+             python manage.py runserver 0.0.0.0:8000 --settings=LTLMS.settings_docker_simple"
 
   # MySQL Database
   db:
