@@ -8,8 +8,6 @@ services:
       dockerfile: Dockerfile.ultra-fast
     ports:
       - "8000:8000"
-    volumes:
-      - ./logs:/app/logs
     environment:
       - DEBUG=True
       - DJANGO_SETTINGS_MODULE=LTLMS.settings_docker_simple
@@ -22,7 +20,11 @@ services:
       db:
         condition: service_healthy
     command: >
-      sh -c "sleep 15 &&
+      sh -c "sleep 20 &&
+             python manage.py makemigrations user_auth ILAS reports --settings=LTLMS.settings_docker_simple &&
+             python manage.py migrate user_auth --settings=LTLMS.settings_docker_simple &&
+             python manage.py migrate ILAS --settings=LTLMS.settings_docker_simple &&
+             python manage.py migrate reports --settings=LTLMS.settings_docker_simple &&
              python manage.py migrate --settings=LTLMS.settings_docker_simple &&
              python manage.py collectstatic --noinput --settings=LTLMS.settings_docker_simple &&
              python create_superuser.py &&
