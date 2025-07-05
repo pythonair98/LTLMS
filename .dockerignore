@@ -67,6 +67,5 @@ node_modules/
 *.db
 
 # Reports and temporary files
-reports/
 *.tmp
 *.temp 
