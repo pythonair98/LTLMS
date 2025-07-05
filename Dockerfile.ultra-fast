@@ -14,11 +14,21 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy project
-COPY . .
+# Copy project files explicitly
+COPY manage.py .
+COPY LTLMS/ ./LTLMS/
+COPY user_auth/ ./user_auth/
+COPY ILAS/ ./ILAS/
+COPY reports/ ./reports/
+COPY static/ ./static/
+COPY templates/ ./templates/
+COPY wait-for-db.sh .
 
 # Create logs directory with proper permissions
 RUN mkdir -p logs && chmod 777 logs
+
+# Make wait script executable
+RUN chmod +x wait-for-db.sh
 
 # Create a non-root user
 RUN adduser --disabled-password --gecos '' appuser

@@ -19,9 +19,11 @@ services:
       - DATABASE_USER=manager
       - DATABASE_PASSWORD=manger@2025#
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: >
-      sh -c "python manage.py migrate --settings=LTLMS.settings_docker_simple &&
+      sh -c "sleep 15 &&
+             python manage.py migrate --settings=LTLMS.settings_docker_simple &&
              python manage.py collectstatic --noinput --settings=LTLMS.settings_docker_simple &&
              python manage.py runserver 0.0.0.0:8000 --settings=LTLMS.settings_docker_simple"
 
@@ -39,6 +41,12 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "manager", "-pmanger@2025#"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 30s
 
 volumes:
   mysql_data: 
