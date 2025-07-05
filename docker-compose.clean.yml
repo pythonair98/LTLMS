@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Django Application (Ultra-fast build)
+  # Django Application
   web:
     build:
       context: .
@@ -9,9 +9,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
+      - ./logs:/app/logs
     environment:
       - DEBUG=True
       - DJANGO_SETTINGS_MODULE=LTLMS.settings_docker
@@ -43,6 +41,4 @@ services:
     command: --default-authentication-plugin=mysql_native_password
 
 volumes:
-  mysql_data:
-  static_volume:
-  media_volume: 
+  mysql_data: 
