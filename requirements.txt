@@ -1,6 +1,6 @@
 Django~=5.1.5
 requests~=2.32.3
-PyMySQL~=1.1.1
+PyMySQL~=1.1.1  # Pure Python MySQL client - no system dependencies needed
 crispy-bootstrap5
 crispy-tailwind
 django-widget-tweaks

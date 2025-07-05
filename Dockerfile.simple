@@ -8,18 +8,18 @@ ENV PYTHONUNBUFFERED=1
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies
+# Update package list and install system dependencies in one layer
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         default-libmysqlclient-dev \
-        build-essential \
-        pkg-config \
+        gcc \
         && rm -rf /var/lib/apt/lists/* \
         && apt-get clean
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy project
 COPY . .

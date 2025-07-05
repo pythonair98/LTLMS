@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Django Application (Fast build)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.fast
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=LTLMS.settings_docker
+      - DATABASE_HOST=db
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=ltlms
+      - DATABASE_USER=manager
+      - DATABASE_PASSWORD=manger@2025#
+    depends_on:
+      - db
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      - MYSQL_DATABASE=ltlms
+      - MYSQL_USER=manager
+      - MYSQL_PASSWORD=manger@2025#
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  mysql_data:
+  static_volume:
+  media_volume: 
