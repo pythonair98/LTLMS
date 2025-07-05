@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  # Django Application (Fast build)
+  # Django Application (Ultra-fast build)
   web:
     build:
       context: .
-      dockerfile: Dockerfile.fast
+      dockerfile: Dockerfile.ultra-fast
     ports:
       - "8000:8000"
     volumes:
@@ -23,9 +23,9 @@ services:
     depends_on:
       - db
     command: >
-      sh -c "python manage.py migrate &&
+      sh -c "python manage.py migrate --settings=LTLMS.settings_docker &&
              python manage.py collectstatic --noinput --settings=LTLMS.settings_docker &&
-             python manage.py runserver 0.0.0.0:8000"
+             python manage.py runserver 0.0.0.0:8000 --settings=LTLMS.settings_docker"
 
   # MySQL Database
   db:
