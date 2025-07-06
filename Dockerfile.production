@@ -26,19 +26,22 @@ COPY templates/ ./templates/
 COPY wait-for-db.sh .
 COPY init_data.py .
 
-# Create logs directory with proper permissions
-RUN mkdir -p logs && chmod 777 logs
-
-# Make wait script executable
-RUN chmod +x wait-for-db.sh
+# Create logs, staticfiles, and media directories with proper permissions
+RUN mkdir -p logs staticfiles media && chmod -R 777 logs staticfiles media
 
 # Create a non-root user
 RUN adduser --disabled-password --gecos '' appuser
 RUN chown -R appuser:appuser /app
-USER appuser
+
+# Add entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Expose port
 EXPOSE 8000
+
+# Use entrypoint to fix permissions at runtime
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Run the application with Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "LTLMS.wsgi:application"] 
