@@ -27,8 +27,7 @@ services:
              python manage.py migrate reports --settings=LTLMS.settings_docker_simple &&
              python manage.py migrate --settings=LTLMS.settings_docker_simple &&
              python manage.py collectstatic --noinput --settings=LTLMS.settings_docker_simple &&
-             python create_superuser.py &&
-             python init_occupations_teams.py &&
+             python init_data.py &&
              python manage.py runserver 0.0.0.0:8000 --settings=LTLMS.settings_docker_simple"
 
   # MySQL Database
