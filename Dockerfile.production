@@ -1,0 +1,44 @@
+# Use Python 3.11 slim image
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+# Set work directory
+WORKDIR /app
+
+# Install Python dependencies (PyMySQL is pure Python, no system deps needed)
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir gunicorn
+
+# Copy project files explicitly
+COPY manage.py .
+COPY LTLMS/ ./LTLMS/
+COPY user_auth/ ./user_auth/
+COPY ILAS/ ./ILAS/
+COPY reports/ ./reports/
+COPY static/ ./static/
+COPY templates/ ./templates/
+COPY wait-for-db.sh .
+COPY init_data.py .
+
+# Create logs directory with proper permissions
+RUN mkdir -p logs && chmod 777 logs
+
+# Make wait script executable
+RUN chmod +x wait-for-db.sh
+
+# Create a non-root user
+RUN adduser --disabled-password --gecos '' appuser
+RUN chown -R appuser:appuser /app
+USER appuser
+
+# Expose port
+EXPOSE 8000
+
+# Run the application with Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120", "LTLMS.wsgi:application"] 

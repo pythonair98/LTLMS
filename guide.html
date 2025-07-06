@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LTLMS Docker Deployment Guide (Ubuntu)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      margin: 0;
+      padding: 20px 40px;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      color: #004c99;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    h2 {
+      border-bottom: 2px solid #004c99;
+      padding-bottom: 4px;
+      margin-top: 40px;
+    }
+    pre {
+      background: #272822;
+      color: #f8f8f2;
+      padding: 15px;
+      overflow-x: auto;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    code {
+      font-family: Consolas, monospace;
+    }
+    .note {
+      background-color: #e7f3fe;
+      border-left: 5px solid #2196F3;
+      padding: 10px;
+      margin: 20px 0;
+    }
+    ul {
+      margin-left: 20px;
+    }
+    .success {
+      color: #228B22;
+      font-weight: bold;
+    }
+    .error {
+      color: #B22222;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🚀 LTLMS Docker Deployment Guide (Ubuntu)</h1>
+
+  <div class="note">
+    <strong>Prerequisites:</strong>
+    <ul>
+      <li>Ubuntu 20.04 or later</li>
+      <li>User with <code>sudo</code> privileges</li>
+      <li>Internet connection</li>
+      <li>Git installed (<code>sudo apt install git</code>)</li>
+    </ul>
+  </div>
+
+  <h2>1️⃣ Install Docker & Docker Compose</h2>
+  <p>Update your system and install Docker Engine and Compose:</p>
+  <pre><code>sudo apt-get update
+sudo apt-get install -y ca-certificates curl git
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+</code></pre>
+  <p><strong>Optional:</strong> If you need legacy Compose v1:</p>
+  <pre><code>sudo apt-get install -y docker-compose</code></pre>
+
+  <h2>2️⃣ Clone the LTLMS Project</h2>
+  <pre><code>git clone https://github.com/pythonair98/LTLMS.git
+cd LTLMS</code></pre>
+
+  <h2>3️⃣ Build and Run the Project</h2>
+  <p>Build and launch the project using Docker Compose:</p>
+  <pre><code>docker compose -f docker-compose.simple-logging.yml up --build</code></pre>
+  <p>To run in the background (detached mode):</p>
+  <pre><code>docker compose -f docker-compose.simple-logging.yml up --build -d</code></pre>
+
+  <h2>4️⃣ What Happens on First Run?</h2>
+  <ul>
+    <li>All required Python dependencies are installed in the container.</li>
+    <li>MySQL database is initialized and migrations are applied for all apps.</li>
+    <li>Initial data is loaded automatically via <code>init_data.py</code>:
+      <ul>
+        <li>Superuser <code>manager</code> (password: <code>manger@2025#</code>) is created.</li>
+        <li>Default Occupations and Teams are created/updated.</li>
+        <li>Superuser profile is created and assigned to the first team and "Licensing Department Director" occupation.</li>
+        <li>All Activities are created/updated.</li>
+      </ul>
+    </li>
+    <li>Django development server is started on <code>http://localhost:8000</code>.</li>
+  </ul>
+
+  <h2>5️⃣ Access the Application</h2>
+  <ul>
+    <li>Open <a href="http://localhost:8000" target="_blank">http://localhost:8000</a> in your browser.</li>
+    <li>Login to the admin panel at <a href="http://localhost:8000/admin/" target="_blank">/admin/</a> with:<br>
+      <strong>Username:</strong> <code>manager</code><br>
+      <strong>Password:</strong> <code>manger@2025#</code>
+    </li>
+  </ul>
+
+  <h2>6️⃣ Useful Docker Commands</h2>
+  <pre><code># Check running containers
+docker ps
+
+# Stop the project
+docker compose -f docker-compose.simple-logging.yml down
+
+# View logs
+docker compose -f docker-compose.simple-logging.yml logs -f
+
+# Run a command inside the web container
+docker compose -f docker-compose.simple-logging.yml exec web bash
+</code></pre>
+
+  <h2>7️⃣ Troubleshooting</h2>
+  <ul>
+    <li><span class="error">Port already in use:</span> Change the port in <code>docker-compose.simple-logging.yml</code> or stop the service using that port.</li>
+    <li><span class="error">Database errors:</span> Ensure MySQL is running and healthy. The container will retry until ready.</li>
+    <li><span class="error">ModuleNotFoundError:</span> Make sure all app folders are present and not excluded by <code>.dockerignore</code>.</li>
+    <li><span class="error">Permission denied:</span> Ensure the <code>logs/</code> directory exists and is writable, or remove the volume mount if not needed.</li>
+    <li><span class="error">Migrations not applied:</span> The container runs all migrations on startup. You can also run them manually:<br>
+      <code>docker compose -f docker-compose.simple-logging.yml exec web python manage.py migrate --settings=LTLMS.settings_docker_simple</code>
+    </li>
+    <li><span class="error">Superuser/initial data missing:</span> The <code>init_data.py</code> script runs on every container start and is idempotent.</li>
+  </ul>
+
+  <h2>8️⃣ (Optional) Allow Docker Without Sudo</h2>
+  <pre><code>sudo usermod -aG docker $USER
+newgrp docker</code></pre>
+
+  <h2>9️⃣ (Optional) Clean Up</h2>
+  <pre><code># Remove all stopped containers, unused networks, images, and build cache
+docker system prune -a --volumes</code></pre>
+
+  <h2>✅ You're Ready!</h2>
+  <p class="success">Your LTLMS project is now running in Docker. Enjoy!</p>
+
+</body>
+</html>
