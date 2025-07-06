@@ -49,8 +49,8 @@ SESSION_SAVE_EVERY_REQUEST = True
 # Application definition
 DATE_INPUT_FORMATS = ["%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%d-%b-%Y"]
 SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 INSTALLED_APPS = [
     "django.contrib.admin",
