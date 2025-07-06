@@ -7,7 +7,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LTLMS.settings_docker_simple')
 django.setup()
 
 from django.contrib.auth.models import User
-from user_auth.models import Occupation, Team, Profile
+from user_auth.models import Occupation, Team, Profiles
 from ILAS.models import Activity
 
 # --- Create Superuser ---
@@ -65,7 +65,7 @@ try:
     occupation = Occupation.objects.get(en_name="Licensing Department Director")
     team = team_objs[0] if team_objs else None
     if team:
-        profile, created = Profile.objects.get_or_create(
+        profile, created = Profiles.objects.get_or_create(
             user=superuser,
             defaults={
                 "occupation": occupation,
