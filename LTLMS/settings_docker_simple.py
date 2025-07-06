@@ -38,6 +38,7 @@ CSRF_TRUSTED_ORIGINS = [
 ALLOWED_HOSTS = [
     'https://milahaarabia.com',
     'milahaarabia.com',
+    '192.168.136.93',
     "www.milahaarabia.com",
     "https://127.0.0.1",
     "http://localhost",
