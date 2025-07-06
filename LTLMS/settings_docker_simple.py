@@ -47,7 +47,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "0.0.0.0",
     "localhost",
-    "*"  # For development only - remove in production
+    "http://192.168.136.93"  # For development only - remove in production
 ]
 
 EMAIL_BACKEND = 'zoho_zeptomail.backend.zeptomail_backend.ZohoZeptoMailEmailBackend'
