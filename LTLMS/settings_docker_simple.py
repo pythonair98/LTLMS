@@ -35,21 +35,7 @@ CSRF_TRUSTED_ORIGINS = [
    "http://192.168.136.93" # For development only - remove in production
 ]
 
-ALLOWED_HOSTS = [
-    'https://milahaarabia.com',
-    'milahaarabia.com',
-    '192.168.136.93',
-    "www.milahaarabia.com",
-    "https://127.0.0.1",
-    "http://localhost",
-    'https://*.milahaarabia.com',
-    "https://*.127.0.0.1",
-    "http://*.localhost",
-    "127.0.0.1",
-    "0.0.0.0",
-    "localhost",
-    "http://192.168.136.93"  # For development only - remove in production
-]
+ALLOWED_HOSTS = ['*']
 
 EMAIL_BACKEND = 'zoho_zeptomail.backend.zeptomail_backend.ZohoZeptoMailEmailBackend'
 DEFAULT_FROM_EMAIL = 'info@milahaarabia.com'
