@@ -410,6 +410,8 @@ class EstablishmentLicence(models.Model):
         MainCategory,
         on_delete=models.CASCADE,
         help_text="Reference to the main category associated with this licence.",
+        null=True,
+        blank=True,
     )
     activity = models.ForeignKey(
         Activity,
@@ -420,6 +422,8 @@ class EstablishmentLicence(models.Model):
         SubCategory,
         on_delete=models.CASCADE,
         help_text="Reference to the sub category associated with this licence.",
+        null=True,
+        blank=True,
     )
 
     # Timestamps for record tracking

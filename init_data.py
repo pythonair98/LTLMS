@@ -7,12 +7,14 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LTLMS.settings_docker_simple')
 django.setup()
 
 from django.contrib.auth.models import User
-from user_auth.models import Occupation, Team
+from user_auth.models import Occupation, Team, Profile
 from ILAS.models import Activity
 
 # --- Create Superuser ---
-if not User.objects.filter(username='manager').exists():
-    User.objects.create_superuser('manager', '', 'manger@2025#')
+superuser, created = User.objects.get_or_create(username='manager', defaults={'is_superuser': True, 'is_staff': True})
+if created:
+    superuser.set_password('manger@2025#')
+    superuser.save()
     print("Superuser 'manager' created successfully!")
 else:
     print("Superuser 'manager' already exists!")
@@ -49,12 +51,36 @@ teams_data = [
     {"ar_name": "الفريق الثاني", "en_name": "Team Two"},
 ]
 
+team_objs = []
 for team in teams_data:
     obj, created = Team.objects.get_or_create(
         ar_name=team["ar_name"],
         en_name=team["en_name"]
     )
+    team_objs.append(obj)
     print(f"Team {obj.en_name} ({'created' if created else 'already exists'})")
+
+# --- Create Profile for Superuser ---
+try:
+    occupation = Occupation.objects.get(en_name="Licensing Department Director")
+    team = team_objs[0] if team_objs else None
+    if team:
+        profile, created = Profile.objects.get_or_create(
+            user=superuser,
+            defaults={
+                "occupation": occupation,
+                "team": team,
+            }
+        )
+        if not created:
+            profile.occupation = occupation
+            profile.team = team
+            profile.save()
+        print("Profile for superuser 'manager' created/updated.")
+    else:
+        print("No team found to assign to superuser profile.")
+except Exception as e:
+    print(f"Error creating profile for superuser: {e}")
 
 # --- Activities Data ---
 activities_data = [
