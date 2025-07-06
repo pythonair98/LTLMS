@@ -32,7 +32,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://0.0.0.0:8000",
     "http://localhost:8000",
     "http://0.0.0.0",
-    "*" # For development only - remove in production
+   "http://192.168.136.93" # For development only - remove in production
 ]
 
 ALLOWED_HOSTS = [
