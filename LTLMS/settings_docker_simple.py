@@ -23,20 +23,13 @@ SECRET_KEY = os.environ.get('SECRET_KEY', "django-insecure-b5af10c63e**-73bnz^c*
 DEBUG = True
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://milahaarabia.com',
-    "https://127.0.0.1",
-    "http://localhost",
-    'https://*.milahaarabia.com',
-    "https://*.127.0.0.1",
-    "http://*.localhost",
-    "http://0.0.0.0:8000",
-    "http://localhost:8000",
-    "http://0.0.0.0",
-    "http://192.168.136.93",
-    "http://172.18.0.3:8000/"
+    'http://*',
+    'https://*',
 ]
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '*',  # Allow all hosts for Docker/Nginx compatibility
+]
 
 EMAIL_BACKEND = 'zoho_zeptomail.backend.zeptomail_backend.ZohoZeptoMailEmailBackend'
 DEFAULT_FROM_EMAIL = 'info@milahaarabia.com'
@@ -48,9 +41,9 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 # Application definition
 DATE_INPUT_FORMATS = ["%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%d-%b-%Y"]
-SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'  # Use 'None' if you need cross-site cookies
+SESSION_COOKIE_SECURE = False  # Set to True if using HTTPS
+CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS
 
 INSTALLED_APPS = [
     "django.contrib.admin",

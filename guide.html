@@ -89,12 +89,13 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
   <h2>2️⃣ Clone the LTLMS Project</h2>
   <pre><code>git clone https://github.com/pythonair98/LTLMS.git
 cd LTLMS</code></pre>
+  <pre><code>git checkout detached29</code></pre>
 
   <h2>3️⃣ Build and Run the Project</h2>
   <p>Build and launch the project using Docker Compose:</p>
-  <pre><code>docker compose -f docker-compose.simple-logging.yml up --build</code></pre>
+  <pre><code>docker compose -f docker-compose.production.yml up --build</code></pre>
   <p>To run in the background (detached mode):</p>
-  <pre><code>docker compose -f docker-compose.simple-logging.yml up --build -d</code></pre>
+  <pre><code>docker compose -f docker-compose.production.yml up --build -d</code></pre>
 
   <h2>4️⃣ What Happens on First Run?</h2>
   <ul>
