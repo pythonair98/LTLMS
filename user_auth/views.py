@@ -159,7 +159,7 @@ def login_view(request):
             
             logger.info(f"User {user.username} successfully logged in")
             assignment_count = inspector_assignments(user)
-            if assignment_count > 0:
+            if type(assignment_count) != None:
                 logger.info(f"User {user.username} has {assignment_count} pending assignments")
                 messages.info(request, f"يوجد لديك تكليفات عدد: {assignment_count}")
                 

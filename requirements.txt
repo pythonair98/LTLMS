@@ -1,5 +1,5 @@
-Django~=5.1.5
-requests~=2.32.3
+Django>=5.2.8,<5.3
+requests
 PyMySQL~=1.1.1
 crispy-bootstrap5
 crispy-tailwind

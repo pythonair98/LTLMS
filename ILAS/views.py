@@ -6,8 +6,9 @@ logger = logging.getLogger(__name__)
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_http_methods, require_POST
@@ -533,9 +534,19 @@ def view_inspection_assignments(request):
     Returns:
         HttpResponse: Renders the assignments template with context.
     """
-    assignments = InspectionAssignment.objects.all()
+    assignments = InspectionAssignment.objects.select_related(
+        "inspector", "establishment"
+    )
+    assignment_counts = assignments.aggregate(
+        total=Count("id"),
+        pending=Count("id", filter=Q(status="pending")),
+        in_progress=Count("id", filter=Q(status="in_progress")),
+        completed=Count("id", filter=Q(status="completed")),
+    )
     return render(
-        request, "licesnsing/inspectors_assignments.html", {"assignments": assignments}
+        request,
+        "licesnsing/inspectors_assignments.html",
+        {"assignments": assignments, "assignment_counts": assignment_counts},
     )
 
 
@@ -620,31 +631,37 @@ def assign_establishment(request):
     Returns:
         HttpResponse: Renders the assignment form or redirects after submission.
     """
-    if request.method == "POST":
-        form = InspectionAssignmentForm(request.POST)
-        if form.is_valid():
-            assignment = form.save()
-            logger.info(f"New inspection assignment created: ID {assignment.id} by user {request.user.username}")
-            messages.success(request, "تم توجيه التكليف بنجاح")
-            return redirect("view_assignments")
-        else:
-            logger.warning(f"Assignment form validation failed: {form.errors}")
-            messages.warning(request, form.errors.as_text())
-    
     # Get inspectors with appropriate permissions
-    inspectors = Profiles.objects.filter(occupation__power=6)
+    inspectors = Profiles.objects.filter(occupation__power=6).select_related("user")
     
     # Get establishments that aren't currently assigned for inspection
     unassigned_establishments = Establishment.objects.exclude(
         inspection_assignments__isnull=False,
         inspection_assignments__status='pending'
     )
+
+    form = InspectionAssignmentForm(
+        request.POST if request.method == "POST" else None
+    )
+    form.fields["inspector"].queryset = get_user_model().objects.filter(
+        pk__in=inspectors.values("user_id")
+    )
+    form.fields["establishment"].queryset = unassigned_establishments
+
+    if request.method == "POST":
+        if form.is_valid():
+            assignment = form.save()
+            logger.info(f"New inspection assignment created: ID {assignment.id} by user {request.user.username}")
+            messages.success(request, "تم توجيه التكليف بنجاح")
+            return redirect("view_assignments")
+        logger.warning(f"Assignment form validation failed: {form.errors}")
+        messages.warning(request, "يرجى مراجعة الحقول المحددة وتصحيحها.")
     
-    if not unassigned_establishments:
+    if not unassigned_establishments.exists():
         logger.info("No unassigned establishments available for inspection")
-        messages.warning(request, "جميع المنشآت قد تم تعيينها.")
-    
-    form = InspectionAssignmentForm()
+    if not inspectors.exists():
+        logger.info("No inspectors with inspection permissions are available")
+
     return render(
         request,
         "licesnsing/assign_establishment.html",

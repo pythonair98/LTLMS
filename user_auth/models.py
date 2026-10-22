@@ -5,12 +5,12 @@ from django.contrib.auth.models import User, AbstractUser
 from django.utils.timezone import now
 
 
-class OccupationType(models.TextChoices):
-    """Defines different occupation roles available for users."""
-    HEAD_OF_LICENSE = "head_of_license", "مدير دائرة التراخيص"
-    HEAD_OF_INSPECTION = "head_of_inspection", "رئيس قسم التفتيش" 
-    HEAD_OF_INSPECTION_TEAM = "head_of_inspection_team", "مسؤول فريق التفتيش"
-    INSPECTOR = "inspector", "مفتش (معاين)"
+class OccupationType(models.IntegerChoices):
+    """Occupation power codes used to identify user roles throughout the app."""
+    HEAD_OF_LICENSE = 1, "مدير دائرة التراخيص"
+    HEAD_OF_INSPECTION = 2, "رئيس قسم التفتيش"
+    HEAD_OF_INSPECTION_TEAM = 3, "مسؤول فريق التفتيش"
+    INSPECTOR = 6, "مفتش (معاين)"
 
 
 class Occupation(models.Model):

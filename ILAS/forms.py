@@ -8,10 +8,8 @@ widgets for data entry.
 
 import logging
 from django import forms
-from django.contrib.admin.widgets import AutocompleteSelect
 from django.core.exceptions import ValidationError
 from django.forms.widgets import DateInput
-from django.contrib import admin
 
 from .models import (
     Establishment,
@@ -34,6 +32,185 @@ class EstablishmentForm(forms.ModelForm):
     Handles establishment information including contact details,
     location information, and activity classification.
     """
+
+    # Establishment details
+    rifd = forms.CharField(
+        label="رقم RFID",
+        required=True,
+        help_text="أدخل رقم البطاقة التعريفية المخصص للمنشأة.",
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "dir": "ltr",
+                "autocomplete": "off",
+                "placeholder": "مثال: RFID-123456",
+            }
+        ),
+    )
+    establishment_name = forms.CharField(
+        label="الاسم التجاري للمنشأة",
+        required=True,
+        help_text="استخدم الاسم الظاهر في الوثائق الرسمية.",
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "autocomplete": "organization",
+                "placeholder": "اكتب الاسم التجاري",
+            }
+        ),
+    )
+
+    # Contact details
+    owner_name = forms.CharField(
+        label="اسم مالك المنشأة",
+        required=True,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "autocomplete": "name", "placeholder": "الاسم الكامل"}
+        ),
+    )
+    owner_number = forms.CharField(
+        label="رقم هاتف المالك",
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "type": "tel",
+                "inputmode": "tel",
+                "autocomplete": "tel",
+                "placeholder": "مثال: 3XXX XXXX",
+                "dir": "ltr",
+            }
+        ),
+    )
+    director_name = forms.CharField(
+        label="اسم المدير التنفيذي",
+        required=True,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "autocomplete": "name", "placeholder": "الاسم الكامل"}
+        ),
+    )
+    director_number = forms.CharField(
+        label="رقم هاتف المدير التنفيذي",
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "type": "tel",
+                "inputmode": "tel",
+                "autocomplete": "tel",
+                "placeholder": "مثال: 3XXX XXXX",
+                "dir": "ltr",
+            }
+        ),
+    )
+    representative_name = forms.CharField(
+        label="اسم مندوب المنشأة",
+        required=True,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "autocomplete": "name", "placeholder": "الاسم الكامل"}
+        ),
+    )
+    representative_number = forms.CharField(
+        label="رقم هاتف مندوب المنشأة",
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "type": "tel",
+                "inputmode": "tel",
+                "autocomplete": "tel",
+                "placeholder": "مثال: 3XXX XXXX",
+                "dir": "ltr",
+            }
+        ),
+    )
+    email = forms.EmailField(
+        label="البريد الإلكتروني",
+        required=True,
+        help_text="سيُستخدم هذا العنوان للتواصل مع المنشأة.",
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control",
+                "type": "email",
+                "inputmode": "email",
+                "autocomplete": "email",
+                "placeholder": "name@example.com",
+                "dir": "ltr",
+            }
+        ),
+    )
+    phone_number = forms.CharField(
+        label="رقم هاتف المنشأة",
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "type": "tel",
+                "inputmode": "tel",
+                "autocomplete": "tel",
+                "placeholder": "مثال: 3XXX XXXX",
+                "dir": "ltr",
+            }
+        ),
+    )
+
+    # Location details
+    box_O_P = forms.IntegerField(
+        label="صندوق البريد",
+        required=True,
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "inputmode": "numeric", "placeholder": "رقم صندوق البريد"}
+        ),
+    )
+    municipality_name = forms.CharField(
+        label="البلدية",
+        required=True,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "autocomplete": "address-level2", "placeholder": "اسم البلدية"}
+        ),
+    )
+    region_number = forms.IntegerField(
+        label="رقم المنطقة",
+        required=True,
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "inputmode": "numeric", "placeholder": "رقم المنطقة"}
+        ),
+    )
+    street_number = forms.IntegerField(
+        label="رقم الشارع",
+        required=True,
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "inputmode": "numeric", "placeholder": "رقم الشارع"}
+        ),
+    )
+    street_name = forms.CharField(
+        label="اسم الشارع",
+        required=True,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "autocomplete": "street-address", "placeholder": "اسم الشارع"}
+        ),
+    )
+    block_number = forms.IntegerField(
+        label="رقم الحي",
+        required=True,
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "inputmode": "numeric", "placeholder": "رقم الحي"}
+        ),
+    )
+    block_name = forms.CharField(
+        label="اسم الحي",
+        required=True,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "اسم الحي"}
+        ),
+    )
+    building_number = forms.IntegerField(
+        label="رقم المبنى",
+        required=True,
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "inputmode": "numeric", "placeholder": "رقم المبنى"}
+        ),
+    )
 
     class Meta:
         model = Establishment
@@ -61,47 +238,11 @@ class EstablishmentForm(forms.ModelForm):
             "block_name",
             "activity",
         ]
-
-    # Establishment details
-    rifd = forms.CharField(label="رقم RFID:", required=True)
-    establishment_name = forms.CharField(
-        label="اسم المنشأة/Commercial Name:", required=True
-    )
-
-    # Contact details
-    owner_name = forms.CharField(label="مالك المنشأة/Owner:", required=True)
-    owner_number = forms.CharField(label="الهاتف/Telephone:", required=True)
-    director_name = forms.CharField(
-        label="المدير التنفيذي للمنشأة/Executive Director:", required=True
-    )
-    director_number = forms.CharField(label="الهاتف/Telephone:", required=True)
-    representative_name = forms.CharField(
-        label="مندوب المنشأة/Representative:", required=True
-    )
-    representative_number = forms.CharField(label="الهاتف/Telephone:", required=True)
-    email = forms.EmailField(label="البريد الإلكتروني/Email:", required=True)
-    phone_number = forms.CharField(label="رقم هاتف المنشأة/Telephone:", required=True)
-
-    # Location details
-    box_O_P = forms.IntegerField(label="صندوق البريد/P.O Box:", required=True)
-    municipality_name = forms.CharField(
-        label="اسم البلدية/Municipality:", required=True
-    )
-    region_number = forms.IntegerField(label="رقم المنطقة/Region No:", required=True)
-    street_number = forms.IntegerField(label="رقم الشارع/Street No:", required=True)
-    street_name = forms.CharField(label="وصف الشارع/Street Name:", required=True)
-    block_number = forms.IntegerField(label="رقم الحي/Block No:", required=True)
-    block_name = forms.CharField(label="اسم الحي/Block Name:", required=True)
-    building_number = forms.IntegerField(label="رقم المبنى/Bldg. No:", required=True)
-
-    # Form widgets
-    widgets = {
-        "activity": AutocompleteSelect(
-            Activity._meta.get_field("id").remote_field, admin.site
-        ),
-        "main_category": forms.Select(attrs={"class": "form-control"}),
-        "sub_category": forms.Select(attrs={"class": "form-control"}),
-    }
+        widgets = {
+            "activity": forms.Select(attrs={"class": "form-select"}),
+            "main_category": forms.Select(attrs={"class": "form-select"}),
+            "sub_category": forms.Select(attrs={"class": "form-select"}),
+        }
 
     def clean_rifd(self):
         """Validates RFID uniqueness."""
@@ -276,8 +417,18 @@ class InspectionAssignmentForm(forms.ModelForm):
         model = InspectionAssignment
         fields = ["inspector", "establishment", "due_date", "notes"]
         widgets = {
-            "due_date": forms.DateTimeInput(attrs={"type": "datetime-local"}),
-            "notes": forms.Textarea(attrs={"rows": 3}),
+            "inspector": forms.Select(attrs={"class": "form-select"}),
+            "establishment": forms.Select(attrs={"class": "form-select"}),
+            "due_date": forms.DateTimeInput(
+                attrs={"type": "datetime-local", "class": "form-control"}
+            ),
+            "notes": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "class": "form-control",
+                    "placeholder": "أضف أي تعليمات أو معلومات تساعد المفتش...",
+                }
+            ),
         }
         
     def save(self, commit=True):

@@ -1,60 +1,208 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
-{% load static %}
 
 {% block title %}
-    <title>Assign Establishment for Inspection</title>
+    <title>توجيه تكليف معاينة</title>
 {% endblock %}
 
 {% block content %}
-    <div class="container mt-4" dir="rtl">
-        <h2 class="text-center">تعيين منشأة للتفتيش</h2>
-        <form method="post">
-            {% csrf_token %}
-
-
-            <div id="div_id_inspector" class="mb-3"><label
-                    for="id_inspector" class="form-label requiredField">
-                المفتش<span class="asteriskField">*</span> </label>
-                <select name="inspector"
-                                                                               class="select form-select" required
-                                                                               id="id_inspector">
-                <option value="">----</option>
-                {% for inspector in inspectors %}
-                	<option value="{{ inspector.user.id }}">{{ inspector.user.first_name  }}</option>
-                {% endfor %}
-
-
-
-
-            </select>
+<div class="container py-4" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-9">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="assignment-title-icon"><i class="fas fa-user-check"></i></div>
+                <div>
+                    <h1 class="h3 mb-1">توجيه تكليف معاينة</h1>
+                    <p class="text-muted mb-0">اختر المفتش والمنشأة، وأضف موعداً أو تعليمات عند الحاجة.</p>
+                </div>
             </div>
-            <div id="div_id_establishment" class="mb-3"><label
-                    for="id_establishment" class="form-label requiredField">
-                المنشأة<span class="asteriskField">*</span> </label> <select name="establishment"
-                                                                                   class="select form-select" required
-                                                                                   id="id_establishment">
-                <option value="" selected>---------</option>
-                {% for unassigned_establishment in unassigned_establishments %}
 
-                <option value="{{ unassigned_establishment.id }}"> {{ unassigned_establishment.establishment_name}}</option>
-                {% endfor %}
-
-            </select></div>
-            <div id="div_id_due_date" class="mb-3"><label
-                    for="id_due_date" class="form-label">
-                Due Date
-            </label> <input type="datetime-local" name="due_date" class="datetimeinput form-control" id="id_due_date">
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6">
+                    <div class="assignment-info-card">
+                        <span class="assignment-info-icon"><i class="fas fa-user-shield"></i></span>
+                        <div>
+                            <div class="assignment-info-count">{{ inspectors|length }}</div>
+                            <div class="assignment-info-label">مفتش متاح</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="assignment-info-card">
+                        <span class="assignment-info-icon"><i class="fas fa-building"></i></span>
+                        <div>
+                            <div class="assignment-info-count">{{ unassigned_establishments|length }}</div>
+                            <div class="assignment-info-label">منشأة متاحة للتكليف</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div id="div_id_notes" class="mb-3"><label
-                    for="id_notes" class="form-label">
-                Assignment Notes
-            </label> <textarea name="notes" cols="40" rows="3" class="textarea form-control" id="id_notes">
-</textarea></div>
 
-            <div class="text-center">
-                <button type="submit" class="btn btn-lg" style="background-color:#8A1538; color:white;">تعيين</button>
+            {% if not inspectors.exists or not unassigned_establishments.exists %}
+                <div class="alert alert-warning d-flex align-items-start gap-2" role="alert">
+                    <i class="fas fa-circle-info mt-1"></i>
+                    <div>
+                        {% if not inspectors.exists %}
+                            لا يوجد مفتشون متاحون حالياً. أضف مستخدماً وحدد مهنته كمفتش قبل إنشاء التكليف.
+                        {% endif %}
+                        {% if not unassigned_establishments.exists %}
+                            {% if not inspectors.exists %}<br>{% endif %}
+                            لا توجد منشآت متاحة للتكليف حالياً. قد تكون جميع المنشآت مسندة بالفعل.
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="card assignment-form-card">
+                <div class="card-header">
+                    <h2 class="h5 mb-1">بيانات التكليف</h2>
+                    <p class="mb-0 small text-muted">الحقول المشار إليها بعلامة <span class="text-danger">*</span> مطلوبة.</p>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <label for="{{ form.inspector.id_for_label }}" class="form-label fw-semibold">
+                                المفتش <span class="text-danger">*</span>
+                            </label>
+                            {{ form.inspector }}
+                            <div class="form-text">اختر الشخص المسؤول عن تنفيذ المعاينة.</div>
+                            {% for error in form.inspector.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.establishment.id_for_label }}" class="form-label fw-semibold">
+                                المنشأة <span class="text-danger">*</span>
+                            </label>
+                            {{ form.establishment }}
+                            <div class="form-text">تظهر هنا المنشآت غير المسندة حالياً.</div>
+                            {% for error in form.establishment.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.due_date.id_for_label }}" class="form-label fw-semibold">الموعد النهائي</label>
+                            {{ form.due_date }}
+                            <div class="form-text">اختياري؛ حدّد موعداً مستهدفاً لإتمام المعاينة.</div>
+                            {% for error in form.due_date.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label fw-semibold">ملاحظات وتعليمات</label>
+                            {{ form.notes }}
+                            <div class="form-text">أضف تفاصيل تساعد المفتش على الاستعداد للمهمة.</div>
+                            {% for error in form.notes.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-2 border-top">
+                            <a href="{% url 'view_assignments' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-right me-1"></i>العودة للتكليفات
+                            </a>
+                            {% if inspectors.exists and unassigned_establishments.exists %}
+                                <button type="submit" class="btn assignment-submit-btn">
+                                    <i class="fas fa-paper-plane me-1"></i>تأكيد وتوجيه التكليف
+                                </button>
+                            {% else %}
+                                <button type="button" class="btn assignment-submit-btn" disabled>
+                                    <i class="fas fa-paper-plane me-1"></i>لا يمكن إنشاء التكليف حالياً
+                                </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
+</div>
+
+<style>
+    .assignment-title-icon {
+        display: grid;
+        width: 52px;
+        height: 52px;
+        flex: 0 0 52px;
+        place-items: center;
+        border-radius: 15px;
+        color: #8a1538;
+        background: #f7e9ee;
+        font-size: 1.25rem;
+    }
+
+    .assignment-info-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        min-height: 90px;
+        padding: 1rem 1.25rem;
+        border: 1px solid #e9eaf0;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 4px 16px rgba(22, 34, 51, 0.04);
+    }
+
+    .assignment-info-icon {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        border-radius: 12px;
+        color: #8a1538;
+        background: #f7e9ee;
+        font-size: 1.1rem;
+    }
+
+    .assignment-info-count {
+        color: #252b36;
+        font-size: 1.35rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .assignment-info-label {
+        margin-top: 0.2rem;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .assignment-form-card {
+        overflow: hidden;
+        border: 1px solid #e9eaf0;
+        border-radius: 14px;
+        box-shadow: 0 8px 28px rgba(22, 34, 51, 0.06);
+    }
+
+    .assignment-form-card .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #eef0f4;
+        background: #fff;
+    }
+
+    .assignment-submit-btn {
+        padding: 0.65rem 1.2rem;
+        color: #fff;
+        background: #8a1538;
+        font-weight: 600;
+    }
+
+    .assignment-submit-btn:hover:not(:disabled) {
+        color: #fff;
+        background: #70112e;
+    }
+
+    @media (max-width: 575.98px) {
+        .assignment-form-card .card-body {
+            padding: 1.25rem !important;
+        }
+    }
+</style>
 {% endblock %}

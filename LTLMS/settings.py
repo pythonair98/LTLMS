@@ -12,9 +12,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
-import pymysql
-
-pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-b5af10c63e**-73bnz^c*+rk5u%-9)!@#5uy5^#^*%r09rm7r1"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 CSRF_TRUSTED_ORIGINS = [
     'https://milahaarabia.com',
     "https://127.0.0.1",
@@ -114,16 +111,8 @@ LOGIN_URL = "login"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",  # MariaDB uses the MySQL backend
-        "NAME": "ltlms",  # Replace with your database name
-        "USER": "manager",
-        "PASSWORD": "manger@2025#",
-        "HOST": "localhost",
-        "PORT": "3307",
-        "OPTIONS": {
-            "charset": "utf8mb4",
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -185,7 +174,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': str(BASE_DIR / 'logs' / 'django.log'),
+            'filename': str(BASE_DIR / 'django.log'),
             'maxBytes': 1024 * 1024 * 5,  # 5 MB
             'backupCount': 5,
             'formatter': 'verbose',
